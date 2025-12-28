@@ -1213,8 +1213,8 @@ const AdventureManager = {
 
         if (roll < winProb) {
             // WIN
-            const goldReward = Math.floor(enemySoldiers / 10);
-            const soldierReward = Math.floor(enemySoldiers / 10);
+            const goldReward = Math.floor(enemySoldiers / 10) * 2;
+            const soldierReward = Math.floor(enemySoldiers / 10) * 2;
 
             this.party.gold += goldReward;
             this.party.soldiers += soldierReward; // replenish or recruit
@@ -1226,7 +1226,10 @@ const AdventureManager = {
             this.updateStats();
         } else {
             // LOSE
-            this.party.soldiers = 1;
+            // Retain half of starting army, round down to nearest 5, min 5
+            const retained = Math.max(5, Math.floor((mySoldiers / 2) / 5) * 5);
+            this.party.soldiers = retained;
+
             this.updateStats();
             this.closePopup();
 
