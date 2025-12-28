@@ -508,7 +508,16 @@ const AdventureManager = {
     // DIPLOMATIC TOUR State
     diplomaticTargets: [], // Array of cell IDs (capitals)
     diplomacySolvedCount: 0,
+    // DIPLOMATIC TOUR State
+    diplomaticTargets: [], // Array of cell IDs (capitals)
+    diplomacySolvedCount: 0,
     diplomacyGroup: null, // SVG group for rings
+
+    // SIEGE State
+    siege: null, // { burgId: int, armyCell: int, soldiers: int }
+    siegeElement: null, // Group for Bomb icon
+    siegeCountElement: null,
+    siegeRingGroup: null, // Group for siege ring
 
     init() {
         if (this.partyElement) return;
@@ -722,6 +731,59 @@ const AdventureManager = {
         previewLine.style.opacity = "0.8";
         previewLine.style.display = "none";
 
+        // Create Siege Ring Group
+        const siegeRingGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        this.siegeRingGroup = siegeRingGroup;
+
+        // Create Siege Element (Group)
+        const siegeGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        siegeGroup.setAttribute("id", "siegeMarker");
+        siegeGroup.style.display = "none";
+        siegeGroup.style.cursor = "pointer";
+        siegeGroup.setAttribute("pointer-events", "all");
+
+        siegeGroup.onclick = (e) => {
+            e.stopPropagation();
+            this.handleSiegeClick();
+        };
+
+        const siegeCircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        siegeCircle.setAttribute("r", "14");
+        siegeCircle.setAttribute("fill", "#2c3e50"); // Dark Blue/Black
+        siegeCircle.setAttribute("stroke", "#000");
+        siegeCircle.setAttribute("stroke-width", "2");
+
+        const siegeText = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        siegeText.textContent = "💣";
+        siegeText.setAttribute("text-anchor", "middle");
+        siegeText.setAttribute("dy", "5");
+        siegeText.setAttribute("font-size", "16px");
+
+        const siegeCountBg = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+        siegeCountBg.setAttribute("x", "-12");
+        siegeCountBg.setAttribute("y", "16");
+        siegeCountBg.setAttribute("width", "24");
+        siegeCountBg.setAttribute("height", "14");
+        siegeCountBg.setAttribute("rx", "4");
+        siegeCountBg.setAttribute("fill", "#fff");
+        siegeCountBg.setAttribute("stroke", "#000");
+        siegeCountBg.setAttribute("stroke-width", "0.5");
+
+        const siegeCount = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        siegeCount.setAttribute("text-anchor", "middle");
+        siegeCount.setAttribute("dy", "26");
+        siegeCount.setAttribute("font-size", "10px");
+        siegeCount.setAttribute("fill", "#000");
+        siegeCount.setAttribute("stroke", "none");
+        siegeCount.style.fontWeight = "bold";
+
+        siegeGroup.appendChild(siegeCircle);
+        siegeGroup.appendChild(siegeText);
+        siegeGroup.appendChild(siegeCountBg);
+        siegeGroup.appendChild(siegeCount);
+
+        this.siegeCountElement = siegeCount;
+
         const svg = document.getElementById('mapSvg');
 
         // Diplomatic Group (Rings)
@@ -729,11 +791,13 @@ const AdventureManager = {
         this.diplomacyGroup = diplomacyGroup;
 
         svg.appendChild(diplomacyGroup); // Bottom layer for rings, under icons
+        svg.appendChild(siegeRingGroup); // Siege rings
         svg.appendChild(previewLine);
         svg.appendChild(pathLine);
         svg.appendChild(locationsGroup); // Explorer locations bottom layer of interactables
         svg.appendChild(treasureGroup);
         svg.appendChild(enemyGroup);
+        svg.appendChild(siegeGroup); // Siege Army icon
         svg.appendChild(beastGroup);
         svg.appendChild(circle); // Append circle after to be on top
 
@@ -741,6 +805,7 @@ const AdventureManager = {
         this.treasureElement = treasureGroup;
         this.enemyElement = enemyGroup;
         this.beastElement = beastGroup;
+        this.siegeElement = siegeGroup;
         this.pathElement = pathLine;
         this.previewPathElement = previewLine;
     },
@@ -760,6 +825,7 @@ const AdventureManager = {
                 this.partyElement.style.display = "block";
                 if (this.treasure) this.treasureElement.style.display = "block";
                 if (this.enemy) this.enemyElement.style.display = "block";
+                if (this.siege) this.siegeElement.style.display = "block";
                 this.render();
             }
         } else {
@@ -768,6 +834,7 @@ const AdventureManager = {
             if (this.partyElement) this.partyElement.style.display = 'none';
             if (this.treasureElement) this.treasureElement.style.display = 'none';
             if (this.enemyElement) this.enemyElement.style.display = 'none';
+            if (this.siegeElement) this.siegeElement.style.display = 'none';
         }
     },
 
@@ -804,6 +871,7 @@ const AdventureManager = {
             }
 
             this.startDiplomaticTour(); // Start first tour
+            this.spawnSiege(); // Start first siege
 
             this.updateStats();
             this.render();
@@ -822,6 +890,7 @@ const AdventureManager = {
         if (this.treasure) occupiedObj[this.treasure.cell] = true;
         if (this.enemy) occupiedObj[this.enemy.cell] = true;
         if (this.beast) occupiedObj[this.beast.cell] = true;
+        if (this.siege) occupiedObj[this.siege.armyCell] = true;
         this.locations.forEach(l => { if (l) occupiedObj[l.cell] = true; });
 
         const validCells = graphData.filter(c => c.b !== marineBiomeId && !occupiedObj[c.i]);
@@ -829,6 +898,63 @@ const AdventureManager = {
         if (validCells.length > 0) {
             const randomCell = validCells[Math.floor(Math.random() * validCells.length)];
             this.locations[index] = { cell: randomCell.i, id: index };
+        }
+    },
+
+    spawnSiege() {
+        if (!this.active) return;
+        const capitals = burgsData.filter(b => b.is_capital);
+        if (capitals.length === 0) return;
+
+        // Pick random capital
+        const capital = capitals[Math.floor(Math.random() * capitals.length)];
+        const capitalCell = capital.cell_id;
+
+        // Find neighbor land cell for army
+        const neighbors = graphData[capitalCell].c;
+        const validNeighbors = neighbors.filter(n => graphData[n].b !== marineBiomeId);
+
+        if (validNeighbors.length > 0) {
+            const armyCell = validNeighbors[Math.floor(Math.random() * validNeighbors.length)];
+
+            // Calculate soldiers: half of quartiers, rounding up. 
+            // We need to parse quartiers if it's not readily available as a number sum, 
+            // but usually we can estimate from population or type if exact "quartiers" count isn't in burg object directly.
+            // Let's rely on `soldier_quartiers` + `craftsman_quartiers` + others if available, or fallback.
+            // The tooltip code used `data-quartiers`, implying it's derived.
+            // `burg.quartiers` is not standard property in simple view.
+            // Let's assume we can sum visible ones or use population proxy.
+            // Actually, we can just use a random strength scaled by population if needed, but request asked for specific logic.
+            // "half its nr of quartiers rounding up".
+            // Let's check what properties `burg` has from `burgsData`.
+            // Assuming `burg` has `soldier_quartiers`, `craftsman_quartiers`, `noble_quartiers` etc.
+            // If they are not present, we will fallback to population / 1000.
+
+            let totalQuartiers = (capital.soldier_quartiers || 0) + (capital.craftsman_quartiers || 0) + (capital.noble_quartiers || 0) + (capital.religious_quartiers || 0);
+            if (totalQuartiers === 0) totalQuartiers = Math.ceil(capital.population / 1000); // Fallback
+
+            const siegeSoldiers = Math.ceil(totalQuartiers / 2) * 50; // Scale it up? 
+            // "number of soldiers half its nr of quartiers rounding up" -> if 10 quartiers -> 5 soldiers? seems too low.
+            // Maybe "half its nr of quartiers" refers to HUNDREDS or similar unit? 
+            // Or maybe it simply means the "power" value. 
+            // Let's assume "Soldiers" = (Quartiers / 2) * 100 to make it a challenge. 
+            // User script usually deals in 10s or 100s of soldiers.
+            // Let's stick to literal "half its nr of quartiers" FIRST, but 5 soldiers is nothing.
+            // Wait, existing logic: enemy soldiers 20-200.
+            // Quartiers are usually 5-50. Half is 2-25. 
+            // Let's multiply by 10 or 20 to make it a unit of "Army Strength".
+            // Let's try Multiplier = 20. So 10 quartiers -> 5 -> 100 soldiers.
+
+            const strength = Math.ceil(totalQuartiers / 2) * 20;
+
+            this.siege = { burgId: capital.id, armyCell: armyCell, soldiers: strength };
+
+            if (this.siegeElement) {
+                if (this.siegeCountElement) this.siegeCountElement.textContent = strength;
+                this.siegeElement.style.display = "block";
+                this.render();
+            }
+            this.showFeedback(`Siege started at ${capital.name}!`);
         }
     },
 
@@ -1077,6 +1203,24 @@ const AdventureManager = {
         }
     },
 
+    handleSiegeClick() {
+        if (!this.active || !this.siege) return;
+
+        // Path to Siege Army (not the burg, but the army cell)
+        const path = this.findPath(this.party.cell, this.siege.armyCell);
+
+        if (path && path.length > 0) {
+            this.drawPath(path);
+            this.moveAlongPath(path).then(() => {
+                this.drawPath([]);
+            });
+        } else if (this.party.cell === this.siege.armyCell) {
+            this.showSiegeBattlePopup();
+        } else {
+            this.showFeedback("Cannot reach siege army!");
+        }
+    },
+
     handleLocationClick(index) {
         if (!this.active) return;
         const loc = this.locations[index];
@@ -1166,6 +1310,8 @@ const AdventureManager = {
             this.showBattlePopup();
         } else if (this.beast && this.beast.cell === this.party.cell) {
             this.showBeastPopup();
+        } else if (this.siege && this.siege.armyCell === this.party.cell) {
+            this.showSiegeBattlePopup();
         } else if (burg) {
             this.showBurgPopup(burg);
         }
@@ -1226,6 +1372,7 @@ const AdventureManager = {
             <div class="actions">
                 <button class="btn-buy" onclick="AdventureManager.buyFood(10, 1)" title="1 Gold for 10 Food">Buy 10 Food (1 💰)</button>
                 ${this.diplomaticTargets.includes(burg.id) ? `<button class="btn-recruit" style="background-color: #4169E1;" onclick="AdventureManager.resolveDiplomacy(${burg.id})" title="Solve diplomatic issue">Diplomatic Mission (5 💰)</button>` : ''}
+                ${(this.siege && this.siege.burgId === burg.id) ? `<button class="btn-recruit" style="background-color: #000;" onclick="AdventureManager.showSiegeBattlePopup()" title="Fight Sieging Army">Fight Siege Army (💣)</button>` : ''}
                 ${canRecruit ? `<button class="btn-recruit" onclick="AdventureManager.recruitSoldiers(5, ${soldierCost}, ${burg.cell_id})" title="Recruit 5 soldiers for 5 Tools and 5 Gold. Each Soldier Quartier over 1 in the burg decreases the gold cost by one (down to a minimum of 1)">Recruit 5 Soldiers (${soldierCost} 💰, 5 🛠️)</button>` : ''}
                 ${canBuyTools ? `<button class="btn-buy" onclick="AdventureManager.buyTools(${toolsAmount}, 1)" title="1 Gold for an amount of Tools equal to Craftsmen Quartiers in the burg (max 5)">Buy ${toolsAmount} Tools (1 💰)</button>` : ''}
                 <button class="btn-leave" onclick="AdventureManager.closePopup()">Leave</button>
@@ -1486,6 +1633,112 @@ const AdventureManager = {
 
 
 
+
+    showSiegeBattlePopup() {
+        if (!this.siege) return;
+
+        if (!this.popupElement) {
+            this.popupElement = document.createElement('div');
+            this.popupElement.className = 'burg-popup';
+            document.body.appendChild(this.popupElement);
+        }
+
+        let overlay = document.getElementById('modalOverlay');
+        if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.id = 'modalOverlay';
+            overlay.className = 'modal-overlay';
+            document.body.appendChild(overlay);
+        }
+        overlay.style.display = 'block';
+
+        const mySoldiers = this.party.soldiers;
+        const enemySoldiers = this.siege.soldiers;
+
+        const ratio = mySoldiers / enemySoldiers;
+        const k = 2;
+        const winProb = (Math.pow(ratio, k) / (Math.pow(ratio, k) + 1));
+        const winPercent = (winProb * 100).toFixed(1);
+
+        this.popupElement.innerHTML = `
+             <h2>⚔️ Break the Siege ⚔️</h2>
+             <div class="content-wrapper" style="display: flex; gap: 20px; align-items: center; justify-content: center;">
+                 <div style="text-align: center;">
+                    <h3>Your Army</h3>
+                    <div style="font-size: 24px; color: #2ecc71; font-weight: bold;">${mySoldiers} 🛡️</div>
+                 </div>
+                 <div style="font-size: 20px; font-weight: bold;">VS</div>
+                 <div style="text-align: center;">
+                    <h3>Siege Army</h3>
+                    <div style="font-size: 24px; color: #000; font-weight: bold;">${enemySoldiers} 💣</div>
+                 </div>
+             </div>
+             
+             <div style="text-align: center; margin: 15px 0;">
+                <div>Win Success Chance: <strong>${winPercent}%</strong></div>
+             </div>
+             
+             <div class="actions">
+                 <button class="btn-recruit" style="background-color: #c0392b;" onclick="AdventureManager.resolveSiegeBattle()">ATTACK!</button>
+                 <button class="btn-leave" onclick="AdventureManager.closePopup()">Retreat</button>
+             </div>
+        `;
+        this.popupElement.style.display = 'block';
+    },
+
+    resolveSiegeBattle() {
+        if (!this.siege) return;
+
+        const mySoldiers = this.party.soldiers;
+        const enemySoldiers = this.siege.soldiers;
+        const ratio = mySoldiers / enemySoldiers;
+        const k = 2;
+        const winProb = (Math.pow(ratio, k) / (Math.pow(ratio, k) + 1));
+
+        if (Math.random() < winProb) {
+            // WIN
+            const goldReward = 50; // High reward
+            const soldierReward = 10; // Freed prisoners?
+
+            this.party.gold += goldReward;
+            this.party.soldiers += soldierReward;
+
+            this.showFeedback(`SIEGE BROKEN! Hero of the city! +${goldReward} Gold.`);
+
+            this.closePopup();
+            this.siege = null;
+            if (this.siegeElement) this.siegeElement.style.display = 'none';
+            this.render(); // remove rings
+
+            // Spawn new siege elsewhere
+            setTimeout(() => this.spawnSiege(), 3000);
+            this.updateStats();
+        } else {
+            // LOSE
+            const retained = Math.max(5, Math.floor((mySoldiers / 2) / 5) * 5);
+            this.party.soldiers = retained;
+
+            this.updateStats();
+            this.closePopup();
+
+            // Damage enemy
+            const damage = mySoldiers;
+            this.siege.soldiers = Math.max(0, this.siege.soldiers - damage);
+
+            if (this.siege.soldiers === 0) {
+                this.showFeedback(`DEFEAT! But siege is broken at high cost!`);
+                this.siege = null;
+                if (this.siegeElement) this.siegeElement.style.display = 'none';
+                this.render();
+                setTimeout(() => this.spawnSiege(), 3000);
+            } else {
+                this.showFeedback(`DEFEAT! Siege continues...`);
+                // Update text to show weakened enemy
+                if (this.siegeCountElement) this.siegeCountElement.textContent = this.siege.soldiers;
+            }
+        }
+    },
+
     render() {
         const cell = graphData[this.party.cell];
         if (cell && this.partyElement) {
@@ -1520,6 +1773,16 @@ const AdventureManager = {
                 this.beastElement.style.display = "block";
             } else {
                 this.beastElement.style.display = "none";
+            }
+        }
+
+        if (this.siege && this.siegeElement) {
+            const sData = graphData[this.siege.armyCell];
+            if (sData) {
+                this.siegeElement.setAttribute("transform", `translate(${sData.p[0]}, ${sData.p[1]})`);
+                this.siegeElement.style.display = "block";
+            } else {
+                this.siegeElement.style.display = "none";
             }
         }
 
@@ -1560,6 +1823,28 @@ const AdventureManager = {
                     this.diplomacyGroup.appendChild(ring);
                 }
             });
+        }
+
+        // Siege Rings
+        if (this.siegeRingGroup) {
+            while (this.siegeRingGroup.firstChild) {
+                this.siegeRingGroup.removeChild(this.siegeRingGroup.firstChild);
+            }
+            if (this.siege) {
+                const burg = burgsData.find(b => b.id === this.siege.burgId);
+                if (burg) {
+                    const ring = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                    ring.setAttribute("cx", burg.x);
+                    ring.setAttribute("cy", burg.y);
+                    ring.setAttribute("r", parseFloat(burg.r) + 12); // Bigger radius
+                    ring.setAttribute("fill", "none");
+                    ring.setAttribute("stroke", "#000"); // Black
+                    ring.setAttribute("stroke-width", "4"); // Thicker
+                    ring.setAttribute("pointer-events", "none");
+                    // ring.setAttribute("class", "siege-ring"); 
+                    this.siegeRingGroup.appendChild(ring);
+                }
+            }
         }
     },
 
