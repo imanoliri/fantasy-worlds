@@ -610,6 +610,50 @@ const AdventureManager = {
 
         this.enemyCountElement = enemyCount;
 
+        // Create Beast Element (Group)
+        const beastGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        beastGroup.style.display = 'none';
+        beastGroup.style.cursor = 'pointer';
+
+        // Add click listener
+        beastGroup.onclick = (e) => {
+            e.stopPropagation();
+            this.handleBeastClick();
+        };
+
+        const beastCircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        beastCircle.setAttribute("r", "12");
+        beastCircle.setAttribute("fill", "#8e44ad"); // Purple
+        beastCircle.setAttribute("stroke", "#ffffff");
+        beastCircle.setAttribute("stroke-width", "2");
+
+        const beastText = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        beastText.textContent = "🐺"; // Boar emoji
+        beastText.setAttribute("text-anchor", "middle");
+        beastText.setAttribute("dy", "5");
+        beastText.setAttribute("font-size", "16px");
+
+        const beastCountBg = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+        beastCountBg.setAttribute("x", "-12");
+        beastCountBg.setAttribute("y", "14");
+        beastCountBg.setAttribute("width", "24");
+        beastCountBg.setAttribute("height", "14");
+        beastCountBg.setAttribute("rx", "4");
+        beastCountBg.setAttribute("fill", "#fff");
+        beastCountBg.setAttribute("stroke", "#000");
+        beastCountBg.setAttribute("stroke-width", "0.5");
+
+        const beastCount = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        beastCount.setAttribute("text-anchor", "middle");
+        beastCount.setAttribute("dy", "24"); // Offset
+        beastCount.setAttribute("font-size", "10px");
+
+        beastGroup.appendChild(beastCircle);
+        beastGroup.appendChild(beastText);
+        // beastGroup.appendChild(beastCountBg); // Optional
+        beastGroup.appendChild(beastCount);
+        this.beastCountElement = beastCount;
+
         // Create path element (polyline)
         const pathLine = document.createElementNS("http://www.w3.org/2000/svg", "polyline");
         pathLine.setAttribute("fill", "none");
@@ -635,11 +679,13 @@ const AdventureManager = {
         svg.appendChild(pathLine);
         svg.appendChild(treasureGroup);
         svg.appendChild(enemyGroup);
+        svg.appendChild(beastGroup);
         svg.appendChild(circle); // Append circle after to be on top
 
         this.partyElement = circle;
         this.treasureElement = treasureGroup;
         this.enemyElement = enemyGroup;
+        this.beastElement = beastGroup;
         this.pathElement = pathLine;
         this.previewPathElement = previewLine;
     },
@@ -694,6 +740,7 @@ const AdventureManager = {
 
             this.spawnTreasure(); // Spawn first treasure
             this.spawnEnemy();    // Spawn first enemy
+            this.spawnBeast();    // Spawn first beast
 
             this.updateStats();
             this.render();
@@ -728,6 +775,23 @@ const AdventureManager = {
             if (this.enemyElement) {
                 if (this.enemyCountElement) this.enemyCountElement.textContent = amount;
                 this.enemyElement.style.display = "block";
+                this.render();
+            }
+        }
+    },
+
+    spawnBeast() {
+        const validCells = graphData.filter(c => c.b !== marineBiomeId && c.i !== this.party.cell && (!this.treasure || c.i !== this.treasure.cell) && (!this.enemy || c.i !== this.enemy.cell));
+        if (validCells.length > 0) {
+            const randomCell = validCells[Math.floor(Math.random() * validCells.length)];
+            const strength = Math.floor(Math.random() * (30 - 5 + 1)) + 5; // 5 to 30
+            this.beast = { cell: randomCell.i, strength: strength };
+
+            if (this.beastElement) {
+                // If text content for strength is needed, we'd need a child element. 
+                // For now, simple tooltip or just icon. UI usually separate.
+                if (this.beastCountElement) this.beastCountElement.textContent = strength;
+                this.beastElement.style.display = "block";
                 this.render();
             }
         }
@@ -901,6 +965,23 @@ const AdventureManager = {
         }
     },
 
+    handleBeastClick() {
+        if (!this.active || !this.beast) return;
+
+        const path = this.findPath(this.party.cell, this.beast.cell);
+
+        if (path && path.length > 0) {
+            this.drawPath(path);
+            this.moveAlongPath(path).then(() => {
+                this.drawPath([]);
+            });
+        } else if (this.party.cell === this.beast.cell) {
+            this.showBeastPopup();
+        } else {
+            this.showFeedback("Cannot reach beast!");
+        }
+    },
+
     async moveAlongPath(path) {
         this.isMoving = true;
         const currentId = this.movementId;
@@ -957,6 +1038,8 @@ const AdventureManager = {
             this.showTreasurePopup();
         } else if (this.enemy && this.enemy.cell === this.party.cell) {
             this.showBattlePopup();
+        } else if (this.beast && this.beast.cell === this.party.cell) {
+            this.showBeastPopup();
         } else if (burg) {
             this.showBurgPopup(burg);
         }
@@ -1253,7 +1336,6 @@ const AdventureManager = {
     render() {
         const cell = graphData[this.party.cell];
         if (cell && this.partyElement) {
-            // cell.p is [x, y]
             this.partyElement.setAttribute('cx', cell.p[0]);
             this.partyElement.setAttribute('cy', cell.p[1]);
         }
@@ -1275,6 +1357,198 @@ const AdventureManager = {
                 this.enemyElement.style.display = "block";
             } else {
                 this.enemyElement.style.display = "none";
+            }
+        }
+
+        if (this.beast && this.beastElement) {
+            const bData = graphData[this.beast.cell];
+            if (bData) {
+                this.beastElement.setAttribute("transform", `translate(${bData.p[0]}, ${bData.p[1]})`);
+                this.beastElement.style.display = "block";
+            } else {
+                this.beastElement.style.display = "none";
+            }
+        }
+    },
+
+    showBeastPopup() {
+        if (!this.popupElement) {
+            this.popupElement = document.createElement('div');
+            this.popupElement.className = 'burg-popup';
+            document.body.appendChild(this.popupElement);
+        }
+
+        let overlay = document.getElementById('modalOverlay');
+        if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.id = 'modalOverlay';
+            overlay.className = 'modal-overlay';
+            document.body.appendChild(overlay);
+        }
+        overlay.style.display = 'block';
+
+        const mySoldiers = this.party.soldiers;
+        const beastStrength = this.beast.strength;
+        const willWin = mySoldiers > beastStrength;
+
+        this.popupElement.innerHTML = `
+             <h2>🐺 Beast Encounter 🐺</h2>
+             <div class="content-wrapper" style="display: flex; gap: 20px; align-items: center; justify-content: center;">
+                 <div style="text-align: center;">
+                    <h3>Your Party</h3>
+                    <div style="font-size: 24px; color: #2ecc71; font-weight: bold;">${mySoldiers} 🛡️</div>
+                 </div>
+                 <div style="font-size: 20px; font-weight: bold;">VS</div>
+                 <div style="text-align: center;">
+                    <h3>The Beast</h3>
+                    <div style="font-size: 24px; color: #8e44ad; font-weight: bold;">${beastStrength} 🐺</div>
+                 </div>
+             </div>
+             
+             <div style="text-align: center; margin: 15px 0;">
+                ${willWin ?
+                `<div style="color: #2ecc71;"><strong>Outcome: VICTORY gauranteed!</strong></div>` :
+                `<div style="color: #e74c3c;"><strong>Outcome: DEFEAT likely...</strong></div>`
+            }
+             </div>
+             
+             <div class="actions">
+                 <button class="btn-recruit" style="background-color: #8e44ad;" onclick="AdventureManager.resolveBeastBattle()">FIGHT!</button>
+                 <button class="btn-leave" onclick="AdventureManager.closePopup()">Retreat</button>
+             </div>
+        `;
+        this.popupElement.style.display = 'block';
+    },
+
+    resolveBeastBattle() {
+        if (!this.beast) return;
+
+        const mySoldiers = this.party.soldiers;
+        const beastStrength = this.beast.strength;
+
+        if (mySoldiers > beastStrength) {
+            // WIN
+            // Gain 1 gold for each 5 strength of the beast, rounding up.
+            const goldReward = Math.ceil(beastStrength / 5);
+
+            this.party.gold += goldReward;
+
+            this.showFeedback(`SLAIN! Gained ${goldReward} Gold.`);
+
+            this.closePopup();
+            this.spawnBeast(); // Respawn
+            this.updateStats();
+        } else {
+            // LOSE
+            this.showFeedback("DEFEAT! The beast was too strong.");
+
+            // Damage beast by half of nr of soldiers
+            const damage = Math.floor(mySoldiers / 2);
+            this.beast.strength = Math.max(0, this.beast.strength - damage);
+
+            // Lose 5 soldiers
+            this.party.soldiers = Math.max(0, this.party.soldiers - 5);
+
+            this.updateStats();
+            this.closePopup();
+
+            // Check if beast died from damage
+            if (this.beast.strength <= 0) {
+                this.showFeedback("The beast succumbed to its wounds!");
+                this.beastElement.style.display = "none";
+                this.beast = null;
+                this.spawnBeast();
+            }
+        }
+    },
+
+    showBeastPopup() {
+        if (!this.popupElement) {
+            this.popupElement = document.createElement('div');
+            this.popupElement.className = 'burg-popup';
+            document.body.appendChild(this.popupElement);
+        }
+
+        let overlay = document.getElementById('modalOverlay');
+        if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.id = 'modalOverlay';
+            overlay.className = 'modal-overlay';
+            document.body.appendChild(overlay);
+        }
+        overlay.style.display = 'block';
+
+        const mySoldiers = this.party.soldiers;
+        const beastStrength = this.beast.strength;
+        const willWin = mySoldiers > beastStrength;
+
+        this.popupElement.innerHTML = `
+             <h2>🐺 Beast Encounter 🐺</h2>
+             <div class="content-wrapper" style="display: flex; gap: 20px; align-items: center; justify-content: center;">
+                 <div style="text-align: center;">
+                    <h3>Your Party</h3>
+                    <div style="font-size: 24px; color: #2ecc71; font-weight: bold;">${mySoldiers} 🛡️</div>
+                 </div>
+                 <div style="font-size: 20px; font-weight: bold;">VS</div>
+                 <div style="text-align: center;">
+                    <h3>The Beast</h3>
+                    <div style="font-size: 24px; color: #8e44ad; font-weight: bold;">${beastStrength} 🐺</div>
+                 </div>
+             </div>
+             
+             <div style="text-align: center; margin: 15px 0;">
+                ${willWin ?
+                `<div style="color: #2ecc71;"><strong>Outcome: VICTORY gauranteed!</strong></div>` :
+                `<div style="color: #e74c3c;"><strong>Outcome: DEFEAT likely...</strong></div>`
+            }
+             </div>
+             
+             <div class="actions">
+                 <button class="btn-recruit" style="background-color: #8e44ad;" onclick="AdventureManager.resolveBeastBattle()">FIGHT!</button>
+                 <button class="btn-leave" onclick="AdventureManager.closePopup()">Retreat</button>
+             </div>
+        `;
+        this.popupElement.style.display = 'block';
+    },
+
+    resolveBeastBattle() {
+        if (!this.beast) return;
+
+        const mySoldiers = this.party.soldiers;
+        const beastStrength = this.beast.strength;
+
+        if (mySoldiers > beastStrength) {
+            // WIN
+            // Gain 1 gold for each 5 strength of the beast, rounding up.
+            const goldReward = Math.ceil(beastStrength / 5);
+
+            this.party.gold += goldReward;
+
+            this.showFeedback(`SLAIN! Gained ${goldReward} Gold.`);
+
+            this.closePopup();
+            this.spawnBeast(); // Respawn
+            this.updateStats();
+        } else {
+            // LOSE
+            this.showFeedback("DEFEAT! The beast was too strong.");
+
+            // Damage beast by half of nr of soldiers
+            const damage = Math.floor(mySoldiers / 2);
+            this.beast.strength = Math.max(0, this.beast.strength - damage);
+
+            // Lose 5 soldiers
+            this.party.soldiers = Math.max(0, this.party.soldiers - 5);
+
+            this.updateStats();
+            this.closePopup();
+
+            // Check if beast died from damage
+            if (this.beast.strength <= 0) {
+                this.showFeedback("The beast succumbed to its wounds!");
+                this.beastElement.style.display = "none";
+                this.beast = null;
+                this.spawnBeast();
             }
         }
     },
