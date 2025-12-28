@@ -276,7 +276,8 @@ def generate_map(burgs, output_file, trades_data=None, map_name="Interactive Map
             'citizens': b.get('citizens', {}),
             'quartiers': b.get('quartiers', {}),
             'name_display': name_display,
-            'row_class': row_class
+            'row_class': row_class,
+            'is_capital': is_capital
         })
 
     # 4. States Data for Table

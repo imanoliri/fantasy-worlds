@@ -86,10 +86,16 @@ svg:active {
     display: none;
 }
 
-/* Only show capital glow when body has show-capitals class */
-body.show-capitals .burg-dot.capital {
-    filter: drop-shadow(0 0 6px gold);
+/* Capital Crowns Toggle */
+.capital-crown {
+    display: none;
+    pointer-events: none;
 }
+
+body.show-capitals .capital-crown {
+    display: block;
+}
+
 
 .trade-route {
     pointer-events: none;
