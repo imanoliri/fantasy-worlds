@@ -492,6 +492,9 @@ const AdventureManager = {
     treasure: null, // { cell: int, amount: int }
     treasureElement: null,
 
+    enemy: null, // { cell: int, soldiers: int }
+    enemyElement: null,
+
     init() {
         if (this.partyElement) return;
 
@@ -535,6 +538,33 @@ const AdventureManager = {
         treasureGroup.appendChild(treasureCircle);
         treasureGroup.appendChild(treasureText);
 
+        // Create Enemy Element (Group)
+        const enemyGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        enemyGroup.setAttribute("id", "enemyMarker");
+        enemyGroup.style.display = "none";
+        enemyGroup.style.cursor = "pointer";
+        enemyGroup.setAttribute("pointer-events", "all");
+
+        enemyGroup.onclick = (e) => {
+            e.stopPropagation();
+            this.handleEnemyClick();
+        };
+
+        const enemyCircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        enemyCircle.setAttribute("r", "14");
+        enemyCircle.setAttribute("fill", "#e74c3c"); // Red
+        enemyCircle.setAttribute("stroke", "#c0392b");
+        enemyCircle.setAttribute("stroke-width", "2");
+
+        const enemyText = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        enemyText.textContent = "⚔️";
+        enemyText.setAttribute("text-anchor", "middle");
+        enemyText.setAttribute("dy", "5");
+        enemyText.setAttribute("font-size", "16px");
+
+        enemyGroup.appendChild(enemyCircle);
+        enemyGroup.appendChild(enemyText);
+
         // Create path element (polyline)
         const pathLine = document.createElementNS("http://www.w3.org/2000/svg", "polyline");
         pathLine.setAttribute("fill", "none");
@@ -559,10 +589,12 @@ const AdventureManager = {
         svg.appendChild(previewLine);
         svg.appendChild(pathLine);
         svg.appendChild(treasureGroup);
+        svg.appendChild(enemyGroup);
         svg.appendChild(circle); // Append circle after to be on top
 
         this.partyElement = circle;
         this.treasureElement = treasureGroup;
+        this.enemyElement = enemyGroup;
         this.pathElement = pathLine;
         this.previewPathElement = previewLine;
     },
@@ -581,6 +613,7 @@ const AdventureManager = {
             } else {
                 this.partyElement.style.display = "block";
                 if (this.treasure) this.treasureElement.style.display = "block";
+                if (this.enemy) this.enemyElement.style.display = "block";
                 this.render();
             }
         } else {
@@ -588,6 +621,7 @@ const AdventureManager = {
             stats.style.display = 'none';
             if (this.partyElement) this.partyElement.style.display = 'none';
             if (this.treasureElement) this.treasureElement.style.display = 'none';
+            if (this.enemyElement) this.enemyElement.style.display = 'none';
         }
     },
 
@@ -610,7 +644,10 @@ const AdventureManager = {
             this.party.tools = 10;
             this.partyElement.style.display = "block";
 
+            this.partyElement.style.display = "block";
+
             this.spawnTreasure(); // Spawn first treasure
+            this.spawnEnemy();    // Spawn first enemy
 
             this.updateStats();
             this.render();
@@ -630,6 +667,19 @@ const AdventureManager = {
             this.treasure = { cell: randomCell.i, amount: amount };
             if (this.treasureElement) {
                 this.treasureElement.style.display = "block";
+                this.render();
+            }
+        }
+    },
+
+    spawnEnemy() {
+        const validCells = graphData.filter(c => c.h >= 20 && c.i !== this.party.cell && (!this.treasure || c.i !== this.treasure.cell));
+        if (validCells.length > 0) {
+            const randomCell = validCells[Math.floor(Math.random() * validCells.length)];
+            const amount = Math.floor(Math.random() * (200 - 20 + 1)) + 20; // 20 to 200
+            this.enemy = { cell: randomCell.i, soldiers: amount };
+            if (this.enemyElement) {
+                this.enemyElement.style.display = "block";
                 this.render();
             }
         }
@@ -783,6 +833,25 @@ const AdventureManager = {
         }
     },
 
+    handleEnemyClick() {
+        if (!this.active || !this.enemy) return;
+
+        // Calculate path to enemy
+        const path = this.findPath(this.party.cell, this.enemy.cell);
+
+        if (path && path.length > 0) {
+            this.drawPath(path);
+            this.moveAlongPath(path).then(() => {
+                this.drawPath([]);
+            });
+        } else if (this.party.cell === this.enemy.cell) {
+            // Already there
+            this.showBattlePopup();
+        } else {
+            this.showFeedback("Cannot reach enemy!");
+        }
+    },
+
     async moveAlongPath(path) {
         this.isMoving = true;
         const currentId = this.movementId;
@@ -837,6 +906,8 @@ const AdventureManager = {
 
         if (this.treasure && this.treasure.cell === this.party.cell) {
             this.showTreasurePopup();
+        } else if (this.enemy && this.enemy.cell === this.party.cell) {
+            this.showBattlePopup();
         } else if (burg) {
             this.showBurgPopup(burg);
         }
@@ -1027,6 +1098,182 @@ const AdventureManager = {
         }
     },
 
+    showBattlePopup() {
+        if (!this.popupElement) {
+            this.popupElement = document.createElement('div');
+            this.popupElement.className = 'burg-popup';
+            document.body.appendChild(this.popupElement);
+        }
+
+        let overlay = document.getElementById('modalOverlay');
+        if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.id = 'modalOverlay';
+            overlay.className = 'modal-overlay';
+            document.body.appendChild(overlay);
+        }
+        overlay.style.display = 'block';
+
+        const mySoldiers = this.party.soldiers;
+        const enemySoldiers = this.enemy.soldiers;
+
+        // Use ratio R = Player / Enemy.
+        // P(Win) = R^2 / (R^2 + 1)
+        const ratio = mySoldiers / enemySoldiers;
+        const k = 2; // Squared for sharper curve
+        const winProb = (Math.pow(ratio, k) / (Math.pow(ratio, k) + 1));
+        const winPercent = (winProb * 100).toFixed(1);
+
+        this.popupElement.innerHTML = `
+             <h2>⚔️ Battle Imminent ⚔️</h2>
+             <div class="content-wrapper" style="display: flex; gap: 20px; align-items: center; justify-content: center;">
+                 <div style="text-align: center;">
+                    <h3>Your Army</h3>
+                    <div style="font-size: 24px; color: #2ecc71; font-weight: bold;">${mySoldiers} 🛡️</div>
+                 </div>
+                 <div style="font-size: 20px; font-weight: bold;">VS</div>
+                 <div style="text-align: center;">
+                    <h3>Enemy Army</h3>
+                    <div style="font-size: 24px; color: #e74c3c; font-weight: bold;">${enemySoldiers} ⚔️</div>
+                 </div>
+             </div>
+             
+             <div style="text-align: center; margin: 15px 0;">
+                <div>Ratio: <strong>1:${(1 / ratio).toFixed(2)}</strong> (Player:Enemy)</div>
+                <div>Win Probability: <strong>${winPercent}%</strong></div>
+             </div>
+             
+             <div class="actions">
+                 <button class="btn-recruit" style="background-color: #c0392b;" onclick="AdventureManager.resolveBattle()">FIGHT!</button>
+                 <button class="btn-leave" onclick="AdventureManager.closePopup()">Retreat (Stay here)</button>
+             </div>
+        `;
+        this.popupElement.style.display = 'block';
+    },
+
+    resolveBattle() {
+        if (!this.enemy) return;
+
+        const mySoldiers = this.party.soldiers;
+        const enemySoldiers = this.enemy.soldiers;
+        const ratio = mySoldiers / enemySoldiers;
+        const k = 2;
+        const winProb = (Math.pow(ratio, k) / (Math.pow(ratio, k) + 1));
+
+        const roll = Math.random();
+
+        if (roll < winProb) {
+            // WIN
+            const goldReward = Math.floor(enemySoldiers / 10);
+            const soldierReward = Math.floor(enemySoldiers / 10);
+
+            this.party.gold += goldReward;
+            this.party.soldiers += soldierReward; // replenish or recruit
+
+            this.showFeedback(`VICTORY! Gained ${goldReward} Gold & ${soldierReward} Soldiers.`);
+
+            this.closePopup();
+            this.spawnEnemy(); // Respawn
+            this.updateStats();
+        } else {
+            // LOSE
+            this.party.soldiers = 0;
+            this.updateStats();
+            this.closePopup();
+            alert("DEFEAT! Your army has been annihilated. GAME OVER.");
+            this.toggle(); // Turn off adventure mode
+            location.reload(); // Reload or just stop? Let's hide UI.
+        }
+    },
+
+    showBattlePopup() {
+        if (!this.popupElement) {
+            this.popupElement = document.createElement('div');
+            this.popupElement.className = 'burg-popup';
+            document.body.appendChild(this.popupElement);
+        }
+
+        let overlay = document.getElementById('modalOverlay');
+        if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.id = 'modalOverlay';
+            overlay.className = 'modal-overlay';
+            document.body.appendChild(overlay);
+        }
+        overlay.style.display = 'block';
+
+        const mySoldiers = this.party.soldiers;
+        const enemySoldiers = this.enemy.soldiers;
+
+        // Use ratio R = Player / Enemy.
+        // P(Win) = R^2 / (R^2 + 1)
+        const ratio = mySoldiers / enemySoldiers;
+        const k = 2; // Squared for sharper curve
+        const winProb = (Math.pow(ratio, k) / (Math.pow(ratio, k) + 1));
+        const winPercent = (winProb * 100).toFixed(1);
+
+        this.popupElement.innerHTML = `
+             <h2>⚔️ Battle Imminent ⚔️</h2>
+             <div class="content-wrapper" style="display: flex; gap: 20px; align-items: center; justify-content: center;">
+                 <div style="text-align: center;">
+                    <h3>Your Army</h3>
+                    <div style="font-size: 24px; color: #2ecc71; font-weight: bold;">${mySoldiers} 🛡️</div>
+                 </div>
+                 <div style="font-size: 20px; font-weight: bold;">VS</div>
+                 <div style="text-align: center;">
+                    <h3>Enemy Army</h3>
+                    <div style="font-size: 24px; color: #e74c3c; font-weight: bold;">${enemySoldiers} ⚔️</div>
+                 </div>
+             </div>
+             
+             <div style="text-align: center; margin: 15px 0;">
+                <div>Ratio: <strong>1:${(1 / ratio).toFixed(2)}</strong> (Player:Enemy)</div>
+                <div>Win Probability: <strong>${winPercent}%</strong></div>
+             </div>
+             
+             <div class="actions">
+                 <button class="btn-recruit" style="background-color: #c0392b;" onclick="AdventureManager.resolveBattle()">FIGHT!</button>
+                 <button class="btn-leave" onclick="AdventureManager.closePopup()">Retreat (Stay here)</button>
+             </div>
+        `;
+        this.popupElement.style.display = 'block';
+    },
+
+    resolveBattle() {
+        if (!this.enemy) return;
+
+        const mySoldiers = this.party.soldiers;
+        const enemySoldiers = this.enemy.soldiers;
+        const ratio = mySoldiers / enemySoldiers;
+        const k = 2;
+        const winProb = (Math.pow(ratio, k) / (Math.pow(ratio, k) + 1));
+
+        const roll = Math.random();
+
+        if (roll < winProb) {
+            // WIN
+            const goldReward = Math.floor(enemySoldiers / 10);
+            const soldierReward = Math.floor(enemySoldiers / 10);
+
+            this.party.gold += goldReward;
+            this.party.soldiers += soldierReward; // replenish or recruit
+
+            this.showFeedback(`VICTORY! Gained ${goldReward} Gold & ${soldierReward} Soldiers.`);
+
+            this.closePopup();
+            this.spawnEnemy(); // Respawn
+            this.updateStats();
+        } else {
+            // LOSE
+            this.party.soldiers = 0;
+            this.updateStats();
+            this.closePopup();
+            alert("DEFEAT! Your army has been annihilated. GAME OVER.");
+            this.toggle(); // Turn off adventure mode
+            location.reload(); // Reload or just stop? Let's hide UI.
+        }
+    },
+
     render() {
         const cell = graphData[this.party.cell];
         if (cell && this.partyElement) {
@@ -1042,6 +1289,16 @@ const AdventureManager = {
                 this.treasureElement.style.display = "block";
             } else {
                 this.treasureElement.style.display = "none";
+            }
+        }
+
+        if (this.enemy && this.enemyElement) {
+            const eData = graphData[this.enemy.cell];
+            if (eData) {
+                this.enemyElement.setAttribute("transform", `translate(${eData.p[0]}, ${eData.p[1]})`);
+                this.enemyElement.style.display = "block";
+            } else {
+                this.enemyElement.style.display = "none";
             }
         }
     },

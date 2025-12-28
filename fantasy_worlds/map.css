@@ -514,3 +514,29 @@ caption {
         stroke: #DAA520;
     }
 }
+
+#enemyMarker circle {
+    transform-origin: center;
+    transform-box: fill-box;
+    animation: pulseEnemy 1.5s infinite ease-in-out;
+}
+
+@keyframes pulseEnemy {
+    0% {
+        transform: scale(1);
+        stroke: #c0392b;
+        /* Dark red */
+    }
+
+    50% {
+        transform: scale(1.15);
+        stroke: #e74c3c;
+        /* Light red */
+        stroke-width: 3px;
+    }
+
+    100% {
+        transform: scale(1);
+        stroke: #c0392b;
+    }
+}
