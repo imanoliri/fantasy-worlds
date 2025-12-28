@@ -1533,12 +1533,15 @@ const AdventureManager = {
     knownBurgs: {},
 
     accessibleCells: [], // Cache for valid land cells
+    portDockingCells: {}, // Map of Port Cell ID -> Valid Water Cell ID
 
     init() {
         if (this.partyElement) return;
 
         // Identify Accessible Land (Islands with at least one port)
         this.identifyAccessibleLand();
+        // Calculate static docking points for ports
+        this.calculateDockingPoints();
 
         // Initialize Missions
         MissionDiplomacy.init();
@@ -1590,6 +1593,29 @@ const AdventureManager = {
         svg.appendChild(previewLine);
         svg.appendChild(pathLine);
         svg.appendChild(circle); // Append circle after to be on top
+    },
+
+    calculateDockingPoints() {
+        this.portDockingCells = {};
+        // Iterate all cells to find ports
+        graphData.forEach((cell, index) => {
+            if (cell.b === marineBiomeId) return; // Skip water cells
+
+            // Check neighbors for water
+            const waterNeighbors = [];
+            for (const n of cell.c) {
+                if (graphData[n].b === marineBiomeId) {
+                    waterNeighbors.push(n);
+                }
+            }
+
+            if (waterNeighbors.length > 0) {
+                // This is a port. Assign the FIRST water neighbor as the docking point.
+                // Deterministic assignment (lowest ID or array order).
+                this.portDockingCells[index] = waterNeighbors[0];
+            }
+        });
+        console.log("Calculated static docking points for " + Object.keys(this.portDockingCells).length + " ports.");
     },
 
     identifyAccessibleLand() {
@@ -1842,21 +1868,30 @@ const AdventureManager = {
                 // Movement Logic
                 let canMove = false;
                 if (this.party.onShip) {
-                    // On ship: Can ONLY move on water.
-                    // Exception: Can move to a Port (land) ONLY if it is the specific destination (docking).
-                    // We don't know the exact destination here in BFS easily without checking 'end'.
-                    // But we can say: allow water adjacent. Allow port adjacent.
-                    // The user said: "pathing... can only include cells of the biome=marine".
-                    // This implies NO land cells in the path steps.
-                    // But we need to reach the port cell to interact.
-                    // Let's implement strict check:
-                    // If next is WATER: allowed.
-                    // If next is PORT: allowed ONLY if next === end (docking).
+                    const currentIsWater = graphData[current].b === marineBiomeId;
 
-                    if (isWater) {
-                        canMove = true;
-                    } else if (isPort && next === end) {
-                        canMove = true;
+                    if (currentIsWater) {
+                        // From Water:
+                        // 1. To Water (always allowed)
+                        // 2. To Port (Docking) - ONLY if 'current' is the designated docking point for 'next'
+                        if (isWater) {
+                            canMove = true;
+                        } else if (isPort && next === end) {
+                            // Check valid docking point
+                            if (this.portDockingCells[next] === current) {
+                                canMove = true;
+                            }
+                        }
+                    } else {
+                        // From Land (Port) - we are docked:
+                        // 1. To Water (Leaving Dock) - ONLY to the designated docking point
+                        // 2. To Land/Port (NEVER allowed)
+                        if (isWater) {
+                            // Check if 'next' is the designated docking point for 'current' (Port)
+                            if (this.portDockingCells[current] === next) {
+                                canMove = true;
+                            }
+                        }
                     }
                 } else {
                     // On land: Can move to Land (including ports)
