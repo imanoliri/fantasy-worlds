@@ -1498,7 +1498,8 @@ const AdventureManager = {
         soldiers: 10,
         food: 50,
         gold: 10,
-        tools: 10
+        tools: 10,
+        onShip: false
     },
     partyElement: null,
     pathElement: null,
@@ -1618,6 +1619,7 @@ const AdventureManager = {
             this.party.food = 50;
             this.party.gold = 10;
             this.party.tools = 10;
+            this.party.onShip = false;
             this.partyElement.style.display = "block";
 
             // Spawn Missions
@@ -1640,25 +1642,22 @@ const AdventureManager = {
 
     async handleClick(target) {
         if (!this.active) return;
-
-        // Clear preview on click
         this.drawPreviewPath([]);
-
-        // if moving, we override. No return.
-
-        // Increment movementId to invalidate previous moves
         this.movementId++;
-
         const cellId = this.getTargetCellId(target);
 
         if (cellId !== null) {
-            // Check if water
-            if (graphData[cellId].b === marineBiomeId) {
+            const isWater = graphData[cellId].b === marineBiomeId;
+
+            if (!this.party.onShip && isWater) {
                 this.showFeedback("Cannot move to water!");
                 return;
             }
+            if (this.party.onShip && !isWater && !this.isPort(cellId)) {
+                this.showFeedback("Must dock at a Port!");
+                return;
+            }
 
-            // Pathfinding
             const path = this.findPath(this.party.cell, cellId);
             if (path && path.length > 0) {
                 this.drawPath(path);
@@ -1675,11 +1674,13 @@ const AdventureManager = {
 
         const cellId = this.getTargetCellId(target);
         if (cellId !== null) {
-            // Pathfinding Preview
-            if (graphData[cellId].b === marineBiomeId) {
+            const isWater = graphData[cellId].b === marineBiomeId;
+
+            if (!this.party.onShip && isWater) {
                 this.showFeedback("Cannot preview path to water!");
                 return;
             }
+            // Pathfinding/Preview
             const path = this.findPath(this.party.cell, cellId);
             if (path && path.length > 0) {
                 this.drawPreviewPath(path);
@@ -1696,7 +1697,7 @@ const AdventureManager = {
             const id = target.getAttribute('data-cell-id');
             cellId = parseInt(id);
         } else if (target.classList.contains('burg-dot')) {
-            // Fallback (though burg-dot should have data-cell-id)
+            // Fallback
             const cx = parseFloat(target.getAttribute('cx'));
             const cy = parseFloat(target.getAttribute('cy'));
             cellId = this.findCellAt(cx, cy);
@@ -1705,7 +1706,6 @@ const AdventureManager = {
     },
 
     findCellAt(x, y) {
-        // Simple search for closest cell
         let minDist = Infinity;
         let closest = -1;
 
@@ -1722,29 +1722,51 @@ const AdventureManager = {
         return closest;
     },
 
+    // Helper to check if a cell is a port (adjacent to water)
+    isPort(cellId) {
+        if (!graphData[cellId]) return false;
+        // Check if itself is water
+        if (graphData[cellId].b === marineBiomeId) return false;
+
+        const neighbors = graphData[cellId].c;
+        return neighbors.some(n => graphData[n].b === marineBiomeId);
+    },
+
     findPath(start, end) {
         if (start === end) return [];
 
-        // BFS
         const queue = [start];
-        const cameFrom = {}; // path reconstruction
+        const cameFrom = {};
         cameFrom[start] = null;
 
-        // Limit search depth/nodes to avoid freeze on large maps
         let visited = 0;
         const limit = 5000;
 
         while (queue.length > 0) {
             const current = queue.shift();
             visited++;
-            if (visited > limit) return null; // Too far
+            if (visited > limit) return null;
 
             if (current === end) break;
 
             const neighbors = graphData[current].c;
             for (let next of neighbors) {
-                // Check bounds and water
-                if (graphData[next] && graphData[next].b !== marineBiomeId) {
+                if (!graphData[next]) continue;
+
+                const isWater = graphData[next].b === marineBiomeId;
+                const isPort = this.isPort(next);
+
+                // Movement Logic
+                let canMove = false;
+                if (this.party.onShip) {
+                    // On ship: Can move to Water OR to a Port(Land)
+                    if (isWater || isPort) canMove = true;
+                } else {
+                    // On land: Can move to Land (including ports)
+                    if (!isWater) canMove = true;
+                }
+
+                if (canMove) {
                     if (!(next in cameFrom)) {
                         queue.push(next);
                         cameFrom[next] = current;
@@ -1755,14 +1777,12 @@ const AdventureManager = {
 
         if (!(end in cameFrom)) return null;
 
-        // Reconstruct path
         const path = [];
         let curr = end;
         while (curr !== start) {
             path.push(curr);
             curr = cameFrom[curr];
         }
-        // path is reversed (end -> start)
         return path.reverse();
     },
 
@@ -1793,7 +1813,11 @@ const AdventureManager = {
                 mission.onArrival();
             }
         } else {
-            this.showFeedback("Cannot reach destination!");
+            if (this.party.onShip) {
+                this.showFeedback("Cannot reach destination! (Check water path)");
+            } else {
+                this.showFeedback("Cannot reach destination! (Check land path)");
+            }
         }
     },
 
@@ -1802,49 +1826,44 @@ const AdventureManager = {
         const currentId = this.movementId;
 
         for (let nextCell of path) {
-            // Check if superseded
             if (this.movementId !== currentId) {
                 return;
             }
 
-            if (this.party.food <= 0) {
-                this.showFeedback("Out of food! Party is starving.");
-                // Maybe penalty?
-                this.party.soldiers = Math.max(0, this.party.soldiers - 1);
-                if (this.party.soldiers === 0) {
-                    this.showFeedback("Game Over! All soldiers died.");
-                    this.isMoving = false;
-                    return;
+            if (!this.party.onShip) {
+                if (this.party.food <= 0) {
+                    this.showFeedback("Out of food! Party is starving.");
+                    this.party.soldiers = Math.max(0, this.party.soldiers - 1);
+                    if (this.party.soldiers === 0) {
+                        this.showFeedback("Game Over! All soldiers died.");
+                        this.isMoving = false;
+                        return;
+                    }
                 }
+                this.party.food--;
             }
 
             this.party.cell = nextCell;
-            this.party.food--;
             this.updateStats();
             this.render();
 
-            // Update path visual (remove visited nodes)
             const remainingIndex = path.indexOf(nextCell);
             if (remainingIndex > -1) {
                 this.drawPath(path.slice(remainingIndex));
             }
 
-            // Wait a bit for animation
             await new Promise(r => setTimeout(r, 150));
         }
         this.isMoving = false;
-        this.checkForArrival(); // Final check
+        this.checkForArrival();
     },
 
     checkForArrival() {
         if (this.party.cell === -1) return;
 
-        // Check Missions
         const missions = [MissionTreasure, MissionBattle, MissionHunt, MissionSiege, MissionExplore];
         for (let m of missions) {
-            // Check single data missions
             if (m.data) {
-                // Siege uses armyCell, others use cell. Let's normalize or check both.
                 const target = m.data.armyCell || m.data.cell;
                 if (target === this.party.cell) {
                     if (m.onArrival) {
@@ -1853,7 +1872,6 @@ const AdventureManager = {
                     }
                 }
             }
-            // Check Explorer (array)
             if (m.locations) {
                 for (let i = 0; i < m.locations.length; i++) {
                     if (m.locations[i] && m.locations[i].cell === this.party.cell) {
@@ -1864,7 +1882,6 @@ const AdventureManager = {
             }
         }
 
-        // Check Burg Arrival
         const burg = burgsData.find(b => b.cell_id === this.party.cell);
         if (burg) {
             this.showBurgPopup(burg);
@@ -1901,19 +1918,16 @@ const AdventureManager = {
     },
 
     showBurgPopup(burg) {
-        // Create popup if doesn't exist
         if (!this.popupElement) {
             this.popupElement = document.createElement('div');
             this.popupElement.className = 'burg-popup';
             document.body.appendChild(this.popupElement);
         }
 
-        // Calculate Surplus and Reset Logic
         let notificationHtml = '';
-        const netFood = parseFloat(burg.net_food); // Ensure number
+        const netFood = parseFloat(burg.net_food);
 
         if (netFood > 0) {
-            // Only refill if current food is LESS than the surplus capacity
             const surplusCap = Math.floor(netFood * 10);
             if (this.party.food < surplusCap) {
                 this.party.food = surplusCap;
@@ -1922,7 +1936,6 @@ const AdventureManager = {
             }
         }
 
-        // Ensure overlay exists
         let overlay = document.getElementById('modalOverlay');
         if (!overlay) {
             overlay = document.createElement('div');
@@ -1940,9 +1953,20 @@ const AdventureManager = {
         const soldierCost = Math.max(1, 6 - soldierQuartiers);
         const canRecruit = soldierQuartiers >= 1;
 
-        // Adventure specific buttons
         const diplomatic = MissionDiplomacy.targets.includes(burg.id);
         const siege = (MissionSiege.data && MissionSiege.data.burgId === burg.id);
+
+        const isPort = this.isPort(burg.cell_id);
+        const onShip = this.party.onShip;
+
+        let shipHtml = '';
+        if (isPort) {
+            if (onShip) {
+                shipHtml = `<button class="btn-recruit" style="background-color: #34495e;" onclick="AdventureManager.leaveShip()" title="Return to land travel">Leave Ship ⚓</button>`;
+            } else {
+                shipHtml = `<button class="btn-buy" style="background-color: #2980b9;" onclick="AdventureManager.rentShip(5)" title="Rent a ship for water travel (5 💰)">Rent Ship (5 💰) ⛵</button>`;
+            }
+        }
 
         this.popupElement.innerHTML = `
             <h2>${burg.name}</h2>
@@ -1957,6 +1981,7 @@ const AdventureManager = {
                 ${notificationHtml}
             </div>
             <div class="actions">
+                ${shipHtml}
                 <button class="btn-buy" onclick="AdventureManager.buyFood(10, 1)" title="1 Gold for 10 Food">Buy 10 Food (1 💰)</button>
                 ${diplomatic ? `<button class="btn-recruit" style="background-color: #4169E1;" onclick="MissionDiplomacy.resolve(${burg.id})" title="Solve diplomatic issue">Diplomatic Mission (5 💰)</button>` : ''}
                 ${siege ? `<button class="btn-recruit" style="background-color: #000;" onclick="MissionSiege.showPopup()" title="Fight Sieging Army">Fight Siege Army (💣)</button>` : ''}
@@ -1967,6 +1992,26 @@ const AdventureManager = {
         `;
 
         this.popupElement.style.display = 'block';
+    },
+
+    rentShip(cost) {
+        if (this.party.gold >= cost) {
+            this.party.gold -= cost;
+            this.party.onShip = true;
+            this.updateStats();
+            this.showFeedback("Ship rented! Water travel enabled ⛵");
+            this.closePopup();
+            this.render();
+        } else {
+            this.showFeedback("Not enough gold!");
+        }
+    },
+
+    leaveShip() {
+        this.party.onShip = false;
+        this.showFeedback("Returned to land ⛺");
+        this.closePopup();
+        this.render();
     },
 
     buyFood(amount, cost) {
@@ -1992,7 +2037,6 @@ const AdventureManager = {
     },
 
     recruitSoldiers(amount, cost, burgCellId) {
-        // Find burg to update its soldier count
         const burg = burgsData.find(b => b.cell_id === burgCellId);
 
         if (!burg) {
@@ -2029,9 +2073,14 @@ const AdventureManager = {
         if (cell && this.partyElement) {
             this.partyElement.setAttribute('cx', cell.p[0]);
             this.partyElement.setAttribute('cy', cell.p[1]);
+
+            if (this.party.onShip) {
+                this.partyElement.setAttribute('fill', '#2980b9'); // Blue
+            } else {
+                this.partyElement.setAttribute('fill', '#e67e22'); // Pumpkin
+            }
         }
 
-        // Render Missions
         MissionTreasure.updateVisuals();
         MissionBattle.updateVisuals();
         MissionHunt.updateVisuals();
@@ -2051,7 +2100,6 @@ const AdventureManager = {
         const t = document.getElementById('tooltip');
         t.innerHTML = msg;
         t.style.display = 'block';
-        // Center tooltip or show at party location
         t.style.left = window.innerWidth / 2 + 'px';
         t.style.top = '100px';
         setTimeout(() => t.style.display = 'none', 2000);
