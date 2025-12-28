@@ -64,7 +64,13 @@ const MissionBattle = {
         const occupied = [AdventureManager.party.cell];
         if (MissionTreasure.data) occupied.push(MissionTreasure.data.cell);
 
-        const validCells = graphData.filter(c => c.b !== marineBiomeId && !occupied.includes(c.i));
+        let validCells = [];
+        if (AdventureManager.accessibleCells && AdventureManager.accessibleCells.length > 0) {
+            validCells = AdventureManager.accessibleCells.map(id => graphData[id]).filter(c => !occupied.includes(c.i));
+        } else {
+            validCells = graphData.filter(c => c.b !== marineBiomeId && !occupied.includes(c.i));
+        }
+
         if (validCells.length > 0) {
             const randomCell = validCells[Math.floor(Math.random() * validCells.length)];
             const amount = Math.floor(Math.random() * (200 - 20 + 1)) + 20; // 20 to 200

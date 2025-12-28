@@ -59,7 +59,12 @@ const MissionExplore = {
         if (MissionSiege.data) occupiedObj[MissionSiege.data.armyCell] = true;
         this.locations.forEach(l => { if (l) occupiedObj[l.cell] = true; });
 
-        const validCells = graphData.filter(c => c.b !== marineBiomeId && !occupiedObj[c.i]);
+        let validCells = [];
+        if (AdventureManager.accessibleCells && AdventureManager.accessibleCells.length > 0) {
+            validCells = AdventureManager.accessibleCells.map(id => graphData[id]).filter(c => !occupiedObj[c.i]);
+        } else {
+            validCells = graphData.filter(c => c.b !== marineBiomeId && !occupiedObj[c.i]);
+        }
 
         if (validCells.length > 0) {
             const randomCell = validCells[Math.floor(Math.random() * validCells.length)];

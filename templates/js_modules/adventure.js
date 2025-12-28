@@ -19,8 +19,13 @@ const AdventureManager = {
     movementId: 0,
     knownBurgs: {},
 
+    accessibleCells: [], // Cache for valid land cells
+
     init() {
         if (this.partyElement) return;
+
+        // Identify Accessible Land (Islands with at least one port)
+        this.identifyAccessibleLand();
 
         // Initialize Missions
         MissionDiplomacy.init();
@@ -74,6 +79,55 @@ const AdventureManager = {
         svg.appendChild(circle); // Append circle after to be on top
     },
 
+    identifyAccessibleLand() {
+        // 1. Identify all land cells
+        const landCells = graphData.map((c, i) => ({ ...c, i })).filter(c => c.b !== marineBiomeId);
+        const visited = new Set();
+        const validCells = [];
+
+        // 2. Group into connected components (Islands/Continents)
+        for (let cell of landCells) {
+            if (visited.has(cell.i)) continue;
+
+            const component = [];
+            const queue = [cell.i];
+            visited.add(cell.i);
+            let hasPort = false;
+
+            while (queue.length > 0) {
+                const currentId = queue.shift();
+                component.push(currentId);
+
+                // Check if this cell is a port (has burg and is adjacent to water)
+                // Actually, isPort checks neighbors. 
+                // BUT user said "no burg exists where player can rent a ship".
+                // So we need: Has a BURG that is a PORT.
+                if (!hasPort) {
+                    const burg = burgsData.find(b => b.cell_id === currentId);
+                    if (burg && this.isPort(currentId)) {
+                        hasPort = true;
+                    }
+                }
+
+                // Neighbors
+                const neighbors = graphData[currentId].c;
+                for (let n of neighbors) {
+                    if (graphData[n].b !== marineBiomeId && !visited.has(n)) {
+                        visited.add(n);
+                        queue.push(n);
+                    }
+                }
+            }
+
+            // 3. If component has at least one port-burg, add to allowed list
+            if (hasPort) {
+                validCells.push(...component);
+            }
+        }
+        this.accessibleCells = validCells;
+        console.log(`Identified ${this.accessibleCells.length} accessible land cells out of ${landCells.length} total land cells.`);
+    },
+
     toggle() {
         this.active = !this.active;
         const btn = document.getElementById('toggleAdventure');
@@ -114,13 +168,19 @@ const AdventureManager = {
     },
 
     start() {
-        // Pick random start cell that is not water
+        // Pick random start cell from ACCESSIBLE cells
         let startCell = -1;
 
-        const validCells = graphData.filter(c => c.b !== marineBiomeId);
-        if (validCells.length > 0) {
-            const random = validCells[Math.floor(Math.random() * validCells.length)];
-            startCell = random.i;
+        if (this.accessibleCells.length > 0) {
+            const randomId = this.accessibleCells[Math.floor(Math.random() * this.accessibleCells.length)];
+            startCell = randomId;
+        } else {
+            // Fallback if something went wrong or no ports exist
+            const validCells = graphData.filter(c => c.b !== marineBiomeId);
+            if (validCells.length > 0) {
+                const random = validCells[Math.floor(Math.random() * validCells.length)];
+                startCell = random.i;
+            }
         }
 
         if (startCell !== -1) {

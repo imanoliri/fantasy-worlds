@@ -50,7 +50,13 @@ const MissionHunt = {
         if (MissionTreasure.data) occupied.push(MissionTreasure.data.cell);
         if (MissionBattle.data) occupied.push(MissionBattle.data.cell);
 
-        const validCells = graphData.filter(c => c.b !== marineBiomeId && !occupied.includes(c.i));
+        let validCells = [];
+        if (AdventureManager.accessibleCells && AdventureManager.accessibleCells.length > 0) {
+            validCells = AdventureManager.accessibleCells.map(id => graphData[id]).filter(c => !occupied.includes(c.i));
+        } else {
+            validCells = graphData.filter(c => c.b !== marineBiomeId && !occupied.includes(c.i));
+        }
+
         if (validCells.length > 0) {
             const randomCell = validCells[Math.floor(Math.random() * validCells.length)];
             const strength = Math.floor(Math.random() * (30 - 5 + 1)) + 5; // 5 to 30

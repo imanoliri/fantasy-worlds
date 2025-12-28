@@ -62,7 +62,13 @@ const MissionTreasure = {
     },
 
     spawn() {
-        const validCells = graphData.filter(c => c.b !== marineBiomeId && c.i !== AdventureManager.party.cell);
+        let validCells = [];
+        if (AdventureManager.accessibleCells && AdventureManager.accessibleCells.length > 0) {
+            validCells = AdventureManager.accessibleCells.map(id => graphData[id]).filter(c => c.i !== AdventureManager.party.cell);
+        } else {
+            validCells = graphData.filter(c => c.b !== marineBiomeId && c.i !== AdventureManager.party.cell);
+        }
+
         if (validCells.length > 0) {
             const randomCell = validCells[Math.floor(Math.random() * validCells.length)];
             const amount = Math.floor(Math.random() * (60 - 20 + 1)) + 20; // 20 to 60

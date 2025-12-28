@@ -532,7 +532,13 @@ const MissionTreasure = {
     },
 
     spawn() {
-        const validCells = graphData.filter(c => c.b !== marineBiomeId && c.i !== AdventureManager.party.cell);
+        let validCells = [];
+        if (AdventureManager.accessibleCells && AdventureManager.accessibleCells.length > 0) {
+            validCells = AdventureManager.accessibleCells.map(id => graphData[id]).filter(c => c.i !== AdventureManager.party.cell);
+        } else {
+            validCells = graphData.filter(c => c.b !== marineBiomeId && c.i !== AdventureManager.party.cell);
+        }
+
         if (validCells.length > 0) {
             const randomCell = validCells[Math.floor(Math.random() * validCells.length)];
             const amount = Math.floor(Math.random() * (60 - 20 + 1)) + 20; // 20 to 60
@@ -694,7 +700,13 @@ const MissionBattle = {
         const occupied = [AdventureManager.party.cell];
         if (MissionTreasure.data) occupied.push(MissionTreasure.data.cell);
 
-        const validCells = graphData.filter(c => c.b !== marineBiomeId && !occupied.includes(c.i));
+        let validCells = [];
+        if (AdventureManager.accessibleCells && AdventureManager.accessibleCells.length > 0) {
+            validCells = AdventureManager.accessibleCells.map(id => graphData[id]).filter(c => !occupied.includes(c.i));
+        } else {
+            validCells = graphData.filter(c => c.b !== marineBiomeId && !occupied.includes(c.i));
+        }
+
         if (validCells.length > 0) {
             const randomCell = validCells[Math.floor(Math.random() * validCells.length)];
             const amount = Math.floor(Math.random() * (200 - 20 + 1)) + 20; // 20 to 200
@@ -886,7 +898,13 @@ const MissionHunt = {
         if (MissionTreasure.data) occupied.push(MissionTreasure.data.cell);
         if (MissionBattle.data) occupied.push(MissionBattle.data.cell);
 
-        const validCells = graphData.filter(c => c.b !== marineBiomeId && !occupied.includes(c.i));
+        let validCells = [];
+        if (AdventureManager.accessibleCells && AdventureManager.accessibleCells.length > 0) {
+            validCells = AdventureManager.accessibleCells.map(id => graphData[id]).filter(c => !occupied.includes(c.i));
+        } else {
+            validCells = graphData.filter(c => c.b !== marineBiomeId && !occupied.includes(c.i));
+        }
+
         if (validCells.length > 0) {
             const randomCell = validCells[Math.floor(Math.random() * validCells.length)];
             const strength = Math.floor(Math.random() * (30 - 5 + 1)) + 5; // 5 to 30
@@ -1426,7 +1444,12 @@ const MissionExplore = {
         if (MissionSiege.data) occupiedObj[MissionSiege.data.armyCell] = true;
         this.locations.forEach(l => { if (l) occupiedObj[l.cell] = true; });
 
-        const validCells = graphData.filter(c => c.b !== marineBiomeId && !occupiedObj[c.i]);
+        let validCells = [];
+        if (AdventureManager.accessibleCells && AdventureManager.accessibleCells.length > 0) {
+            validCells = AdventureManager.accessibleCells.map(id => graphData[id]).filter(c => !occupiedObj[c.i]);
+        } else {
+            validCells = graphData.filter(c => c.b !== marineBiomeId && !occupiedObj[c.i]);
+        }
 
         if (validCells.length > 0) {
             const randomCell = validCells[Math.floor(Math.random() * validCells.length)];
@@ -1509,8 +1532,13 @@ const AdventureManager = {
     movementId: 0,
     knownBurgs: {},
 
+    accessibleCells: [], // Cache for valid land cells
+
     init() {
         if (this.partyElement) return;
+
+        // Identify Accessible Land (Islands with at least one port)
+        this.identifyAccessibleLand();
 
         // Initialize Missions
         MissionDiplomacy.init();
@@ -1564,6 +1592,55 @@ const AdventureManager = {
         svg.appendChild(circle); // Append circle after to be on top
     },
 
+    identifyAccessibleLand() {
+        // 1. Identify all land cells
+        const landCells = graphData.map((c, i) => ({ ...c, i })).filter(c => c.b !== marineBiomeId);
+        const visited = new Set();
+        const validCells = [];
+
+        // 2. Group into connected components (Islands/Continents)
+        for (let cell of landCells) {
+            if (visited.has(cell.i)) continue;
+
+            const component = [];
+            const queue = [cell.i];
+            visited.add(cell.i);
+            let hasPort = false;
+
+            while (queue.length > 0) {
+                const currentId = queue.shift();
+                component.push(currentId);
+
+                // Check if this cell is a port (has burg and is adjacent to water)
+                // Actually, isPort checks neighbors. 
+                // BUT user said "no burg exists where player can rent a ship".
+                // So we need: Has a BURG that is a PORT.
+                if (!hasPort) {
+                    const burg = burgsData.find(b => b.cell_id === currentId);
+                    if (burg && this.isPort(currentId)) {
+                        hasPort = true;
+                    }
+                }
+
+                // Neighbors
+                const neighbors = graphData[currentId].c;
+                for (let n of neighbors) {
+                    if (graphData[n].b !== marineBiomeId && !visited.has(n)) {
+                        visited.add(n);
+                        queue.push(n);
+                    }
+                }
+            }
+
+            // 3. If component has at least one port-burg, add to allowed list
+            if (hasPort) {
+                validCells.push(...component);
+            }
+        }
+        this.accessibleCells = validCells;
+        console.log(`Identified ${this.accessibleCells.length} accessible land cells out of ${landCells.length} total land cells.`);
+    },
+
     toggle() {
         this.active = !this.active;
         const btn = document.getElementById('toggleAdventure');
@@ -1604,13 +1681,19 @@ const AdventureManager = {
     },
 
     start() {
-        // Pick random start cell that is not water
+        // Pick random start cell from ACCESSIBLE cells
         let startCell = -1;
 
-        const validCells = graphData.filter(c => c.b !== marineBiomeId);
-        if (validCells.length > 0) {
-            const random = validCells[Math.floor(Math.random() * validCells.length)];
-            startCell = random.i;
+        if (this.accessibleCells.length > 0) {
+            const randomId = this.accessibleCells[Math.floor(Math.random() * this.accessibleCells.length)];
+            startCell = randomId;
+        } else {
+            // Fallback if something went wrong or no ports exist
+            const validCells = graphData.filter(c => c.b !== marineBiomeId);
+            if (validCells.length > 0) {
+                const random = validCells[Math.floor(Math.random() * validCells.length)];
+                startCell = random.i;
+            }
         }
 
         if (startCell !== -1) {
