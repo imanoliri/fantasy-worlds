@@ -86,10 +86,16 @@ svg:active {
     display: none;
 }
 
-/* Only show capital glow when body has show-capitals class */
-body.show-capitals .burg-dot.capital {
-    filter: drop-shadow(0 0 6px gold);
+/* Capital Crowns Toggle */
+.capital-crown {
+    display: none;
+    pointer-events: none;
 }
+
+body.show-capitals .capital-crown {
+    display: block;
+}
+
 
 .trade-route {
     pointer-events: none;
@@ -106,15 +112,16 @@ body.show-gold-trades .trade-route-gold {
     opacity: 1;
 }
 
-/* Burg Rings Toggles */
-/* Default stroke is white (defined inline or default), overrides below */
+/* Burg Rings Toggles (Updated for Production) */
 
-body.show-food-trades .burg-dot.food-receiver {
+body.show-food-trades .burg-dot.food-producer {
     stroke: #27ae60 !important;
+    /* Green */
 }
 
-body.show-gold-trades .burg-dot.gold-receiver {
+body.show-gold-trades .burg-dot.gold-producer {
     stroke: #e74c3c !important;
+    /* Red/Maroon */
 }
 
 .burg-ring-gold {
@@ -489,4 +496,59 @@ caption {
         opacity: 1;
         transform: translate(-50%, -50%);
     }
+}
+
+#treasureMarker circle {
+    transform-origin: center;
+    transform-box: fill-box;
+    animation: pulseTreasure 1.5s infinite ease-in-out;
+}
+
+@keyframes pulseTreasure {
+    0% {
+        transform: scale(1);
+        stroke: #DAA520;
+    }
+
+    50% {
+        transform: scale(1.2);
+        stroke: #FFF;
+        stroke-width: 3px;
+    }
+
+    100% {
+        transform: scale(1);
+        stroke: #DAA520;
+    }
+}
+
+#enemyMarker circle {
+    transform-origin: center;
+    transform-box: fill-box;
+    animation: pulseEnemy 1.5s infinite ease-in-out;
+}
+
+@keyframes pulseEnemy {
+    0% {
+        transform: scale(1);
+        stroke: #c0392b;
+        /* Dark red */
+    }
+
+    50% {
+        transform: scale(1.15);
+        stroke: #e74c3c;
+        /* Light red */
+        stroke-width: 3px;
+    }
+
+    100% {
+        transform: scale(1);
+        stroke: #c0392b;
+    }
+}
+
+/* Diplomacy Pulse Animation */
+.diplomacy-ring {
+    filter: drop-shadow(0 0 4px #4169E1);
 }

@@ -468,6 +468,1049 @@ function sortTable(n, header, tableId) {
 }
 
 
+const MissionTreasure = {
+    data: null, // { cell: int, amount: int }
+    element: null,
+    countElement: null,
+
+    init() {
+        if (this.element) return;
+
+        // Create Treasure Element (Group)
+        const treasureGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        treasureGroup.setAttribute("id", "treasureMarker");
+        treasureGroup.style.display = "none";
+        treasureGroup.style.cursor = "pointer";
+        treasureGroup.setAttribute("pointer-events", "all");
+
+        // Add click listener
+        treasureGroup.onclick = (e) => {
+            e.stopPropagation();
+            AdventureManager.handleMissionClick(this);
+        };
+
+        const treasureCircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        treasureCircle.setAttribute("r", "12");
+        treasureCircle.setAttribute("fill", "#FFD700"); // Gold
+        treasureCircle.setAttribute("stroke", "#DAA520");
+        treasureCircle.setAttribute("stroke-width", "2");
+
+        const treasureText = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        treasureText.textContent = "💎";
+        treasureText.setAttribute("text-anchor", "middle");
+        treasureText.setAttribute("dy", "5");
+        treasureText.setAttribute("font-size", "16px");
+
+        const treasureCountBg = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+        treasureCountBg.setAttribute("x", "-12");
+        treasureCountBg.setAttribute("y", "14");
+        treasureCountBg.setAttribute("width", "24");
+        treasureCountBg.setAttribute("height", "14");
+        treasureCountBg.setAttribute("rx", "4");
+        treasureCountBg.setAttribute("fill", "#fff");
+        treasureCountBg.setAttribute("stroke", "#000");
+        treasureCountBg.setAttribute("stroke-width", "0.5");
+
+        const treasureCount = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        treasureCount.setAttribute("text-anchor", "middle");
+        treasureCount.setAttribute("dy", "24");
+        treasureCount.setAttribute("font-size", "10px");
+        treasureCount.setAttribute("fill", "#000"); // Black text
+        treasureCount.setAttribute("stroke", "none"); // No stroke on text for clarity
+        treasureCount.style.fontWeight = "bold";
+
+        treasureGroup.appendChild(treasureCircle);
+        treasureGroup.appendChild(treasureText);
+        treasureGroup.appendChild(treasureCountBg); // Background first
+        treasureGroup.appendChild(treasureCount);
+
+        this.element = treasureGroup;
+        this.countElement = treasureCount;
+
+        const svg = document.getElementById('mapSvg');
+        if (svg) svg.appendChild(this.element);
+    },
+
+    spawn() {
+        let validCells = [];
+        if (AdventureManager.accessibleCells && AdventureManager.accessibleCells.length > 0) {
+            validCells = AdventureManager.accessibleCells.map(id => graphData[id]).filter(c => c.i !== AdventureManager.party.cell);
+        } else {
+            validCells = graphData.filter(c => c.b !== marineBiomeId && c.i !== AdventureManager.party.cell);
+        }
+
+        if (validCells.length > 0) {
+            const randomCell = validCells[Math.floor(Math.random() * validCells.length)];
+            const amount = Math.floor(Math.random() * (60 - 20 + 1)) + 20; // 20 to 60
+            this.data = { cell: randomCell.i, amount: amount };
+            this.updateVisuals();
+        }
+    },
+
+    updateVisuals() {
+        if (!this.element) return;
+
+        if (this.data && AdventureManager.active) {
+            const tData = graphData[this.data.cell];
+            if (tData) {
+                this.element.setAttribute("transform", `translate(${tData.p[0]}, ${tData.p[1]})`);
+                this.element.style.display = "block";
+                if (this.countElement) this.countElement.textContent = this.data.amount;
+            } else {
+                this.element.style.display = "none";
+            }
+        } else {
+            this.element.style.display = "none";
+        }
+    },
+
+    toggle(active) {
+        if (!this.element) return;
+        this.element.style.display = (active && this.data) ? "block" : "none";
+    },
+
+    getTargetCell() {
+        return this.data ? this.data.cell : null;
+    },
+
+    onArrival() {
+        this.showPopup();
+    },
+
+    showPopup() {
+        if (!AdventureManager.popupElement) AdventureManager.openPopup(''); // Initialize if needed
+
+        // Ensure overlay
+        let overlay = document.getElementById('modalOverlay');
+        if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.id = 'modalOverlay';
+            overlay.className = 'modal-overlay';
+            document.body.appendChild(overlay);
+        }
+        overlay.style.display = 'block';
+
+        const cost = this.data.amount;
+        const canMine = AdventureManager.party.tools >= cost;
+
+        const content = `
+            <h2>💎 Buried Treasure 💎</h2>
+            <div class="content-wrapper">
+                <div class="info">
+                    You found a buried treasure chest!<br>
+                    It seems to contain <strong>${this.data.amount} Gold</strong>.
+                </div>
+            </div>
+            <div class="actions">
+                ${canMine ?
+                `<button class="btn-recruit" onclick="MissionTreasure.mine()">Mine Treasure (Cost: ${cost} 🛠️)</button>` :
+                `<div class="warning" style="color: #e74c3c; margin-bottom: 10px;">You do not have enough tools to mine this treasure (Need ${cost} 🛠️).</div>`
+            }
+                <button class="btn-leave" onclick="AdventureManager.closePopup()">Leave</button>
+            </div>
+        `;
+
+        AdventureManager.openPopup(content);
+    },
+
+    mine() {
+        if (!this.data) return;
+        const cost = this.data.amount;
+
+        if (AdventureManager.party.tools >= cost) {
+            AdventureManager.party.tools -= cost;
+            AdventureManager.party.gold += this.data.amount;
+            AdventureManager.showFeedback(`Mined ${this.data.amount} Gold! Used ${cost} Tools.`);
+
+            AdventureManager.closePopup();
+            this.spawn(); // Respawn
+            AdventureManager.updateStats();
+        } else {
+            AdventureManager.showFeedback("Not enough tools!");
+        }
+    }
+};
+
+window.MissionTreasure = MissionTreasure;
+
+
+const MissionBattle = {
+    data: null, // { cell: int, soldiers: int }
+    element: null,
+    countElement: null,
+
+    init() {
+        if (this.element) return;
+
+        // Create Enemy Element (Group)
+        const enemyGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        enemyGroup.setAttribute("id", "enemyMarker");
+        enemyGroup.style.display = "none";
+        enemyGroup.style.cursor = "pointer";
+        enemyGroup.setAttribute("pointer-events", "all");
+
+        enemyGroup.onclick = (e) => {
+            e.stopPropagation();
+            AdventureManager.handleMissionClick(this);
+        };
+
+        const enemyCircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        enemyCircle.setAttribute("r", "14");
+        enemyCircle.setAttribute("fill", "#e74c3c"); // Red
+        enemyCircle.setAttribute("stroke", "#c0392b");
+        enemyCircle.setAttribute("stroke-width", "2");
+
+        const enemyText = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        enemyText.textContent = "⚔️";
+        enemyText.setAttribute("text-anchor", "middle");
+        enemyText.setAttribute("dy", "5");
+        enemyText.setAttribute("font-size", "16px");
+
+        const enemyCountBg = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+        enemyCountBg.setAttribute("x", "-12");
+        enemyCountBg.setAttribute("y", "16");
+        enemyCountBg.setAttribute("width", "24");
+        enemyCountBg.setAttribute("height", "14");
+        enemyCountBg.setAttribute("rx", "4");
+        enemyCountBg.setAttribute("fill", "#fff");
+        enemyCountBg.setAttribute("stroke", "#000");
+        enemyCountBg.setAttribute("stroke-width", "0.5");
+
+        const enemyCount = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        enemyCount.setAttribute("text-anchor", "middle");
+        enemyCount.setAttribute("dy", "26");
+        enemyCount.setAttribute("font-size", "10px");
+        enemyCount.setAttribute("fill", "#000"); // Black text
+        enemyCount.setAttribute("stroke", "none");
+        enemyCount.style.fontWeight = "bold";
+
+        enemyGroup.appendChild(enemyCircle);
+        enemyGroup.appendChild(enemyText);
+        enemyGroup.appendChild(enemyCountBg); // Background first
+        enemyGroup.appendChild(enemyCount);
+
+        this.element = enemyGroup;
+        this.countElement = enemyCount;
+
+        const svg = document.getElementById('mapSvg');
+        if (svg) svg.appendChild(this.element);
+    },
+
+    spawn() {
+        const occupied = [AdventureManager.party.cell];
+        if (MissionTreasure.data) occupied.push(MissionTreasure.data.cell);
+
+        let validCells = [];
+        if (AdventureManager.accessibleCells && AdventureManager.accessibleCells.length > 0) {
+            validCells = AdventureManager.accessibleCells.map(id => graphData[id]).filter(c => !occupied.includes(c.i));
+        } else {
+            validCells = graphData.filter(c => c.b !== marineBiomeId && !occupied.includes(c.i));
+        }
+
+        if (validCells.length > 0) {
+            const randomCell = validCells[Math.floor(Math.random() * validCells.length)];
+            const amount = Math.floor(Math.random() * (200 - 20 + 1)) + 20; // 20 to 200
+            this.data = { cell: randomCell.i, soldiers: amount };
+            this.updateVisuals();
+        }
+    },
+
+    updateVisuals() {
+        if (!this.element) return;
+
+        if (this.data && AdventureManager.active) {
+            const eData = graphData[this.data.cell];
+            if (eData) {
+                this.element.setAttribute("transform", `translate(${eData.p[0]}, ${eData.p[1]})`);
+                this.element.style.display = "block";
+                if (this.countElement) this.countElement.textContent = this.data.soldiers;
+            } else {
+                this.element.style.display = "none";
+            }
+        } else {
+            this.element.style.display = "none";
+        }
+    },
+
+    toggle(active) {
+        if (!this.element) return;
+        this.element.style.display = (active && this.data) ? "block" : "none";
+    },
+
+    getTargetCell() {
+        return this.data ? this.data.cell : null;
+    },
+
+    onArrival() {
+        this.showPopup();
+    },
+
+    showPopup() {
+        if (!AdventureManager.popupElement) AdventureManager.openPopup('');
+
+        let overlay = document.getElementById('modalOverlay');
+        if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.id = 'modalOverlay';
+            overlay.className = 'modal-overlay';
+            document.body.appendChild(overlay);
+        }
+        overlay.style.display = 'block';
+
+        const mySoldiers = AdventureManager.party.soldiers;
+        const enemySoldiers = this.data.soldiers;
+
+        // Use ratio R = Player / Enemy.
+        // P(Win) = R^2 / (R^2 + 1)
+        const ratio = mySoldiers / enemySoldiers;
+        const k = 2; // Squared for sharper curve
+        const winProb = (Math.pow(ratio, k) / (Math.pow(ratio, k) + 1));
+        const winPercent = (winProb * 100).toFixed(1);
+
+        const content = `
+             <h2>⚔️ Battle Imminent ⚔️</h2>
+             <div class="content-wrapper" style="display: flex; gap: 20px; align-items: center; justify-content: center;">
+                 <div style="text-align: center;">
+                    <h3>Your Army</h3>
+                    <div style="font-size: 24px; color: #2ecc71; font-weight: bold;">${mySoldiers} 🛡️</div>
+                 </div>
+                 <div style="font-size: 20px; font-weight: bold;">VS</div>
+                 <div style="text-align: center;">
+                    <h3>Enemy Army</h3>
+                    <div style="font-size: 24px; color: #e74c3c; font-weight: bold;">${enemySoldiers} ⚔️</div>
+                 </div>
+             </div>
+             
+             <div style="text-align: center; margin: 15px 0;">
+                <div>Ratio: <strong>1:${(1 / ratio).toFixed(2)}</strong> (Player:Enemy)</div>
+                <div>Win Probability: <strong>${winPercent}%</strong></div>
+             </div>
+             
+             <div class="actions">
+                 <button class="btn-recruit" style="background-color: #c0392b;" onclick="MissionBattle.resolve()">FIGHT!</button>
+                 <button class="btn-leave" onclick="AdventureManager.closePopup()">Retreat (Stay here)</button>
+             </div>
+        `;
+        AdventureManager.openPopup(content);
+    },
+
+    resolve() {
+        if (!this.data) return;
+
+        const mySoldiers = AdventureManager.party.soldiers;
+        const enemySoldiers = this.data.soldiers;
+        const ratio = mySoldiers / enemySoldiers;
+        const k = 2;
+        const winProb = (Math.pow(ratio, k) / (Math.pow(ratio, k) + 1));
+
+        const roll = Math.random();
+
+        if (roll < winProb) {
+            // WIN
+            const goldReward = Math.floor(enemySoldiers / 10) * 2;
+            const soldierReward = Math.floor(enemySoldiers / 10) * 2;
+
+            AdventureManager.party.gold += goldReward;
+            AdventureManager.party.soldiers += soldierReward; // replenish or recruit
+
+            AdventureManager.showFeedback(`VICTORY! Gained ${goldReward} Gold & ${soldierReward} Soldiers.`);
+
+            AdventureManager.closePopup();
+            this.spawn(); // Respawn
+            AdventureManager.updateStats();
+        } else {
+            // LOSE
+            // Retain half of starting army, round down to nearest 5, min 5
+            const retained = Math.max(5, Math.floor((mySoldiers / 2) / 5) * 5);
+            AdventureManager.party.soldiers = retained;
+
+            AdventureManager.updateStats();
+            AdventureManager.closePopup();
+
+            // Damage enemy
+            const damage = mySoldiers;
+            this.data.soldiers = Math.max(0, this.data.soldiers - damage);
+
+            if (this.data.soldiers === 0) {
+                AdventureManager.showFeedback(`DEFEAT! But you wiped out the enemy!`);
+                this.element.style.display = "none";
+                this.data = null;
+                this.spawn();
+            } else {
+                AdventureManager.showFeedback(`DEFEAT! Enemy took ${damage} casualties.`);
+            }
+        }
+    }
+};
+
+window.MissionBattle = MissionBattle;
+
+
+const MissionHunt = {
+    data: null, // { cell: int, strength: int }
+    element: null,
+    countElement: null,
+
+    init() {
+        if (this.element) return;
+
+        // Create Beast Element (Group)
+        const beastGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        beastGroup.style.display = 'none';
+        beastGroup.style.cursor = 'pointer';
+
+        // Add click listener
+        beastGroup.onclick = (e) => {
+            e.stopPropagation();
+            AdventureManager.handleMissionClick(this);
+        };
+
+        const beastCircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        beastCircle.setAttribute("r", "12");
+        beastCircle.setAttribute("fill", "#8e44ad"); // Purple
+        beastCircle.setAttribute("stroke", "#ffffff");
+        beastCircle.setAttribute("stroke-width", "2");
+
+        const beastText = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        beastText.textContent = "🐺"; // Boar emoji
+        beastText.setAttribute("text-anchor", "middle");
+        beastText.setAttribute("dy", "5");
+        beastText.setAttribute("font-size", "16px");
+
+        const beastCount = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        beastCount.setAttribute("text-anchor", "middle");
+        beastCount.setAttribute("dy", "24"); // Offset
+        beastCount.setAttribute("font-size", "10px");
+
+        beastGroup.appendChild(beastCircle);
+        beastGroup.appendChild(beastText);
+        beastGroup.appendChild(beastCount);
+
+        this.element = beastGroup;
+        this.countElement = beastCount;
+
+        const svg = document.getElementById('mapSvg');
+        if (svg) svg.appendChild(this.element);
+    },
+
+    spawn() {
+        const occupied = [AdventureManager.party.cell];
+        if (MissionTreasure.data) occupied.push(MissionTreasure.data.cell);
+        if (MissionBattle.data) occupied.push(MissionBattle.data.cell);
+
+        let validCells = [];
+        if (AdventureManager.accessibleCells && AdventureManager.accessibleCells.length > 0) {
+            validCells = AdventureManager.accessibleCells.map(id => graphData[id]).filter(c => !occupied.includes(c.i));
+        } else {
+            validCells = graphData.filter(c => c.b !== marineBiomeId && !occupied.includes(c.i));
+        }
+
+        if (validCells.length > 0) {
+            const randomCell = validCells[Math.floor(Math.random() * validCells.length)];
+            const strength = Math.floor(Math.random() * (30 - 5 + 1)) + 5; // 5 to 30
+            this.data = { cell: randomCell.i, strength: strength };
+            this.updateVisuals();
+        }
+    },
+
+    updateVisuals() {
+        if (!this.element) return;
+
+        if (this.data && AdventureManager.active) {
+            const bData = graphData[this.data.cell];
+            if (bData) {
+                this.element.setAttribute("transform", `translate(${bData.p[0]}, ${bData.p[1]})`);
+                this.element.style.display = "block";
+                if (this.countElement) this.countElement.textContent = this.data.strength;
+            } else {
+                this.element.style.display = "none";
+            }
+        } else {
+            this.element.style.display = "none";
+        }
+    },
+
+    toggle(active) {
+        if (!this.element) return;
+        this.element.style.display = (active && this.data) ? "block" : "none";
+    },
+
+    getTargetCell() {
+        return this.data ? this.data.cell : null;
+    },
+
+    onArrival() {
+        this.showPopup();
+    },
+
+    showPopup() {
+        if (!AdventureManager.popupElement) AdventureManager.openPopup('');
+
+        let overlay = document.getElementById('modalOverlay');
+        if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.id = 'modalOverlay';
+            overlay.className = 'modal-overlay';
+            document.body.appendChild(overlay);
+        }
+        overlay.style.display = 'block';
+
+        const mySoldiers = AdventureManager.party.soldiers;
+        const beastStrength = this.data.strength;
+        const willWin = mySoldiers > beastStrength;
+
+        const content = `
+             <h2>🐺 Beast Encounter 🐺</h2>
+             <div class="content-wrapper" style="display: flex; gap: 20px; align-items: center; justify-content: center;">
+                 <div style="text-align: center;">
+                    <h3>Your Party</h3>
+                    <div style="font-size: 24px; color: #2ecc71; font-weight: bold;">${mySoldiers} 🛡️</div>
+                 </div>
+                 <div style="font-size: 20px; font-weight: bold;">VS</div>
+                 <div style="text-align: center;">
+                    <h3>The Beast</h3>
+                    <div style="font-size: 24px; color: #8e44ad; font-weight: bold;">${beastStrength} 🐺</div>
+                 </div>
+             </div>
+             
+             <div style="text-align: center; margin: 15px 0;">
+                ${willWin ?
+                `<div style="color: #2ecc71;"><strong>Outcome: VICTORY gauranteed!</strong></div>` :
+                `<div style="color: #e74c3c;"><strong>Outcome: DEFEAT likely...</strong></div>`
+            }
+             </div>
+             
+             <div class="actions">
+                 <button class="btn-recruit" style="background-color: #8e44ad;" onclick="MissionHunt.resolve()">FIGHT!</button>
+                 <button class="btn-leave" onclick="AdventureManager.closePopup()">Retreat</button>
+             </div>
+        `;
+        AdventureManager.openPopup(content);
+    },
+
+    resolve() {
+        if (!this.data) return;
+
+        const mySoldiers = AdventureManager.party.soldiers;
+        const beastStrength = this.data.strength;
+
+        if (mySoldiers > beastStrength) {
+            // WIN
+            // Gain 1 gold for each 5 strength of the beast, rounding up.
+            const goldReward = Math.ceil(beastStrength / 5);
+
+            AdventureManager.party.gold += goldReward;
+
+            AdventureManager.showFeedback(`SLAIN! Gained ${goldReward} Gold.`);
+
+            AdventureManager.closePopup();
+            this.spawn(); // Respawn
+            AdventureManager.updateStats();
+        } else {
+            // LOSE
+            AdventureManager.showFeedback("DEFEAT! The beast was too strong.");
+
+            // Damage beast by half of nr of soldiers
+            const damage = Math.floor(mySoldiers / 2);
+            this.data.strength = Math.max(0, this.data.strength - damage);
+
+            // Lose 5 soldiers
+            AdventureManager.party.soldiers = Math.max(0, AdventureManager.party.soldiers - 5);
+
+            AdventureManager.updateStats();
+            AdventureManager.closePopup();
+
+            // Check if beast died from damage
+            if (this.data.strength <= 0) {
+                AdventureManager.showFeedback("The beast succumbed to its wounds!");
+                this.element.style.display = "none";
+                this.data = null;
+                this.spawn();
+            }
+        }
+    }
+};
+
+window.MissionHunt = MissionHunt;
+
+
+const MissionSiege = {
+    data: null, // { burgId: int, armyCell: int, soldiers: int }
+    element: null, // Group for Bomb icon
+    countElement: null,
+    ringGroup: null, // Group for siege ring
+
+    init() {
+        if (this.element) return;
+
+        // Create Siege Ring Group
+        const siegeRingGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        this.ringGroup = siegeRingGroup;
+
+        // Create Siege Element (Group)
+        const siegeGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        siegeGroup.setAttribute("id", "siegeMarker");
+        siegeGroup.style.display = "none";
+        siegeGroup.style.cursor = "pointer";
+        siegeGroup.setAttribute("pointer-events", "all");
+
+        siegeGroup.onclick = (e) => {
+            e.stopPropagation();
+            AdventureManager.handleMissionClick(this);
+        };
+
+        const siegeCircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        siegeCircle.setAttribute("r", "14");
+        siegeCircle.setAttribute("fill", "#2c3e50"); // Dark Blue/Black
+        siegeCircle.setAttribute("stroke", "#000");
+        siegeCircle.setAttribute("stroke-width", "2");
+
+        const siegeText = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        siegeText.textContent = "💣";
+        siegeText.setAttribute("text-anchor", "middle");
+        siegeText.setAttribute("dy", "5");
+        siegeText.setAttribute("font-size", "16px");
+
+        const siegeCountBg = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+        siegeCountBg.setAttribute("x", "-12");
+        siegeCountBg.setAttribute("y", "16");
+        siegeCountBg.setAttribute("width", "24");
+        siegeCountBg.setAttribute("height", "14");
+        siegeCountBg.setAttribute("rx", "4");
+        siegeCountBg.setAttribute("fill", "#fff");
+        siegeCountBg.setAttribute("stroke", "#000");
+        siegeCountBg.setAttribute("stroke-width", "0.5");
+
+        const siegeCount = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        siegeCount.setAttribute("text-anchor", "middle");
+        siegeCount.setAttribute("dy", "26");
+        siegeCount.setAttribute("font-size", "10px");
+        siegeCount.setAttribute("fill", "#000");
+        siegeCount.setAttribute("stroke", "none");
+        siegeCount.style.fontWeight = "bold";
+
+        siegeGroup.appendChild(siegeCircle);
+        siegeGroup.appendChild(siegeText);
+        siegeGroup.appendChild(siegeCountBg);
+        siegeGroup.appendChild(siegeCount);
+
+        this.element = siegeGroup;
+        this.countElement = siegeCount;
+
+        const svg = document.getElementById('mapSvg');
+        if (svg) {
+            svg.appendChild(siegeRingGroup);
+            svg.appendChild(siegeGroup);
+        }
+    },
+
+    spawn() {
+        if (!AdventureManager.active) return;
+        const capitals = burgsData.filter(b => b.is_capital);
+        if (capitals.length === 0) return;
+
+        // Pick random capital
+        const capital = capitals[Math.floor(Math.random() * capitals.length)];
+        const capitalCell = capital.cell_id;
+
+        // Find neighbor land cell for army
+        const neighbors = graphData[capitalCell].c;
+        const validNeighbors = neighbors.filter(n => graphData[n].b !== marineBiomeId);
+
+        if (validNeighbors.length > 0) {
+            const armyCell = validNeighbors[Math.floor(Math.random() * validNeighbors.length)];
+
+            let totalQuartiers = (capital.soldier_quartiers || 0) + (capital.craftsman_quartiers || 0) + (capital.noble_quartiers || 0) + (capital.religious_quartiers || 0);
+            if (totalQuartiers === 0) totalQuartiers = Math.ceil(capital.population / 1000); // Fallback
+
+            const strength = Math.ceil(totalQuartiers / 2) * 20;
+
+            this.data = { burgId: capital.id, armyCell: armyCell, soldiers: strength };
+            this.updateVisuals();
+            AdventureManager.showFeedback(`Siege started at ${capital.name}!`);
+        }
+    },
+
+    updateVisuals() {
+        if (!this.element) return;
+
+        if (this.data && AdventureManager.active) {
+            // Icon
+            const sData = graphData[this.data.armyCell];
+            if (sData) {
+                this.element.setAttribute("transform", `translate(${sData.p[0]}, ${sData.p[1]})`);
+                this.element.style.display = "block";
+                if (this.countElement) this.countElement.textContent = this.data.soldiers;
+            } else {
+                this.element.style.display = "none";
+            }
+
+            // Ring
+            if (this.ringGroup) {
+                while (this.ringGroup.firstChild) {
+                    this.ringGroup.removeChild(this.ringGroup.firstChild);
+                }
+                const burg = burgsData.find(b => b.id === this.data.burgId);
+                if (burg) {
+                    const ring = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                    ring.setAttribute("cx", burg.x);
+                    ring.setAttribute("cy", burg.y);
+                    ring.setAttribute("r", parseFloat(burg.r) + 12); // Bigger radius
+                    ring.setAttribute("fill", "none");
+                    ring.setAttribute("stroke", "#000"); // Black
+                    ring.setAttribute("stroke-width", "4"); // Thicker
+                    ring.setAttribute("pointer-events", "none");
+                    this.ringGroup.appendChild(ring);
+                    this.ringGroup.style.display = 'inline';
+                }
+            }
+        } else {
+            this.element.style.display = "none";
+            if (this.ringGroup) this.ringGroup.style.display = 'none';
+        }
+    },
+
+    toggle(active) {
+        if (!this.element) return;
+        this.element.style.display = (active && this.data) ? "block" : "none";
+        if (this.ringGroup) this.ringGroup.style.display = (active && this.data) ? "inline" : "none";
+    },
+
+    getTargetCell() {
+        return this.data ? this.data.armyCell : null;
+    },
+
+    onArrival() {
+        this.showPopup();
+    },
+
+    showPopup() {
+        if (!AdventureManager.popupElement) AdventureManager.openPopup('');
+
+        let overlay = document.getElementById('modalOverlay');
+        if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.id = 'modalOverlay';
+            overlay.className = 'modal-overlay';
+            document.body.appendChild(overlay);
+        }
+        overlay.style.display = 'block';
+
+        const mySoldiers = AdventureManager.party.soldiers;
+        const enemySoldiers = this.data.soldiers;
+
+        const ratio = mySoldiers / enemySoldiers;
+        const k = 2;
+        const winProb = (Math.pow(ratio, k) / (Math.pow(ratio, k) + 1));
+        const winPercent = (winProb * 100).toFixed(1);
+
+        const content = `
+             <h2>⚔️ Break the Siege ⚔️</h2>
+             <div class="content-wrapper" style="display: flex; gap: 20px; align-items: center; justify-content: center;">
+                 <div style="text-align: center;">
+                    <h3>Your Army</h3>
+                    <div style="font-size: 24px; color: #2ecc71; font-weight: bold;">${mySoldiers} 🛡️</div>
+                 </div>
+                 <div style="font-size: 20px; font-weight: bold;">VS</div>
+                 <div style="text-align: center;">
+                    <h3>Siege Army</h3>
+                    <div style="font-size: 24px; color: #000; font-weight: bold;">${enemySoldiers} 💣</div>
+                 </div>
+             </div>
+             
+             <div style="text-align: center; margin: 15px 0;">
+                <div>Win Success Chance: <strong>${winPercent}%</strong></div>
+             </div>
+             
+             <div class="actions">
+                 <button class="btn-recruit" style="background-color: #c0392b;" onclick="MissionSiege.resolve()">ATTACK!</button>
+                 <button class="btn-leave" onclick="AdventureManager.closePopup()">Retreat</button>
+             </div>
+        `;
+        AdventureManager.openPopup(content);
+    },
+
+    resolve() {
+        if (!this.data) return;
+
+        const mySoldiers = AdventureManager.party.soldiers;
+        const enemySoldiers = this.data.soldiers;
+        const ratio = mySoldiers / enemySoldiers;
+        const k = 2;
+        const winProb = (Math.pow(ratio, k) / (Math.pow(ratio, k) + 1));
+
+        if (Math.random() < winProb) {
+            // WIN
+            const goldReward = 50; // High reward
+            const soldierReward = 10; // Freed prisoners?
+
+            AdventureManager.party.gold += goldReward;
+            AdventureManager.party.soldiers += soldierReward;
+
+            AdventureManager.showFeedback(`SIEGE BROKEN! Hero of the city! +${goldReward} Gold.`);
+
+            AdventureManager.closePopup();
+            this.data = null;
+            this.updateVisuals();
+
+            // Spawn new siege elsewhere
+            setTimeout(() => this.spawn(), 3000);
+            AdventureManager.updateStats();
+        } else {
+            // LOSE
+            const retained = Math.max(5, Math.floor((mySoldiers / 2) / 5) * 5);
+            AdventureManager.party.soldiers = retained;
+
+            AdventureManager.updateStats();
+            AdventureManager.closePopup();
+
+            // Damage enemy
+            const damage = mySoldiers;
+            this.data.soldiers = Math.max(0, this.data.soldiers - damage);
+
+            if (this.data.soldiers === 0) {
+                AdventureManager.showFeedback(`DEFEAT! But siege is broken at high cost!`);
+                this.data = null;
+                this.updateVisuals();
+                setTimeout(() => this.spawn(), 3000);
+            } else {
+                AdventureManager.showFeedback(`DEFEAT! Siege continues...`);
+                // Update text to show weakened enemy
+                if (this.countElement) this.countElement.textContent = this.data.soldiers;
+            }
+        }
+    }
+};
+
+window.MissionSiege = MissionSiege;
+
+
+const MissionDiplomacy = {
+    targets: [], // Array of cell IDs (capitals)
+    solvedCount: 0,
+    group: null, // SVG group for rings
+
+    init() {
+        if (this.group) return;
+
+        // Diplomatic Group (Rings)
+        const diplomacyGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        this.group = diplomacyGroup;
+
+        const svg = document.getElementById('mapSvg');
+        if (svg) svg.appendChild(diplomacyGroup);
+    },
+
+    spawn() {
+        if (!AdventureManager.active) return;
+        this.startTour();
+    },
+
+    startTour() {
+        const capitals = burgsData.filter(b => b.is_capital);
+        // Shuffle using Fisher-Yates
+        for (let i = capitals.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [capitals[i], capitals[j]] = [capitals[j], capitals[i]];
+        }
+        // Take top 3 unique IDs
+        this.targets = capitals.slice(0, 3).map(b => b.id);
+        this.solvedCount = 0;
+        AdventureManager.showFeedback("Diplomatic Tour Started! Visit 3 Capitals (Blue Rings).");
+        this.updateVisuals();
+    },
+
+    updateVisuals() {
+        if (!this.group) return;
+
+        if (AdventureManager.active) {
+            this.group.style.display = 'inline';
+            while (this.group.firstChild) {
+                this.group.removeChild(this.group.firstChild);
+            }
+            this.targets.forEach(id => {
+                const burg = burgsData.find(b => b.id === id);
+                if (burg) {
+                    const ring = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                    ring.setAttribute("cx", burg.x);
+                    ring.setAttribute("cy", burg.y);
+                    ring.setAttribute("r", parseFloat(burg.r) + 8);
+                    ring.setAttribute("fill", "none");
+                    ring.setAttribute("stroke", "#4169E1"); // Royal Blue
+                    ring.setAttribute("stroke-width", "3");
+                    ring.setAttribute("pointer-events", "none");
+                    ring.setAttribute("class", "diplomacy-ring"); // Add class for animation
+                    this.group.appendChild(ring);
+                }
+            });
+        } else {
+            this.group.style.display = 'none';
+        }
+    },
+
+    toggle(active) {
+        if (!this.group) return;
+        this.group.style.display = active ? 'inline' : 'none';
+    },
+
+    resolve(burgId) {
+        if (!this.targets.includes(burgId)) return;
+
+        if (AdventureManager.party.gold >= 5) {
+            AdventureManager.party.gold -= 5;
+            // Remove from targets
+            this.targets = this.targets.filter(id => id !== burgId);
+            this.solvedCount++;
+
+            AdventureManager.updateStats();
+            this.updateVisuals(); // Update rings
+            AdventureManager.closePopup();
+
+            if (this.solvedCount >= 3) {
+                AdventureManager.party.gold += 35;
+                AdventureManager.showFeedback("Diplomatic Tour Complete! +35 Gold. Starting new tour...");
+                AdventureManager.updateStats();
+                setTimeout(() => this.startTour(), 2000);
+            } else {
+                AdventureManager.showFeedback(`Diplomatic Mission Successful! (${this.solvedCount}/3)`);
+            }
+        } else {
+            AdventureManager.showFeedback("Not enough gold (Need 5 💰)!");
+        }
+    }
+};
+
+window.MissionDiplomacy = MissionDiplomacy;
+
+
+const MissionExplore = {
+    locations: [], // Array of { cell: int, id: int }
+    elements: [], // Array of SVG elements
+
+    init() {
+        if (this.elements.length > 0) return;
+
+        // Create Explorer Elements (4 locations)
+        const locationsGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        this.elements = [];
+
+        for (let i = 0; i < 4; i++) {
+            const locGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+            locGroup.style.display = 'none';
+            locGroup.style.cursor = 'pointer';
+
+            locGroup.onclick = (e) => {
+                e.stopPropagation();
+                AdventureManager.handleMissionClick(this, i); // Pass index
+            };
+
+            const locCircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            locCircle.setAttribute("r", "12");
+            locCircle.setAttribute("fill", "#9b59b6"); // Wisteria Purple
+            locCircle.setAttribute("stroke", "#ecf0f1");
+            locCircle.setAttribute("stroke-width", "2");
+
+            const locText = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            locText.textContent = "🔍";
+            locText.setAttribute("text-anchor", "middle");
+            locText.setAttribute("dy", "5");
+            locText.setAttribute("font-size", "16px");
+
+            locGroup.appendChild(locCircle);
+            locGroup.appendChild(locText);
+            locationsGroup.appendChild(locGroup);
+            this.elements.push(locGroup);
+        }
+
+        const svg = document.getElementById('mapSvg');
+        if (svg) svg.appendChild(locationsGroup);
+    },
+
+    spawn() {
+        this.locations = [null, null, null, null];
+        for (let i = 0; i < 4; i++) {
+            this.spawnLocation(i);
+        }
+        this.updateVisuals();
+    },
+
+    spawnLocation(index) {
+        // Collect occupied cells to avoid spawning on top
+        const occupiedObj = {};
+        occupiedObj[AdventureManager.party.cell] = true;
+        if (MissionTreasure.data) occupiedObj[MissionTreasure.data.cell] = true;
+        if (MissionBattle.data) occupiedObj[MissionBattle.data.cell] = true;
+        if (MissionHunt.data) occupiedObj[MissionHunt.data.cell] = true;
+        if (MissionSiege.data) occupiedObj[MissionSiege.data.armyCell] = true;
+        this.locations.forEach(l => { if (l) occupiedObj[l.cell] = true; });
+
+        let validCells = [];
+        if (AdventureManager.accessibleCells && AdventureManager.accessibleCells.length > 0) {
+            validCells = AdventureManager.accessibleCells.map(id => graphData[id]).filter(c => !occupiedObj[c.i]);
+        } else {
+            validCells = graphData.filter(c => c.b !== marineBiomeId && !occupiedObj[c.i]);
+        }
+
+        if (validCells.length > 0) {
+            const randomCell = validCells[Math.floor(Math.random() * validCells.length)];
+            this.locations[index] = { cell: randomCell.i, id: index };
+        }
+    },
+
+    updateVisuals() {
+        if (this.elements.length === 0) return;
+
+        if (AdventureManager.active) {
+            for (let i = 0; i < 4; i++) {
+                const loc = this.locations[i];
+                const el = this.elements[i];
+                if (loc && el) {
+                    const lData = graphData[loc.cell];
+                    if (lData) {
+                        el.setAttribute("transform", `translate(${lData.p[0]}, ${lData.p[1]})`);
+                        el.style.display = "block";
+                    } else {
+                        el.style.display = "none";
+                    }
+                } else if (el) {
+                    el.style.display = "none";
+                }
+            }
+        } else {
+            this.elements.forEach(el => {
+                if (el) el.style.display = 'none';
+            });
+        }
+    },
+
+    toggle(active) {
+        if (this.elements.length === 0) return;
+        if (!active) {
+            this.elements.forEach(el => {
+                if (el) el.style.display = 'none';
+            });
+        } else {
+            this.updateVisuals();
+        }
+    },
+
+    getTargetCell(index) {
+        return this.locations[index] ? this.locations[index].cell : null;
+    },
+
+    onArrival(index) {
+        // Found a location!
+        AdventureManager.party.gold += 5;
+        AdventureManager.showFeedback("Location Discovered! +5 Gold 🔍");
+        this.spawnLocation(index); // Respawn immediately
+        AdventureManager.updateStats();
+        this.updateVisuals(); // Update to remove old, show new
+    }
+};
+
+window.MissionExplore = MissionExplore;
+
+
 
 // Adventure Mode Module
 
@@ -478,9 +1521,9 @@ const AdventureManager = {
         soldiers: 10,
         food: 50,
         gold: 10,
-        tools: 10
+        tools: 10,
+        onShip: false
     },
-    partyElement: null,
     partyElement: null,
     pathElement: null,
     previewPathElement: null,
@@ -489,8 +1532,25 @@ const AdventureManager = {
     movementId: 0,
     knownBurgs: {},
 
+    accessibleCells: [], // Cache for valid land cells
+    portDockingCells: {}, // Map of Port Cell ID -> Valid Water Cell ID
+
     init() {
         if (this.partyElement) return;
+
+        // Identify Accessible Land (Islands with at least one port)
+        this.identifyAccessibleLand();
+        // Calculate static docking points for ports
+        this.calculateDockingPoints();
+
+        // Initialize Missions
+        MissionDiplomacy.init();
+        MissionSiege.init();
+        MissionBattle.init();
+        MissionHunt.init();
+        MissionTreasure.init();
+        MissionExplore.init();
+
 
         // Create party element (circle)
         const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
@@ -503,6 +1563,8 @@ const AdventureManager = {
         circle.style.zIndex = "100";
         circle.style.transition = "cx 0.2s linear, cy 0.2s linear";
         circle.style.display = "none";
+        this.partyElement = circle;
+
 
         // Create path element (polyline)
         const pathLine = document.createElementNS("http://www.w3.org/2000/svg", "polyline");
@@ -513,6 +1575,8 @@ const AdventureManager = {
         pathLine.setAttribute("pointer-events", "none");
         pathLine.style.opacity = "0.8";
         pathLine.style.display = "none";
+        this.pathElement = pathLine;
+
 
         // Create preview path element (polyline) different style
         const previewLine = document.createElementNS("http://www.w3.org/2000/svg", "polyline");
@@ -523,15 +1587,85 @@ const AdventureManager = {
         previewLine.setAttribute("pointer-events", "none");
         previewLine.style.opacity = "0.8";
         previewLine.style.display = "none";
+        this.previewPathElement = previewLine;
 
         const svg = document.getElementById('mapSvg');
         svg.appendChild(previewLine);
         svg.appendChild(pathLine);
         svg.appendChild(circle); // Append circle after to be on top
+    },
 
-        this.partyElement = circle;
-        this.pathElement = pathLine;
-        this.previewPathElement = previewLine;
+    calculateDockingPoints() {
+        this.portDockingCells = {};
+        // Iterate all cells to find ports
+        graphData.forEach((cell, index) => {
+            if (cell.b === marineBiomeId) return; // Skip water cells
+
+            // Check neighbors for water
+            const waterNeighbors = [];
+            for (const n of cell.c) {
+                if (graphData[n].b === marineBiomeId) {
+                    waterNeighbors.push(n);
+                }
+            }
+
+            if (waterNeighbors.length > 0) {
+                // This is a port. Assign the FIRST water neighbor as the docking point.
+                // Deterministic assignment (lowest ID or array order).
+                this.portDockingCells[index] = waterNeighbors[0];
+            }
+        });
+        console.log("Calculated static docking points for " + Object.keys(this.portDockingCells).length + " ports.");
+    },
+
+    identifyAccessibleLand() {
+        // 1. Identify all land cells
+        const landCells = graphData.map((c, i) => ({ ...c, i })).filter(c => c.b !== marineBiomeId);
+        const visited = new Set();
+        const validCells = [];
+
+        // 2. Group into connected components (Islands/Continents)
+        for (let cell of landCells) {
+            if (visited.has(cell.i)) continue;
+
+            const component = [];
+            const queue = [cell.i];
+            visited.add(cell.i);
+            let hasPort = false;
+
+            while (queue.length > 0) {
+                const currentId = queue.shift();
+                component.push(currentId);
+
+                // Check if this cell is a port (has burg and is adjacent to water)
+                // Actually, isPort checks neighbors. 
+                // BUT user said "no burg exists where player can rent a ship".
+                // So we need: Has a BURG that is a PORT.
+                if (!hasPort) {
+                    const burg = burgsData.find(b => b.cell_id === currentId);
+                    // Check if this cell has a burg that is 'Naval' AND is technically a port
+                    if (burg && burg.type === "Naval" && this.isPort(currentId)) {
+                        hasPort = true;
+                    }
+                }
+
+                // Neighbors
+                const neighbors = graphData[currentId].c;
+                for (let n of neighbors) {
+                    if (graphData[n].b !== marineBiomeId && !visited.has(n)) {
+                        visited.add(n);
+                        queue.push(n);
+                    }
+                }
+            }
+
+            // 3. If component has at least one port-burg, add to allowed list
+            if (hasPort) {
+                validCells.push(...component);
+            }
+        }
+        this.accessibleCells = validCells;
+        console.log(`Identified ${this.accessibleCells.length} accessible land cells out of ${landCells.length} total land cells.`);
     },
 
     toggle() {
@@ -547,29 +1681,46 @@ const AdventureManager = {
                 this.start();
             } else {
                 this.partyElement.style.display = "block";
+
+                // Toggle Missions
+                MissionDiplomacy.toggle(true);
+                MissionSiege.toggle(true);
+                MissionBattle.toggle(true);
+                MissionHunt.toggle(true);
+                MissionTreasure.toggle(true);
+                MissionExplore.toggle(true);
+
                 this.render();
             }
         } else {
             btn.classList.remove('active');
             stats.style.display = 'none';
             if (this.partyElement) this.partyElement.style.display = 'none';
+
+            // Toggle Missions
+            MissionDiplomacy.toggle(false);
+            MissionSiege.toggle(false);
+            MissionBattle.toggle(false);
+            MissionHunt.toggle(false);
+            MissionTreasure.toggle(false);
+            MissionExplore.toggle(false);
         }
     },
 
     start() {
-        // Pick random start cell that is not water
-        // We can try to pick a burg's cell if possible
+        // Pick random start cell from ACCESSIBLE cells
         let startCell = -1;
 
-        // Try to find a burg to start at
-        // We don't have direct access to burg objects easily unless we parse DOM
-        // The DOM burgs have x,y. We can find closest cell.
-        // OR we just pick a random cell from graphData that has h >= 20
-
-        const validCells = graphData.filter(c => c.h >= 20);
-        if (validCells.length > 0) {
-            const random = validCells[Math.floor(Math.random() * validCells.length)];
-            startCell = random.i;
+        if (this.accessibleCells.length > 0) {
+            const randomId = this.accessibleCells[Math.floor(Math.random() * this.accessibleCells.length)];
+            startCell = randomId;
+        } else {
+            // Fallback if something went wrong or no ports exist
+            const validCells = graphData.filter(c => c.b !== marineBiomeId);
+            if (validCells.length > 0) {
+                const random = validCells[Math.floor(Math.random() * validCells.length)];
+                startCell = random.i;
+            }
         }
 
         if (startCell !== -1) {
@@ -578,7 +1729,17 @@ const AdventureManager = {
             this.party.food = 50;
             this.party.gold = 10;
             this.party.tools = 10;
+            this.party.onShip = false;
             this.partyElement.style.display = "block";
+
+            // Spawn Missions
+            MissionTreasure.spawn();
+            MissionBattle.spawn();
+            MissionHunt.spawn();
+            MissionDiplomacy.spawn();
+            MissionSiege.spawn();
+            MissionExplore.spawn();
+
             this.updateStats();
             this.render();
 
@@ -591,25 +1752,22 @@ const AdventureManager = {
 
     async handleClick(target) {
         if (!this.active) return;
-
-        // Clear preview on click
         this.drawPreviewPath([]);
-
-        // if moving, we override. No return.
-
-        // Increment movementId to invalidate previous moves
         this.movementId++;
-
         const cellId = this.getTargetCellId(target);
 
         if (cellId !== null) {
-            // Check if water
-            if (graphData[cellId].h < 20) {
+            const isWater = graphData[cellId].b === marineBiomeId;
+
+            if (!this.party.onShip && isWater) {
                 this.showFeedback("Cannot move to water!");
                 return;
             }
+            if (this.party.onShip && !isWater && !this.isPort(cellId)) {
+                this.showFeedback("Must dock at a Port!");
+                return;
+            }
 
-            // Pathfinding
             const path = this.findPath(this.party.cell, cellId);
             if (path && path.length > 0) {
                 this.drawPath(path);
@@ -626,11 +1784,13 @@ const AdventureManager = {
 
         const cellId = this.getTargetCellId(target);
         if (cellId !== null) {
-            // Pathfinding Preview
-            if (graphData[cellId].h < 20) {
+            const isWater = graphData[cellId].b === marineBiomeId;
+
+            if (!this.party.onShip && isWater) {
                 this.showFeedback("Cannot preview path to water!");
                 return;
             }
+            // Pathfinding/Preview
             const path = this.findPath(this.party.cell, cellId);
             if (path && path.length > 0) {
                 this.drawPreviewPath(path);
@@ -643,10 +1803,11 @@ const AdventureManager = {
 
     getTargetCellId(target) {
         let cellId = null;
-        if (target.tagName === 'path') {
+        if (target.getAttribute('data-cell-id')) {
             const id = target.getAttribute('data-cell-id');
-            if (id) cellId = parseInt(id);
+            cellId = parseInt(id);
         } else if (target.classList.contains('burg-dot')) {
+            // Fallback
             const cx = parseFloat(target.getAttribute('cx'));
             const cy = parseFloat(target.getAttribute('cy'));
             cellId = this.findCellAt(cx, cy);
@@ -655,9 +1816,6 @@ const AdventureManager = {
     },
 
     findCellAt(x, y) {
-        // Simple search for closest cell
-        // Optimization: iterate all cells? Expensive? 
-        // 10k cells is fine for click event usually.
         let minDist = Infinity;
         let closest = -1;
 
@@ -674,29 +1832,74 @@ const AdventureManager = {
         return closest;
     },
 
+    // Helper to check if a cell is a port (adjacent to water)
+    isPort(cellId) {
+        if (!graphData[cellId]) return false;
+        // Check if itself is water
+        if (graphData[cellId].b === marineBiomeId) return false;
+
+        const neighbors = graphData[cellId].c;
+        return neighbors.some(n => graphData[n].b === marineBiomeId);
+    },
+
     findPath(start, end) {
         if (start === end) return [];
 
-        // BFS
         const queue = [start];
-        const cameFrom = {}; // path reconstruction
+        const cameFrom = {};
         cameFrom[start] = null;
 
-        // Limit search depth/nodes to avoid freeze on large maps
         let visited = 0;
         const limit = 5000;
 
         while (queue.length > 0) {
             const current = queue.shift();
             visited++;
-            if (visited > limit) return null; // Too far
+            if (visited > limit) return null;
 
             if (current === end) break;
 
             const neighbors = graphData[current].c;
             for (let next of neighbors) {
-                // Check bounds and water
-                if (graphData[next] && graphData[next].h >= 20) {
+                if (!graphData[next]) continue;
+
+                const isWater = graphData[next].b === marineBiomeId;
+                const isPort = this.isPort(next);
+
+                // Movement Logic
+                let canMove = false;
+                if (this.party.onShip) {
+                    const currentIsWater = graphData[current].b === marineBiomeId;
+
+                    if (currentIsWater) {
+                        // From Water:
+                        // 1. To Water (always allowed)
+                        // 2. To Port (Docking) - ONLY if 'current' is the designated docking point for 'next'
+                        if (isWater) {
+                            canMove = true;
+                        } else if (isPort && next === end) {
+                            // Check valid docking point
+                            if (this.portDockingCells[next] === current) {
+                                canMove = true;
+                            }
+                        }
+                    } else {
+                        // From Land (Port) - we are docked:
+                        // 1. To Water (Leaving Dock) - ONLY to the designated docking point
+                        // 2. To Land/Port (NEVER allowed)
+                        if (isWater) {
+                            // Check if 'next' is the designated docking point for 'current' (Port)
+                            if (this.portDockingCells[current] === next) {
+                                canMove = true;
+                            }
+                        }
+                    }
+                } else {
+                    // On land: Can move to Land (including ports)
+                    if (!isWater) canMove = true;
+                }
+
+                if (canMove) {
                     if (!(next in cameFrom)) {
                         queue.push(next);
                         cameFrom[next] = current;
@@ -707,15 +1910,48 @@ const AdventureManager = {
 
         if (!(end in cameFrom)) return null;
 
-        // Reconstruct path
         const path = [];
         let curr = end;
         while (curr !== start) {
             path.push(curr);
             curr = cameFrom[curr];
         }
-        // path is reversed (end -> start)
         return path.reverse();
+    },
+
+    // Generic Helper for Missions
+    handleMissionClick(mission, index = null) {
+        if (!this.active) return;
+
+        let targetCell = null;
+        if (index !== null) {
+            targetCell = mission.getTargetCell(index);
+        } else {
+            targetCell = mission.getTargetCell();
+        }
+
+        if (!targetCell) return;
+
+        const path = this.findPath(this.party.cell, targetCell);
+
+        if (path && path.length > 0) {
+            this.drawPath(path);
+            this.moveAlongPath(path).then(() => {
+                this.drawPath([]);
+            });
+        } else if (this.party.cell === targetCell) {
+            if (index !== null) {
+                mission.onArrival(index);
+            } else {
+                mission.onArrival();
+            }
+        } else {
+            if (this.party.onShip) {
+                this.showFeedback("Cannot reach destination! (Check water path)");
+            } else {
+                this.showFeedback("Cannot reach destination! (Check land path)");
+            }
+        }
     },
 
     async moveAlongPath(path) {
@@ -723,72 +1959,108 @@ const AdventureManager = {
         const currentId = this.movementId;
 
         for (let nextCell of path) {
-            // Check if superseded
             if (this.movementId !== currentId) {
-                // Determine if we should clear path or not. 
-                // The new click will call drawPath with new path, so we don't need to do anything.
-                // Just stop this loop.
                 return;
             }
 
-            if (this.party.food <= 0) {
-                this.showFeedback("Out of food! Party is starving.");
-                // Maybe penalty?
-                this.party.soldiers = Math.max(0, this.party.soldiers - 1);
-                if (this.party.soldiers === 0) {
-                    this.showFeedback("Game Over! All soldiers died.");
-                    this.isMoving = false;
-                    return;
+            if (!this.party.onShip) {
+                if (this.party.food <= 0) {
+                    this.showFeedback("Out of food! Party is starving.");
+                    this.party.soldiers = Math.max(0, this.party.soldiers - 1);
+                    if (this.party.soldiers === 0) {
+                        this.showFeedback("Game Over! All soldiers died.");
+                        this.isMoving = false;
+                        return;
+                    }
                 }
+                this.party.food--;
             }
 
             this.party.cell = nextCell;
-            this.party.food--;
             this.updateStats();
             this.render();
 
-            // Update path visual (remove visited nodes)
-            // path is the full path. We are iterating it.
-            // We want to show from current nextCell to end.
             const remainingIndex = path.indexOf(nextCell);
             if (remainingIndex > -1) {
                 this.drawPath(path.slice(remainingIndex));
             }
 
-            // Wait for animation
             await new Promise(r => setTimeout(r, 150));
         }
-
         this.isMoving = false;
-
-        // Check for arrival at burg
         this.checkForArrival();
     },
 
     checkForArrival() {
-        // We know where the party is: this.party.cell
-        // We need to find if there is a burg at this cell. Easiest is to search burgs_data (global var)
-        const burg = burgsData.find(b => b.cell_id === this.party.cell);
+        if (this.party.cell === -1) return;
 
+        const missions = [MissionTreasure, MissionBattle, MissionHunt, MissionSiege, MissionExplore];
+        for (let m of missions) {
+            if (m.data) {
+                const target = m.data.armyCell || m.data.cell;
+                if (target === this.party.cell) {
+                    if (m.onArrival) {
+                        m.onArrival();
+                        return;
+                    }
+                }
+            }
+            if (m.locations) {
+                for (let i = 0; i < m.locations.length; i++) {
+                    if (m.locations[i] && m.locations[i].cell === this.party.cell) {
+                        m.onArrival(i);
+                        return;
+                    }
+                }
+            }
+        }
+
+        const burg = burgsData.find(b => b.cell_id === this.party.cell);
         if (burg) {
             this.showBurgPopup(burg);
         }
     },
 
-    showBurgPopup(burg) {
-        // Create popup if doesn't exist
+    // UI Helpers
+    openPopup(htmlContent) {
         if (!this.popupElement) {
             this.popupElement = document.createElement('div');
             this.popupElement.className = 'burg-popup';
             document.body.appendChild(this.popupElement);
         }
 
-        // Calculate Surplus and Reset Logic
+        let overlay = document.getElementById('modalOverlay');
+        if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.id = 'modalOverlay';
+            overlay.className = 'modal-overlay';
+            document.body.appendChild(overlay);
+        }
+        overlay.style.display = 'block';
+
+        this.popupElement.innerHTML = htmlContent;
+        this.popupElement.style.display = 'block';
+    },
+
+    closePopup() {
+        if (this.popupElement) {
+            this.popupElement.style.display = 'none';
+        }
+        const overlay = document.getElementById('modalOverlay');
+        if (overlay) overlay.style.display = 'none';
+    },
+
+    showBurgPopup(burg) {
+        if (!this.popupElement) {
+            this.popupElement = document.createElement('div');
+            this.popupElement.className = 'burg-popup';
+            document.body.appendChild(this.popupElement);
+        }
+
         let notificationHtml = '';
-        const netFood = parseFloat(burg.net_food); // Ensure number
+        const netFood = parseFloat(burg.net_food);
 
         if (netFood > 0) {
-            // Only refill if current food is LESS than the surplus capacity
             const surplusCap = Math.floor(netFood * 10);
             if (this.party.food < surplusCap) {
                 this.party.food = surplusCap;
@@ -797,7 +2069,6 @@ const AdventureManager = {
             }
         }
 
-        // Ensure overlay exists
         let overlay = document.getElementById('modalOverlay');
         if (!overlay) {
             overlay = document.createElement('div');
@@ -815,6 +2086,21 @@ const AdventureManager = {
         const soldierCost = Math.max(1, 6 - soldierQuartiers);
         const canRecruit = soldierQuartiers >= 1;
 
+        const diplomatic = MissionDiplomacy.targets.includes(burg.id);
+        const siege = (MissionSiege.data && MissionSiege.data.burgId === burg.id);
+
+        const isPort = this.isPort(burg.cell_id);
+        const onShip = this.party.onShip;
+
+        let shipHtml = '';
+        if (isPort && burg.type === "Naval") {
+            if (onShip) {
+                shipHtml = `<button class="btn-recruit" style="background-color: #34495e;" onclick="AdventureManager.leaveShip()" title="Return to land travel">Leave Ship ⚓</button>`;
+            } else {
+                shipHtml = `<button class="btn-buy" style="background-color: #2980b9;" onclick="AdventureManager.rentShip(5)" title="Rent a ship for water travel (5 💰)">Rent Ship (5 💰) ⛵</button>`;
+            }
+        }
+
         this.popupElement.innerHTML = `
             <h2>${burg.name}</h2>
             <div class="content-wrapper">
@@ -828,7 +2114,10 @@ const AdventureManager = {
                 ${notificationHtml}
             </div>
             <div class="actions">
+                ${shipHtml}
                 <button class="btn-buy" onclick="AdventureManager.buyFood(10, 1)" title="1 Gold for 10 Food">Buy 10 Food (1 💰)</button>
+                ${diplomatic ? `<button class="btn-recruit" style="background-color: #4169E1;" onclick="MissionDiplomacy.resolve(${burg.id})" title="Solve diplomatic issue">Diplomatic Mission (5 💰)</button>` : ''}
+                ${siege ? `<button class="btn-recruit" style="background-color: #000;" onclick="MissionSiege.showPopup()" title="Fight Sieging Army">Fight Siege Army (💣)</button>` : ''}
                 ${canRecruit ? `<button class="btn-recruit" onclick="AdventureManager.recruitSoldiers(5, ${soldierCost}, ${burg.cell_id})" title="Recruit 5 soldiers for 5 Tools and 5 Gold. Each Soldier Quartier over 1 in the burg decreases the gold cost by one (down to a minimum of 1)">Recruit 5 Soldiers (${soldierCost} 💰, 5 🛠️)</button>` : ''}
                 ${canBuyTools ? `<button class="btn-buy" onclick="AdventureManager.buyTools(${toolsAmount}, 1)" title="1 Gold for an amount of Tools equal to Craftsmen Quartiers in the burg (max 5)">Buy ${toolsAmount} Tools (1 💰)</button>` : ''}
                 <button class="btn-leave" onclick="AdventureManager.closePopup()">Leave</button>
@@ -838,14 +2127,24 @@ const AdventureManager = {
         this.popupElement.style.display = 'block';
     },
 
-    closePopup() {
-        if (this.popupElement) {
-            this.popupElement.style.display = 'none';
+    rentShip(cost) {
+        if (this.party.gold >= cost) {
+            this.party.gold -= cost;
+            this.party.onShip = true;
+            this.updateStats();
+            this.showFeedback("Ship rented! Water travel enabled ⛵");
+            this.closePopup();
+            this.render();
+        } else {
+            this.showFeedback("Not enough gold!");
         }
-        const overlay = document.getElementById('modalOverlay');
-        if (overlay) {
-            overlay.style.display = 'none';
-        }
+    },
+
+    leaveShip() {
+        this.party.onShip = false;
+        this.showFeedback("Returned to land ⛺");
+        this.closePopup();
+        this.render();
     },
 
     buyFood(amount, cost) {
@@ -871,7 +2170,6 @@ const AdventureManager = {
     },
 
     recruitSoldiers(amount, cost, burgCellId) {
-        // Find burg to update its soldier count
         const burg = burgsData.find(b => b.cell_id === burgCellId);
 
         if (!burg) {
@@ -906,26 +2204,35 @@ const AdventureManager = {
     render() {
         const cell = graphData[this.party.cell];
         if (cell && this.partyElement) {
-            // cell.p is [x, y]
             this.partyElement.setAttribute('cx', cell.p[0]);
             this.partyElement.setAttribute('cy', cell.p[1]);
+
+            if (this.party.onShip) {
+                this.partyElement.setAttribute('fill', '#2980b9'); // Blue
+            } else {
+                this.partyElement.setAttribute('fill', '#e67e22'); // Pumpkin
+            }
         }
+
+        MissionTreasure.updateVisuals();
+        MissionBattle.updateVisuals();
+        MissionHunt.updateVisuals();
+        MissionSiege.updateVisuals();
+        MissionDiplomacy.updateVisuals();
+        MissionExplore.updateVisuals();
     },
 
     updateStats() {
-        document.getElementById('advSoldiers').textContent = this.party.soldiers;
-        document.getElementById('advFood').textContent = this.party.food;
-        document.getElementById('advGold').textContent = this.party.gold;
-        document.getElementById('advTools').textContent = this.party.tools;
+        if (document.getElementById('advSoldiers')) document.getElementById('advSoldiers').textContent = this.party.soldiers;
+        if (document.getElementById('advFood')) document.getElementById('advFood').textContent = this.party.food;
+        if (document.getElementById('advGold')) document.getElementById('advGold').textContent = this.party.gold;
+        if (document.getElementById('advTools')) document.getElementById('advTools').textContent = this.party.tools;
     },
 
     showFeedback(msg) {
         const t = document.getElementById('tooltip');
         t.innerHTML = msg;
         t.style.display = 'block';
-        // Center tooltip or show at party location
-        // For now just somewhere visible? Or let user clear it.
-        // Let's fade it out
         t.style.left = window.innerWidth / 2 + 'px';
         t.style.top = '100px';
         setTimeout(() => t.style.display = 'none', 2000);

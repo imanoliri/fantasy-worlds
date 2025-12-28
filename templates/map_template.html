@@ -45,7 +45,7 @@
 
             <button class="toggle-btn active" id="toggleFoodTrades" onclick="toggleFoodTrades()">Food Trade</button>
             <button class="toggle-btn active" id="toggleGoldTrades" onclick="toggleGoldTrades()">Gold Trade</button>
-            <button class="toggle-btn active" id="toggleCapitals" onclick="toggleCapitals()">Highlight Capitals</button>
+            <button class="toggle-btn active" id="toggleCapitals" onclick="toggleCapitals()">Show Capitals</button>
             <button class="toggle-btn" id="toggleStateTable" onclick="toggleStateTable()">States Table</button>
             <button class="toggle-btn" id="toggleTable" onclick="toggleTable()">Burgs Table</button>
             <button class="toggle-btn" id="toggleFoodTradeTable" onclick="toggleFoodTradeTable()">Food Trade
@@ -90,7 +90,7 @@
                 <!-- Burgs -->
                 {% for b in burgs_data %}
                 {% if b.extra_ring %}
-                <circle cx="{{ b.x }}" cy="{{ b.y }}" r="{{ b.r + 3 }}" fill="none" stroke="#e74c3c" stroke-width="2"
+                <circle cx="{{ b.x }}" cy="{{ b.y }}" r="{{ b.r + 2 }}" fill="none" stroke="#e74c3c" stroke-width="2"
                     class="burg-ring-gold" pointer-events="none" />
                 {% endif %}
                 <circle cx="{{ b.x }}" cy="{{ b.y }}" r="{{ b.r }}" fill="{{ b.color }}" stroke="{{ b.stroke }}"
@@ -99,6 +99,10 @@
                     data-state="{{ b.state_name }}" data-gold="{{ b.net_gold }}" data-food="{{ b.net_food }}"
                     data-quartiers="{{ b.quartier_details }}" data-cell-id="{{ b.cell_id }}">
                 </circle>
+                {% if b.is_capital %}
+                <text x="{{ b.x }}" y="{{ b.y }}" dy="0.35em" text-anchor="middle" font-size="{{ b.r + 2 }}px"
+                    pointer-events="none" class="capital-crown" style="text-shadow: 0px 0px 2px white;">👑</text>
+                {% endif %}
                 {% endfor %}
             </svg>
         </div>
@@ -232,6 +236,7 @@
             var stateNameIdMap = {{ state_name_id_map }};
             var graphData = {{ graph_data }};
             var burgsData = {{ burgs_data_json }};
+            var marineBiomeId = {{ marine_id }};
         </script>
         <script src="../map.js"></script>
 </body>
