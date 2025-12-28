@@ -1759,8 +1759,22 @@ const AdventureManager = {
                 // Movement Logic
                 let canMove = false;
                 if (this.party.onShip) {
-                    // On ship: Can move to Water OR to a Port(Land)
-                    if (isWater || isPort) canMove = true;
+                    // On ship: Can ONLY move on water.
+                    // Exception: Can move to a Port (land) ONLY if it is the specific destination (docking).
+                    // We don't know the exact destination here in BFS easily without checking 'end'.
+                    // But we can say: allow water adjacent. Allow port adjacent.
+                    // The user said: "pathing... can only include cells of the biome=marine".
+                    // This implies NO land cells in the path steps.
+                    // But we need to reach the port cell to interact.
+                    // Let's implement strict check:
+                    // If next is WATER: allowed.
+                    // If next is PORT: allowed ONLY if next === end (docking).
+
+                    if (isWater) {
+                        canMove = true;
+                    } else if (isPort && next === end) {
+                        canMove = true;
+                    }
                 } else {
                     // On land: Can move to Land (including ports)
                     if (!isWater) canMove = true;
