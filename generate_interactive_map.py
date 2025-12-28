@@ -171,7 +171,7 @@ def generate_map(burgs, output_file, trades_data=None, map_name="Interactive Map
                     'to_id': to_id,
                     'from_name': from_name,
                     'to_name': to_name,
-                    'amount': f"{t['Amount']:.2f}"
+                    'amount': f"{int(t['Amount'])}"
                 }
                 
                 if commodity == 'Net_Food':
@@ -265,8 +265,8 @@ def generate_map(burgs, output_file, trades_data=None, map_name="Interactive Map
             'population_fmt': fmt_num(b['population']),
             'type': b.get('type', 'Unknown'),
             'state_name': b.get('state_name', 'Unknown'),
-            'net_gold': f"{net_gold:.2f}",
-            'net_food': f"{net_food:.2f}",
+            'net_gold': f"{int(net_gold)}",
+            'net_food': f"{int(net_food)}",
             'net_gold_val': net_gold,
             'net_food_val': net_food,
             'quartier_details': quartier_details,
