@@ -826,6 +826,11 @@ const AdventureManager = {
                 if (this.treasure) this.treasureElement.style.display = "block";
                 if (this.enemy) this.enemyElement.style.display = "block";
                 if (this.siege) this.siegeElement.style.display = "block";
+
+                // Show Rings
+                if (this.diplomacyGroup) this.diplomacyGroup.style.display = 'inline';
+                if (this.siegeRingGroup) this.siegeRingGroup.style.display = 'inline';
+
                 this.render();
             }
         } else {
@@ -835,6 +840,15 @@ const AdventureManager = {
             if (this.treasureElement) this.treasureElement.style.display = 'none';
             if (this.enemyElement) this.enemyElement.style.display = 'none';
             if (this.siegeElement) this.siegeElement.style.display = 'none';
+
+            // Hide Rings
+            if (this.diplomacyGroup) this.diplomacyGroup.style.display = 'none';
+            if (this.siegeRingGroup) this.siegeRingGroup.style.display = 'none';
+
+            // Hide Locations
+            this.locationElements.forEach(el => {
+                if (el) el.style.display = 'none';
+            });
         }
     },
 
