@@ -505,6 +505,11 @@ const AdventureManager = {
     locations: [], // Array of { cell: int, id: int }
     locationElements: [], // Array of SVG elements
 
+    // DIPLOMATIC TOUR State
+    diplomaticTargets: [], // Array of cell IDs (capitals)
+    diplomacySolvedCount: 0,
+    diplomacyGroup: null, // SVG group for rings
+
     init() {
         if (this.partyElement) return;
 
@@ -718,6 +723,12 @@ const AdventureManager = {
         previewLine.style.display = "none";
 
         const svg = document.getElementById('mapSvg');
+
+        // Diplomatic Group (Rings)
+        const diplomacyGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        this.diplomacyGroup = diplomacyGroup;
+
+        svg.appendChild(diplomacyGroup); // Bottom layer for rings, under icons
         svg.appendChild(previewLine);
         svg.appendChild(pathLine);
         svg.appendChild(locationsGroup); // Explorer locations bottom layer of interactables
@@ -792,6 +803,8 @@ const AdventureManager = {
                 this.spawnLocation(i);
             }
 
+            this.startDiplomaticTour(); // Start first tour
+
             this.updateStats();
             this.render();
 
@@ -817,6 +830,21 @@ const AdventureManager = {
             const randomCell = validCells[Math.floor(Math.random() * validCells.length)];
             this.locations[index] = { cell: randomCell.i, id: index };
         }
+    },
+
+    startDiplomaticTour() {
+        if (!this.active) return;
+        const capitals = burgsData.filter(b => b.is_capital);
+        // Shuffle using Fisher-Yates
+        for (let i = capitals.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [capitals[i], capitals[j]] = [capitals[j], capitals[i]];
+        }
+        // Take top 3 unique IDs
+        this.diplomaticTargets = capitals.slice(0, 3).map(b => b.id);
+        this.diplomacySolvedCount = 0;
+        this.showFeedback("Diplomatic Tour Started! Visit 3 Capitals (Blue Rings).");
+        this.render();
     },
 
     spawnTreasure() {
@@ -1197,6 +1225,7 @@ const AdventureManager = {
             </div>
             <div class="actions">
                 <button class="btn-buy" onclick="AdventureManager.buyFood(10, 1)" title="1 Gold for 10 Food">Buy 10 Food (1 💰)</button>
+                ${this.diplomaticTargets.includes(burg.id) ? `<button class="btn-recruit" style="background-color: #4169E1;" onclick="AdventureManager.resolveDiplomacy(${burg.id})" title="Solve diplomatic issue">Diplomatic Mission (5 💰)</button>` : ''}
                 ${canRecruit ? `<button class="btn-recruit" onclick="AdventureManager.recruitSoldiers(5, ${soldierCost}, ${burg.cell_id})" title="Recruit 5 soldiers for 5 Tools and 5 Gold. Each Soldier Quartier over 1 in the burg decreases the gold cost by one (down to a minimum of 1)">Recruit 5 Soldiers (${soldierCost} 💰, 5 🛠️)</button>` : ''}
                 ${canBuyTools ? `<button class="btn-buy" onclick="AdventureManager.buyTools(${toolsAmount}, 1)" title="1 Gold for an amount of Tools equal to Craftsmen Quartiers in the burg (max 5)">Buy ${toolsAmount} Tools (1 💰)</button>` : ''}
                 <button class="btn-leave" onclick="AdventureManager.closePopup()">Leave</button>
@@ -1204,6 +1233,32 @@ const AdventureManager = {
         `;
 
         this.popupElement.style.display = 'block';
+    },
+
+    resolveDiplomacy(burgId) {
+        if (!this.diplomaticTargets.includes(burgId)) return;
+
+        if (this.party.gold >= 5) {
+            this.party.gold -= 5;
+            // Remove from targets
+            this.diplomaticTargets = this.diplomaticTargets.filter(id => id !== burgId);
+            this.diplomacySolvedCount++;
+
+            this.updateStats();
+            this.render(); // Update rings
+            this.closePopup();
+
+            if (this.diplomacySolvedCount >= 3) {
+                this.party.gold += 35;
+                this.showFeedback("Diplomatic Tour Complete! +35 Gold. Starting new tour...");
+                this.updateStats();
+                setTimeout(() => this.startDiplomaticTour(), 2000);
+            } else {
+                this.showFeedback(`Diplomatic Mission Successful! (${this.diplomacySolvedCount}/3)`);
+            }
+        } else {
+            this.showFeedback("Not enough gold (Need 5 💰)!");
+        }
     },
 
     closePopup() {
@@ -1483,6 +1538,28 @@ const AdventureManager = {
             } else if (el) {
                 el.style.display = "none";
             }
+        }
+
+        // Diplomatic Tour Rings
+        if (this.diplomacyGroup) {
+            while (this.diplomacyGroup.firstChild) {
+                this.diplomacyGroup.removeChild(this.diplomacyGroup.firstChild);
+            }
+            this.diplomaticTargets.forEach(id => {
+                const burg = burgsData.find(b => b.id === id);
+                if (burg) {
+                    const ring = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                    ring.setAttribute("cx", burg.x);
+                    ring.setAttribute("cy", burg.y);
+                    ring.setAttribute("r", parseFloat(burg.r) + 8);
+                    ring.setAttribute("fill", "none");
+                    ring.setAttribute("stroke", "#4169E1"); // Royal Blue
+                    ring.setAttribute("stroke-width", "3");
+                    ring.setAttribute("pointer-events", "none");
+                    ring.setAttribute("class", "diplomacy-ring"); // Add class for animation
+                    this.diplomacyGroup.appendChild(ring);
+                }
+            });
         }
     },
 

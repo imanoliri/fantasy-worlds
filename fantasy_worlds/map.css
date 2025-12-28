@@ -547,3 +547,8 @@ caption {
         stroke: #c0392b;
     }
 }
+
+/* Diplomacy Pulse Animation */
+.diplomacy-ring {
+    filter: drop-shadow(0 0 4px #4169E1);
+}
