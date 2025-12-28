@@ -19,11 +19,12 @@ const AdventureManager = {
     movementId: 0,
     knownBurgs: {},
 
-    treasure: null, // { cell: int, amount: int }
     treasureElement: null,
+    treasureCountElement: null,
 
     enemy: null, // { cell: int, soldiers: int }
     enemyElement: null,
+    enemyCountElement: null,
 
     init() {
         if (this.partyElement) return;
@@ -65,8 +66,30 @@ const AdventureManager = {
         treasureText.setAttribute("dy", "5");
         treasureText.setAttribute("font-size", "16px");
 
+        const treasureCountBg = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+        treasureCountBg.setAttribute("x", "-12");
+        treasureCountBg.setAttribute("y", "14");
+        treasureCountBg.setAttribute("width", "24");
+        treasureCountBg.setAttribute("height", "14");
+        treasureCountBg.setAttribute("rx", "4");
+        treasureCountBg.setAttribute("fill", "#fff");
+        treasureCountBg.setAttribute("stroke", "#000");
+        treasureCountBg.setAttribute("stroke-width", "0.5");
+
+        const treasureCount = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        treasureCount.setAttribute("text-anchor", "middle");
+        treasureCount.setAttribute("dy", "24");
+        treasureCount.setAttribute("font-size", "10px");
+        treasureCount.setAttribute("fill", "#000"); // Black text
+        treasureCount.setAttribute("stroke", "none"); // No stroke on text for clarity
+        treasureCount.style.fontWeight = "bold";
+
         treasureGroup.appendChild(treasureCircle);
         treasureGroup.appendChild(treasureText);
+        treasureGroup.appendChild(treasureCountBg); // Background first
+        treasureGroup.appendChild(treasureCount);
+
+        this.treasureCountElement = treasureCount;
 
         // Create Enemy Element (Group)
         const enemyGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
@@ -92,8 +115,30 @@ const AdventureManager = {
         enemyText.setAttribute("dy", "5");
         enemyText.setAttribute("font-size", "16px");
 
+        const enemyCountBg = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+        enemyCountBg.setAttribute("x", "-12");
+        enemyCountBg.setAttribute("y", "16");
+        enemyCountBg.setAttribute("width", "24");
+        enemyCountBg.setAttribute("height", "14");
+        enemyCountBg.setAttribute("rx", "4");
+        enemyCountBg.setAttribute("fill", "#fff");
+        enemyCountBg.setAttribute("stroke", "#000");
+        enemyCountBg.setAttribute("stroke-width", "0.5");
+
+        const enemyCount = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        enemyCount.setAttribute("text-anchor", "middle");
+        enemyCount.setAttribute("dy", "26");
+        enemyCount.setAttribute("font-size", "10px");
+        enemyCount.setAttribute("fill", "#000"); // Black text
+        enemyCount.setAttribute("stroke", "none");
+        enemyCount.style.fontWeight = "bold";
+
         enemyGroup.appendChild(enemyCircle);
         enemyGroup.appendChild(enemyText);
+        enemyGroup.appendChild(enemyCountBg); // Background first
+        enemyGroup.appendChild(enemyCount);
+
+        this.enemyCountElement = enemyCount;
 
         // Create path element (polyline)
         const pathLine = document.createElementNS("http://www.w3.org/2000/svg", "polyline");
@@ -196,6 +241,7 @@ const AdventureManager = {
             const amount = Math.floor(Math.random() * (60 - 20 + 1)) + 20; // 20 to 60
             this.treasure = { cell: randomCell.i, amount: amount };
             if (this.treasureElement) {
+                if (this.treasureCountElement) this.treasureCountElement.textContent = amount;
                 this.treasureElement.style.display = "block";
                 this.render();
             }
@@ -209,6 +255,7 @@ const AdventureManager = {
             const amount = Math.floor(Math.random() * (200 - 20 + 1)) + 20; // 20 to 200
             this.enemy = { cell: randomCell.i, soldiers: amount };
             if (this.enemyElement) {
+                if (this.enemyCountElement) this.enemyCountElement.textContent = amount;
                 this.enemyElement.style.display = "block";
                 this.render();
             }
@@ -707,102 +754,26 @@ const AdventureManager = {
             this.updateStats();
         } else {
             // LOSE
-            this.party.soldiers = 0;
+            this.party.soldiers = 1;
             this.updateStats();
             this.closePopup();
-            alert("DEFEAT! Your army has been annihilated. GAME OVER.");
-            this.toggle(); // Turn off adventure mode
-            location.reload(); // Reload or just stop? Let's hide UI.
+
+            // Damage enemy
+            const damage = mySoldiers;
+            this.enemy.soldiers = Math.max(0, this.enemy.soldiers - damage);
+
+            if (this.enemy.soldiers === 0) {
+                this.showFeedback(`DEFEAT! But you wiped out the enemy!`);
+                this.enemyElement.style.display = "none";
+                this.enemy = null;
+                this.spawnEnemy();
+            } else {
+                this.showFeedback(`DEFEAT! Enemy took ${damage} casualties.`);
+            }
         }
     },
 
-    showBattlePopup() {
-        if (!this.popupElement) {
-            this.popupElement = document.createElement('div');
-            this.popupElement.className = 'burg-popup';
-            document.body.appendChild(this.popupElement);
-        }
 
-        let overlay = document.getElementById('modalOverlay');
-        if (!overlay) {
-            overlay = document.createElement('div');
-            overlay.id = 'modalOverlay';
-            overlay.className = 'modal-overlay';
-            document.body.appendChild(overlay);
-        }
-        overlay.style.display = 'block';
-
-        const mySoldiers = this.party.soldiers;
-        const enemySoldiers = this.enemy.soldiers;
-
-        // Use ratio R = Player / Enemy.
-        // P(Win) = R^2 / (R^2 + 1)
-        const ratio = mySoldiers / enemySoldiers;
-        const k = 2; // Squared for sharper curve
-        const winProb = (Math.pow(ratio, k) / (Math.pow(ratio, k) + 1));
-        const winPercent = (winProb * 100).toFixed(1);
-
-        this.popupElement.innerHTML = `
-             <h2>⚔️ Battle Imminent ⚔️</h2>
-             <div class="content-wrapper" style="display: flex; gap: 20px; align-items: center; justify-content: center;">
-                 <div style="text-align: center;">
-                    <h3>Your Army</h3>
-                    <div style="font-size: 24px; color: #2ecc71; font-weight: bold;">${mySoldiers} 🛡️</div>
-                 </div>
-                 <div style="font-size: 20px; font-weight: bold;">VS</div>
-                 <div style="text-align: center;">
-                    <h3>Enemy Army</h3>
-                    <div style="font-size: 24px; color: #e74c3c; font-weight: bold;">${enemySoldiers} ⚔️</div>
-                 </div>
-             </div>
-             
-             <div style="text-align: center; margin: 15px 0;">
-                <div>Ratio: <strong>1:${(1 / ratio).toFixed(2)}</strong> (Player:Enemy)</div>
-                <div>Win Probability: <strong>${winPercent}%</strong></div>
-             </div>
-             
-             <div class="actions">
-                 <button class="btn-recruit" style="background-color: #c0392b;" onclick="AdventureManager.resolveBattle()">FIGHT!</button>
-                 <button class="btn-leave" onclick="AdventureManager.closePopup()">Retreat (Stay here)</button>
-             </div>
-        `;
-        this.popupElement.style.display = 'block';
-    },
-
-    resolveBattle() {
-        if (!this.enemy) return;
-
-        const mySoldiers = this.party.soldiers;
-        const enemySoldiers = this.enemy.soldiers;
-        const ratio = mySoldiers / enemySoldiers;
-        const k = 2;
-        const winProb = (Math.pow(ratio, k) / (Math.pow(ratio, k) + 1));
-
-        const roll = Math.random();
-
-        if (roll < winProb) {
-            // WIN
-            const goldReward = Math.floor(enemySoldiers / 10);
-            const soldierReward = Math.floor(enemySoldiers / 10);
-
-            this.party.gold += goldReward;
-            this.party.soldiers += soldierReward; // replenish or recruit
-
-            this.showFeedback(`VICTORY! Gained ${goldReward} Gold & ${soldierReward} Soldiers.`);
-
-            this.closePopup();
-            this.spawnEnemy(); // Respawn
-            this.updateStats();
-        } else {
-            // LOSE
-            this.party.soldiers = 0;
-            this.updateStats();
-            this.closePopup();
-            alert("DEFEAT! Your army has been annihilated. GAME OVER.");
-            this.toggle(); // Turn off adventure mode
-            location.reload(); // Reload or just stop? Let's hide UI.
-        }
-    },
 
     render() {
         const cell = graphData[this.party.cell];
