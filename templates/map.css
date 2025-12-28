@@ -106,15 +106,16 @@ body.show-gold-trades .trade-route-gold {
     opacity: 1;
 }
 
-/* Burg Rings Toggles */
-/* Default stroke is white (defined inline or default), overrides below */
+/* Burg Rings Toggles (Updated for Production) */
 
-body.show-food-trades .burg-dot.food-receiver {
+body.show-food-trades .burg-dot.food-producer {
     stroke: #27ae60 !important;
+    /* Green */
 }
 
-body.show-gold-trades .burg-dot.gold-receiver {
+body.show-gold-trades .burg-dot.gold-producer {
     stroke: #e74c3c !important;
+    /* Red/Maroon */
 }
 
 .burg-ring-gold {

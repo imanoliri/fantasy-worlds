@@ -201,21 +201,23 @@ def generate_map(burgs, output_file, trades_data=None, map_name="Interactive Map
         net_gold = b.get('net_production_burg', {}).get('Net_Gold', 0)
         net_food = b.get('net_production_burg', {}).get('Net_Food', 0)
         
-        # Receiver logic
-        is_food_receiver = str(b['id']) in food_receivers
-        is_gold_receiver = str(b['id']) in gold_receivers
+        # Producer logic
+        # Red/Maroon Ring: Net Gold > 0
+        # Green Ring: Net Food >= 5
+        is_food_producer = net_food >= 5
+        is_gold_producer = net_gold > 0
         
         stroke = '#ffffff'
         dot_classes = []
         extra_ring = False
         
-        if is_food_receiver and is_gold_receiver:
-            dot_classes.append("food-receiver")
+        if is_food_producer and is_gold_producer:
+            dot_classes.append("food-producer")
             extra_ring = True
-        elif is_food_receiver:
-            dot_classes.append("food-receiver")
-        elif is_gold_receiver:
-            dot_classes.append("gold-receiver")
+        elif is_food_producer:
+            dot_classes.append("food-producer")
+        elif is_gold_producer:
+            dot_classes.append("gold-producer")
             
         dot_class_str = " " + " ".join(dot_classes) if dot_classes else ""
         
