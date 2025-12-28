@@ -5,7 +5,7 @@
         "To_ID": 2,
         "To_Name": "Batua",
         "Commodity": "Net_Food",
-        "Amount": 0.5,
+        "Amount": 5,
         "Distance": 12.81
     },
     {
@@ -14,7 +14,7 @@
         "To_ID": 5,
         "To_Name": "Sgurgo",
         "Commodity": "Net_Food",
-        "Amount": 1.5,
+        "Amount": 15,
         "Distance": 7.12
     },
     {
@@ -23,7 +23,7 @@
         "To_ID": 5,
         "To_Name": "Sgurgo",
         "Commodity": "Net_Food",
-        "Amount": 3.0,
+        "Amount": 30,
         "Distance": 16.73
     },
     {
@@ -32,7 +32,7 @@
         "To_ID": 6,
         "To_Name": "Citrino",
         "Commodity": "Net_Food",
-        "Amount": 2.5,
+        "Amount": 25,
         "Distance": 38.72
     },
     {
@@ -41,7 +41,7 @@
         "To_ID": 8,
         "To_Name": "Bjorata",
         "Commodity": "Net_Food",
-        "Amount": 1.5,
+        "Amount": 15,
         "Distance": 20.92
     },
     {
@@ -50,7 +50,7 @@
         "To_ID": 8,
         "To_Name": "Bjorata",
         "Commodity": "Net_Food",
-        "Amount": 2.5,
+        "Amount": 25,
         "Distance": 49.64
     },
     {
@@ -59,7 +59,7 @@
         "To_ID": 9,
         "To_Name": "Seila",
         "Commodity": "Net_Food",
-        "Amount": 1.5,
+        "Amount": 15,
         "Distance": 20.5
     },
     {
@@ -68,7 +68,7 @@
         "To_ID": 10,
         "To_Name": "Detivis",
         "Commodity": "Net_Food",
-        "Amount": 4.0,
+        "Amount": 40,
         "Distance": 16.44
     },
     {
@@ -77,7 +77,7 @@
         "To_ID": 14,
         "To_Name": "Scidriagu",
         "Commodity": "Net_Gold",
-        "Amount": 0.5,
+        "Amount": 5,
         "Distance": 66.02
     },
     {
@@ -86,7 +86,7 @@
         "To_ID": 15,
         "To_Name": "Mubech",
         "Commodity": "Net_Gold",
-        "Amount": 0.5,
+        "Amount": 5,
         "Distance": 60.76
     },
     {
@@ -95,7 +95,7 @@
         "To_ID": 63,
         "To_Name": "Belden",
         "Commodity": "Net_Gold",
-        "Amount": 0.5,
+        "Amount": 5,
         "Distance": 20.4
     },
     {
@@ -104,7 +104,7 @@
         "To_ID": 106,
         "To_Name": "Paphyrope",
         "Commodity": "Net_Gold",
-        "Amount": 0.5,
+        "Amount": 5,
         "Distance": 67.37
     },
     {
@@ -113,7 +113,7 @@
         "To_ID": 116,
         "To_Name": "Peyatichs",
         "Commodity": "Net_Gold",
-        "Amount": 0.5,
+        "Amount": 5,
         "Distance": 36.09
     },
     {
@@ -122,7 +122,7 @@
         "To_ID": 119,
         "To_Name": "Schonach",
         "Commodity": "Net_Gold",
-        "Amount": 0.5,
+        "Amount": 5,
         "Distance": 8.36
     },
     {
@@ -131,7 +131,7 @@
         "To_ID": 123,
         "To_Name": "Torrolino",
         "Commodity": "Net_Gold",
-        "Amount": 0.5,
+        "Amount": 5,
         "Distance": 54.78
     },
     {
@@ -140,7 +140,7 @@
         "To_ID": 178,
         "To_Name": "Olymnalaidy",
         "Commodity": "Net_Gold",
-        "Amount": 0.5,
+        "Amount": 5,
         "Distance": 86.51
     },
     {
@@ -149,7 +149,7 @@
         "To_ID": 180,
         "To_Name": "Kehrala",
         "Commodity": "Net_Gold",
-        "Amount": 0.5,
+        "Amount": 5,
         "Distance": 88.68
     },
     {
@@ -158,7 +158,7 @@
         "To_ID": 211,
         "To_Name": "Mtsen",
         "Commodity": "Net_Gold",
-        "Amount": 0.5,
+        "Amount": 5,
         "Distance": 47.82
     },
     {
@@ -167,7 +167,7 @@
         "To_ID": 238,
         "To_Name": "Kapenburg",
         "Commodity": "Net_Gold",
-        "Amount": 0.5,
+        "Amount": 5,
         "Distance": 47.68
     },
     {
@@ -176,7 +176,7 @@
         "To_ID": 249,
         "To_Name": "Stresk",
         "Commodity": "Net_Gold",
-        "Amount": 0.5,
+        "Amount": 5,
         "Distance": 49.43
     },
     {
@@ -185,7 +185,7 @@
         "To_ID": 259,
         "To_Name": "Niebenburg",
         "Commodity": "Net_Gold",
-        "Amount": 0.5,
+        "Amount": 5,
         "Distance": 41.01
     },
     {
@@ -194,7 +194,7 @@
         "To_ID": 265,
         "To_Name": "Widedonces",
         "Commodity": "Net_Gold",
-        "Amount": 0.5,
+        "Amount": 5,
         "Distance": 32.15
     },
     {
@@ -203,7 +203,7 @@
         "To_ID": 268,
         "To_Name": "Phoseizi",
         "Commodity": "Net_Gold",
-        "Amount": 0.5,
+        "Amount": 5,
         "Distance": 36.62
     },
     {
@@ -212,7 +212,7 @@
         "To_ID": 289,
         "To_Name": "Kauma",
         "Commodity": "Net_Gold",
-        "Amount": 0.5,
+        "Amount": 5,
         "Distance": 75.77
     },
     {
@@ -221,7 +221,7 @@
         "To_ID": 321,
         "To_Name": "Socensena",
         "Commodity": "Net_Gold",
-        "Amount": 0.5,
+        "Amount": 5,
         "Distance": 44.25
     },
     {
@@ -230,7 +230,7 @@
         "To_ID": 322,
         "To_Name": "Hauta",
         "Commodity": "Net_Gold",
-        "Amount": 0.5,
+        "Amount": 5,
         "Distance": 80.7
     },
     {
@@ -239,7 +239,7 @@
         "To_ID": 324,
         "To_Name": "Kaljan",
         "Commodity": "Net_Gold",
-        "Amount": 0.5,
+        "Amount": 5,
         "Distance": 8.69
     },
     {
@@ -248,7 +248,7 @@
         "To_ID": 335,
         "To_Name": "Pidauros",
         "Commodity": "Net_Gold",
-        "Amount": 0.5,
+        "Amount": 5,
         "Distance": 108.34
     },
     {
@@ -257,7 +257,7 @@
         "To_ID": 336,
         "To_Name": "Lacricana",
         "Commodity": "Net_Gold",
-        "Amount": 0.5,
+        "Amount": 5,
         "Distance": 161.07
     },
     {
@@ -266,7 +266,7 @@
         "To_ID": 365,
         "To_Name": "Bisch",
         "Commodity": "Net_Gold",
-        "Amount": 0.5,
+        "Amount": 5,
         "Distance": 75.06
     },
     {
@@ -275,7 +275,7 @@
         "To_ID": 387,
         "To_Name": "Seatondal",
         "Commodity": "Net_Gold",
-        "Amount": 0.5,
+        "Amount": 5,
         "Distance": 58.56
     },
     {
@@ -284,7 +284,7 @@
         "To_ID": 406,
         "To_Name": "Smemech",
         "Commodity": "Net_Gold",
-        "Amount": 0.5,
+        "Amount": 5,
         "Distance": 46.35
     },
     {
@@ -293,7 +293,7 @@
         "To_ID": 413,
         "To_Name": "Tustello",
         "Commodity": "Net_Gold",
-        "Amount": 0.5,
+        "Amount": 5,
         "Distance": 37.86
     },
     {
@@ -302,7 +302,7 @@
         "To_ID": 436,
         "To_Name": "Kaaki",
         "Commodity": "Net_Gold",
-        "Amount": 0.5,
+        "Amount": 5,
         "Distance": 87.68
     },
     {
@@ -311,7 +311,7 @@
         "To_ID": 446,
         "To_Name": "Pontechiaga",
         "Commodity": "Net_Gold",
-        "Amount": 0.5,
+        "Amount": 5,
         "Distance": 48.14
     },
     {
@@ -320,7 +320,7 @@
         "To_ID": 493,
         "To_Name": "Vallene",
         "Commodity": "Net_Gold",
-        "Amount": 0.5,
+        "Amount": 5,
         "Distance": 18.23
     },
     {
@@ -329,7 +329,7 @@
         "To_ID": 543,
         "To_Name": "Aegiorani",
         "Commodity": "Net_Gold",
-        "Amount": 0.5,
+        "Amount": 5,
         "Distance": 43.17
     },
     {
@@ -338,7 +338,7 @@
         "To_ID": 552,
         "To_Name": "Hezorincseszo",
         "Commodity": "Net_Gold",
-        "Amount": 0.5,
+        "Amount": 5,
         "Distance": 99.6
     },
     {
@@ -347,7 +347,7 @@
         "To_ID": 557,
         "To_Name": "Linsium",
         "Commodity": "Net_Gold",
-        "Amount": 0.5,
+        "Amount": 5,
         "Distance": 149.1
     },
     {
@@ -356,7 +356,7 @@
         "To_ID": 560,
         "To_Name": "Picaramavig",
         "Commodity": "Net_Gold",
-        "Amount": 0.5,
+        "Amount": 5,
         "Distance": 60.8
     },
     {
@@ -365,7 +365,7 @@
         "To_ID": 565,
         "To_Name": "Tofiano",
         "Commodity": "Net_Gold",
-        "Amount": 0.5,
+        "Amount": 5,
         "Distance": 14.99
     },
     {
@@ -374,7 +374,7 @@
         "To_ID": 594,
         "To_Name": "Pesecheren",
         "Commodity": "Net_Gold",
-        "Amount": 0.5,
+        "Amount": 5,
         "Distance": 51.18
     },
     {
@@ -383,7 +383,7 @@
         "To_ID": 609,
         "To_Name": "Brampton",
         "Commodity": "Net_Gold",
-        "Amount": 0.5,
+        "Amount": 5,
         "Distance": 52.06
     },
     {
@@ -392,7 +392,7 @@
         "To_ID": 615,
         "To_Name": "Foriorum",
         "Commodity": "Net_Gold",
-        "Amount": 0.5,
+        "Amount": 5,
         "Distance": 32.21
     },
     {
@@ -401,7 +401,7 @@
         "To_ID": 618,
         "To_Name": "Bryan",
         "Commodity": "Net_Gold",
-        "Amount": 0.5,
+        "Amount": 5,
         "Distance": 57.8
     },
     {
@@ -410,7 +410,7 @@
         "To_ID": 620,
         "To_Name": "Ahtahe",
         "Commodity": "Net_Gold",
-        "Amount": 0.5,
+        "Amount": 5,
         "Distance": 153.93
     },
     {
@@ -419,7 +419,7 @@
         "To_ID": 641,
         "To_Name": "Pigliaganoli",
         "Commodity": "Net_Gold",
-        "Amount": 0.5,
+        "Amount": 5,
         "Distance": 112.06
     },
     {
@@ -428,7 +428,7 @@
         "To_ID": 659,
         "To_Name": "Luchi",
         "Commodity": "Net_Gold",
-        "Amount": 0.5,
+        "Amount": 5,
         "Distance": 7.45
     }
 ]

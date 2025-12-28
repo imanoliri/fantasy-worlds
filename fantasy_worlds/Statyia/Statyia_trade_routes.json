@@ -5,7 +5,7 @@
         "To_ID": 3,
         "To_Name": "Frampton",
         "Commodity": "Net_Food",
-        "Amount": 0.5,
+        "Amount": 5,
         "Distance": 9.54
     },
     {
@@ -14,7 +14,7 @@
         "To_ID": 4,
         "To_Name": "North",
         "Commodity": "Net_Food",
-        "Amount": 3.5,
+        "Amount": 35,
         "Distance": 19.55
     },
     {
@@ -23,7 +23,7 @@
         "To_ID": 5,
         "To_Name": "Wickhamp",
         "Commodity": "Net_Food",
-        "Amount": 0.5,
+        "Amount": 5,
         "Distance": 29.49
     },
     {
@@ -32,7 +32,7 @@
         "To_ID": 9,
         "To_Name": "Sovilsea",
         "Commodity": "Net_Food",
-        "Amount": 3.0,
+        "Amount": 30,
         "Distance": 19.94
     },
     {
@@ -41,7 +41,7 @@
         "To_ID": 11,
         "To_Name": "Moury",
         "Commodity": "Net_Food",
-        "Amount": 4.5,
+        "Amount": 45,
         "Distance": 33.85
     },
     {
@@ -50,7 +50,7 @@
         "To_ID": 13,
         "To_Name": "Berbury",
         "Commodity": "Net_Food",
-        "Amount": 4.0,
+        "Amount": 40,
         "Distance": 16.11
     },
     {
@@ -59,7 +59,7 @@
         "To_ID": 19,
         "To_Name": "Tiverton",
         "Commodity": "Net_Gold",
-        "Amount": 0.5,
+        "Amount": 5,
         "Distance": 58.53
     },
     {
@@ -68,7 +68,7 @@
         "To_ID": 29,
         "To_Name": "Guildleton",
         "Commodity": "Net_Gold",
-        "Amount": 0.5,
+        "Amount": 5,
         "Distance": 67.46
     },
     {
@@ -77,7 +77,7 @@
         "To_ID": 78,
         "To_Name": "Westclif",
         "Commodity": "Net_Gold",
-        "Amount": 0.5,
+        "Amount": 5,
         "Distance": 32.75
     },
     {
@@ -86,7 +86,7 @@
         "To_ID": 84,
         "To_Name": "Wodford",
         "Commodity": "Net_Gold",
-        "Amount": 0.5,
+        "Amount": 5,
         "Distance": 94.19
     },
     {
@@ -95,7 +95,7 @@
         "To_ID": 95,
         "To_Name": "Alseasings",
         "Commodity": "Net_Gold",
-        "Amount": 0.5,
+        "Amount": 5,
         "Distance": 18.48
     },
     {
@@ -104,7 +104,7 @@
         "To_ID": 111,
         "To_Name": "Cleorough",
         "Commodity": "Net_Gold",
-        "Amount": 0.5,
+        "Amount": 5,
         "Distance": 98.34
     },
     {
@@ -113,7 +113,7 @@
         "To_ID": 114,
         "To_Name": "Newleigh",
         "Commodity": "Net_Gold",
-        "Amount": 0.5,
+        "Amount": 5,
         "Distance": 25.08
     },
     {
@@ -122,7 +122,7 @@
         "To_ID": 126,
         "To_Name": "Foverham",
         "Commodity": "Net_Gold",
-        "Amount": 0.5,
+        "Amount": 5,
         "Distance": 32.65
     },
     {
@@ -131,7 +131,7 @@
         "To_ID": 156,
         "To_Name": "Chilton",
         "Commodity": "Net_Gold",
-        "Amount": 0.5,
+        "Amount": 5,
         "Distance": 47.56
     },
     {
@@ -140,7 +140,7 @@
         "To_ID": 159,
         "To_Name": "Altford",
         "Commodity": "Net_Gold",
-        "Amount": 0.5,
+        "Amount": 5,
         "Distance": 47.43
     },
     {
@@ -149,7 +149,7 @@
         "To_ID": 173,
         "To_Name": "Rothbridge",
         "Commodity": "Net_Gold",
-        "Amount": 0.5,
+        "Amount": 5,
         "Distance": 167.76
     },
     {
@@ -158,7 +158,7 @@
         "To_ID": 178,
         "To_Name": "Dunsted",
         "Commodity": "Net_Gold",
-        "Amount": 0.5,
+        "Amount": 5,
         "Distance": 52.83
     },
     {
@@ -167,7 +167,7 @@
         "To_ID": 222,
         "To_Name": "Whitlewent",
         "Commodity": "Net_Gold",
-        "Amount": 0.5,
+        "Amount": 5,
         "Distance": 35.45
     },
     {
@@ -176,7 +176,7 @@
         "To_ID": 248,
         "To_Name": "Congley",
         "Commodity": "Net_Gold",
-        "Amount": 0.5,
+        "Amount": 5,
         "Distance": 53.33
     },
     {
@@ -185,7 +185,7 @@
         "To_ID": 255,
         "To_Name": "Knutstabrid",
         "Commodity": "Net_Gold",
-        "Amount": 0.5,
+        "Amount": 5,
         "Distance": 62.18
     },
     {
@@ -194,7 +194,7 @@
         "To_ID": 268,
         "To_Name": "Knutster",
         "Commodity": "Net_Gold",
-        "Amount": 0.5,
+        "Amount": 5,
         "Distance": 88.18
     },
     {
@@ -203,7 +203,7 @@
         "To_ID": 303,
         "To_Name": "Rethorough",
         "Commodity": "Net_Gold",
-        "Amount": 0.5,
+        "Amount": 5,
         "Distance": 47.03
     },
     {
@@ -212,7 +212,7 @@
         "To_ID": 375,
         "To_Name": "Cantef",
         "Commodity": "Net_Gold",
-        "Amount": 0.5,
+        "Amount": 5,
         "Distance": 82.68
     },
     {
@@ -221,7 +221,7 @@
         "To_ID": 395,
         "To_Name": "Tarleighes",
         "Commodity": "Net_Gold",
-        "Amount": 0.5,
+        "Amount": 5,
         "Distance": 53.11
     },
     {
@@ -230,7 +230,7 @@
         "To_ID": 409,
         "To_Name": "Tetrinchbu",
         "Commodity": "Net_Gold",
-        "Amount": 0.5,
+        "Amount": 5,
         "Distance": 49.53
     },
     {
@@ -239,7 +239,7 @@
         "To_ID": 412,
         "To_Name": "Stapleham",
         "Commodity": "Net_Gold",
-        "Amount": 0.5,
+        "Amount": 5,
         "Distance": 68.04
     },
     {
@@ -248,7 +248,7 @@
         "To_ID": 413,
         "To_Name": "Westfordbu",
         "Commodity": "Net_Gold",
-        "Amount": 0.5,
+        "Amount": 5,
         "Distance": 73.94
     },
     {
@@ -257,7 +257,7 @@
         "To_ID": 426,
         "To_Name": "Sarewich",
         "Commodity": "Net_Gold",
-        "Amount": 0.5,
+        "Amount": 5,
         "Distance": 23.92
     },
     {
@@ -266,7 +266,7 @@
         "To_ID": 431,
         "To_Name": "Wenmouth",
         "Commodity": "Net_Gold",
-        "Amount": 0.5,
+        "Amount": 5,
         "Distance": 30.74
     }
 ]

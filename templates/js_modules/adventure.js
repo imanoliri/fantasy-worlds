@@ -548,7 +548,7 @@ const AdventureManager = {
         const netFood = parseFloat(burg.net_food);
 
         if (netFood > 0) {
-            const surplusCap = Math.floor(netFood * 10);
+            const surplusCap = Math.floor(netFood);
             if (this.party.food < surplusCap) {
                 this.party.food = surplusCap;
                 notificationHtml = `<div class="notification">Abundant food! Supplies reset to ${surplusCap}.</div>`;
@@ -594,7 +594,7 @@ const AdventureManager = {
                 <div class="info">
                     Type: ${burg.type}<br>
                     Pop: ${burg.population_fmt}<br>
-                    Food Surplus: ${parseFloat(burg.net_food).toFixed(2)}<br>
+                    Food Surplus: ${Math.floor(parseFloat(burg.net_food))}<br>
                     ${craftsmanQuartiers > 0 ? `Craftsman Quartiers: ${craftsmanQuartiers}<br>` : ''}
                     ${soldierQuartiers > 0 ? `Soldier Quartiers: ${soldierQuartiers}<br>` : ''}
                 </div>
