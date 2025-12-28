@@ -24,6 +24,71 @@ def save_json(data, filepath):
         json.dump(data, f, indent=4, ensure_ascii=False)
     print(f"Saved JSON to {filepath}")
 
+def fix_burgs_on_water(data):
+    """
+    Checks for burgs placed on water cells (h < 20) and relocates them 
+    to the nearest land neighbor. Modifies data in-place.
+    """
+    pack = data.get('pack', {})
+    cells = pack.get('cells', [])
+    burgs = pack.get('burgs', [])
+    
+    # Create cell lookup
+    cell_lookup = {c.get('i'): c for c in cells if 'i' in c}
+    
+    # Identify Marine biome
+    biomes_data = data.get('biomesData', {})
+    marine_id = -1
+    if biomes_data and 'name' in biomes_data:
+         for idx, name in enumerate(biomes_data['name']):
+             if name.lower() == 'marine':
+                 marine_id = idx
+                 break
+    
+    relocated_count = 0
+    for b in burgs:
+        if not isinstance(b, dict): continue
+        
+        cell_id = b.get('cell')
+        if cell_id is not None and cell_id in cell_lookup:
+            cell = cell_lookup[cell_id]
+            
+            # Logic: If Marine ID found, use it. Else assume land.
+            is_water = False
+            if marine_id != -1:
+                if cell.get('biome') == marine_id:
+                    is_water = True
+            
+            if is_water: 
+                found_land = False
+                # Check neighbors
+                for n_idx in cell.get('c', []):
+                    if n_idx in cell_lookup:
+                        n_cell = cell_lookup[n_idx]
+                        
+                        is_land = False
+                        if marine_id != -1:
+                            if n_cell.get('biome') != marine_id:
+                                is_land = True
+                        else:
+                            if n_cell.get('h', 0) >= 20:
+                                is_land = True
+                                
+                        if is_land: 
+                            # Update burg
+                            b['cell'] = n_idx
+                            if 'p' in n_cell:
+                                b['x'], b['y'] = n_cell['p']
+                            found_land = True
+                            relocated_count += 1
+                            break
+                if not found_land:
+                     # Could expand search here if needed
+                     pass
+                     
+    if relocated_count > 0:
+        print(f"Fixed {relocated_count} burgs located on water cells.")
+
 def analyze_world_data(data):
     pack = data.get('pack', {})
     settings = data.get('settings', {})
@@ -459,6 +524,9 @@ if __name__ == "__main__":
             try:
                 print(f"Processing {os.path.basename(filepath)}...")
                 data = load_data(filepath)
+                
+                # Fix water burgs before any processing
+                fix_burgs_on_water(data)
                 
                 map_name = data.get('info', {}).get('mapName', 'Unknown_Map')
                 safe_name = re.sub(r'[^\w\-_]', '_', map_name)

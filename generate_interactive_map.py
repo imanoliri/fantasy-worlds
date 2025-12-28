@@ -73,12 +73,23 @@ def generate_map(burgs, output_file, trades_data=None, map_name="Interactive Map
             h = cell.get('h', 0)
             t = cell.get('t', 0)
             is_water = False
+            
+            # Identify Marine biome ID
+            marine_id = -1
+            if biomes_data and 'name' in biomes_data:
+                for idx, name in enumerate(biomes_data['name']):
+                    if name.lower() == 'marine':
+                        marine_id = idx
+                        break
+            
             if state_id == 0:
-                if h < 20:
-                    state_fill = "#a0c8f0" # Light blue for water
-                    is_water = True
-                else:
-                    state_fill = "#e0e0e0" # Neutral land
+                # Use biome check if available, else fallback to height
+                if marine_id != -1:
+                    if biome_id == marine_id:
+                        state_fill = "#a0c8f0" # Light blue for water
+                        is_water = True
+                    else:
+                        state_fill = "#e0e0e0" # Neutral land
             
             # Biome color
             if 0 <= biome_id < len(biome_colors_list):
@@ -333,7 +344,8 @@ def generate_map(burgs, output_file, trades_data=None, map_name="Interactive Map
             'h': c.get('h', 0),
             'b': c.get('biome', 0),
             'p': c.get('p', [0, 0])
-        } for c in (map_data.get('pack', {}).get('cells', []) if map_data else [])])
+        } for c in (map_data.get('pack', {}).get('cells', []) if map_data else [])]),
+        'marine_id': marine_id
     }
     
     html_output = template.render(context)

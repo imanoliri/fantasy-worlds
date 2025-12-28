@@ -201,11 +201,12 @@ const AdventureManager = {
     },
 
     start() {
+
         // Pick random start cell that is not water
         // We can try to pick a burg's cell if possible
         let startCell = -1;
 
-        const validCells = graphData.filter(c => c.h >= 20);
+        const validCells = graphData.filter(c => c.b !== marineBiomeId);
         if (validCells.length > 0) {
             const random = validCells[Math.floor(Math.random() * validCells.length)];
             startCell = random.i;
@@ -235,7 +236,7 @@ const AdventureManager = {
     },
 
     spawnTreasure() {
-        const validCells = graphData.filter(c => c.h >= 20 && c.i !== this.party.cell);
+        const validCells = graphData.filter(c => c.b !== marineBiomeId && c.i !== this.party.cell);
         if (validCells.length > 0) {
             const randomCell = validCells[Math.floor(Math.random() * validCells.length)];
             const amount = Math.floor(Math.random() * (60 - 20 + 1)) + 20; // 20 to 60
@@ -249,7 +250,7 @@ const AdventureManager = {
     },
 
     spawnEnemy() {
-        const validCells = graphData.filter(c => c.h >= 20 && c.i !== this.party.cell && (!this.treasure || c.i !== this.treasure.cell));
+        const validCells = graphData.filter(c => c.b !== marineBiomeId && c.i !== this.party.cell && (!this.treasure || c.i !== this.treasure.cell));
         if (validCells.length > 0) {
             const randomCell = validCells[Math.floor(Math.random() * validCells.length)];
             const amount = Math.floor(Math.random() * (200 - 20 + 1)) + 20; // 20 to 200
@@ -277,7 +278,7 @@ const AdventureManager = {
 
         if (cellId !== null) {
             // Check if water
-            if (graphData[cellId].h < 20) {
+            if (graphData[cellId].b === marineBiomeId) {
                 this.showFeedback("Cannot move to water!");
                 return;
             }
@@ -300,7 +301,7 @@ const AdventureManager = {
         const cellId = this.getTargetCellId(target);
         if (cellId !== null) {
             // Pathfinding Preview
-            if (graphData[cellId].h < 20) {
+            if (graphData[cellId].b === marineBiomeId) {
                 this.showFeedback("Cannot preview path to water!");
                 return;
             }
@@ -316,10 +317,11 @@ const AdventureManager = {
 
     getTargetCellId(target) {
         let cellId = null;
-        if (target.tagName === 'path') {
+        if (target.getAttribute('data-cell-id')) {
             const id = target.getAttribute('data-cell-id');
-            if (id) cellId = parseInt(id);
+            cellId = parseInt(id);
         } else if (target.classList.contains('burg-dot')) {
+            // Fallback (though burg-dot should have data-cell-id)
             const cx = parseFloat(target.getAttribute('cx'));
             const cy = parseFloat(target.getAttribute('cy'));
             cellId = this.findCellAt(cx, cy);
@@ -369,7 +371,7 @@ const AdventureManager = {
             const neighbors = graphData[current].c;
             for (let next of neighbors) {
                 // Check bounds and water
-                if (graphData[next] && graphData[next].h >= 20) {
+                if (graphData[next] && graphData[next].b !== marineBiomeId) {
                     if (!(next in cameFrom)) {
                         queue.push(next);
                         cameFrom[next] = current;
