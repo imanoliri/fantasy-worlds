@@ -26,6 +26,15 @@ const AdventureManager = {
     enemyElement: null,
     enemyCountElement: null,
 
+    // BEAST State
+    beast: null, // { cell: int, strength: int }
+    beastElement: null,
+    beastCountElement: null,
+
+    // EXPLORER State
+    locations: [], // Array of { cell: int, id: int }
+    locationElements: [], // Array of SVG elements
+
     init() {
         if (this.partyElement) return;
 
@@ -184,6 +193,40 @@ const AdventureManager = {
         beastGroup.appendChild(beastCount);
         this.beastCountElement = beastCount;
 
+        beastGroup.appendChild(beastCount);
+        this.beastCountElement = beastCount;
+
+        // Create Explorer Elements (4 locations)
+        const locationsGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        this.locationElements = [];
+        for (let i = 0; i < 4; i++) {
+            const locGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+            locGroup.style.display = 'none';
+            locGroup.style.cursor = 'pointer';
+
+            locGroup.onclick = (e) => {
+                e.stopPropagation();
+                this.handleLocationClick(i);
+            };
+
+            const locCircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            locCircle.setAttribute("r", "12");
+            locCircle.setAttribute("fill", "#9b59b6"); // Wisteria Purple
+            locCircle.setAttribute("stroke", "#ecf0f1");
+            locCircle.setAttribute("stroke-width", "2");
+
+            const locText = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            locText.textContent = "🔍";
+            locText.setAttribute("text-anchor", "middle");
+            locText.setAttribute("dy", "5");
+            locText.setAttribute("font-size", "16px");
+
+            locGroup.appendChild(locCircle);
+            locGroup.appendChild(locText);
+            locationsGroup.appendChild(locGroup);
+            this.locationElements.push(locGroup);
+        }
+
         // Create path element (polyline)
         const pathLine = document.createElementNS("http://www.w3.org/2000/svg", "polyline");
         pathLine.setAttribute("fill", "none");
@@ -207,6 +250,7 @@ const AdventureManager = {
         const svg = document.getElementById('mapSvg');
         svg.appendChild(previewLine);
         svg.appendChild(pathLine);
+        svg.appendChild(locationsGroup); // Explorer locations bottom layer of interactables
         svg.appendChild(treasureGroup);
         svg.appendChild(enemyGroup);
         svg.appendChild(beastGroup);
@@ -272,6 +316,12 @@ const AdventureManager = {
             this.spawnEnemy();    // Spawn first enemy
             this.spawnBeast();    // Spawn first beast
 
+            // Spawn 4 Explorer Locations
+            this.locations = [null, null, null, null];
+            for (let i = 0; i < 4; i++) {
+                this.spawnLocation(i);
+            }
+
             this.updateStats();
             this.render();
 
@@ -279,6 +329,23 @@ const AdventureManager = {
             this.showFeedback("Adventure started! Click to move.");
         } else {
             console.error("No valid land cell found");
+        }
+    },
+
+    spawnLocation(index) {
+        // Collect occupied cells to avoid spawning on top
+        const occupiedObj = {};
+        occupiedObj[this.party.cell] = true;
+        if (this.treasure) occupiedObj[this.treasure.cell] = true;
+        if (this.enemy) occupiedObj[this.enemy.cell] = true;
+        if (this.beast) occupiedObj[this.beast.cell] = true;
+        this.locations.forEach(l => { if (l) occupiedObj[l.cell] = true; });
+
+        const validCells = graphData.filter(c => c.b !== marineBiomeId && !occupiedObj[c.i]);
+
+        if (validCells.length > 0) {
+            const randomCell = validCells[Math.floor(Math.random() * validCells.length)];
+            this.locations[index] = { cell: randomCell.i, id: index };
         }
     },
 
@@ -512,6 +579,25 @@ const AdventureManager = {
         }
     },
 
+    handleLocationClick(index) {
+        if (!this.active) return;
+        const loc = this.locations[index];
+        if (!loc) return;
+
+        const path = this.findPath(this.party.cell, loc.cell);
+
+        if (path && path.length > 0) {
+            this.drawPath(path);
+            this.moveAlongPath(path).then(() => {
+                this.drawPath([]);
+            });
+        } else if (this.party.cell === loc.cell) {
+            // Already there, should have triggered arrival logic
+        } else {
+            this.showFeedback("Cannot reach location!");
+        }
+    },
+
     async moveAlongPath(path) {
         this.isMoving = true;
         const currentId = this.movementId;
@@ -563,6 +649,18 @@ const AdventureManager = {
         // We know where the party is: this.party.cell
         // We need to find if there is a burg at this cell. Easiest is to search burgs_data (global var)
         const burg = burgsData.find(b => b.cell_id === this.party.cell);
+
+        // Explorer Check
+        const locIndex = this.locations.findIndex(l => l && l.cell === this.party.cell);
+        if (locIndex !== -1) {
+            // Found a location!
+            this.party.gold += 5;
+            this.showFeedback("Location Discovered! +5 Gold 🔍");
+            this.spawnLocation(locIndex); // Respawn immediately
+            this.updateStats();
+            this.render(); // Update to remove old, show new
+            return; // Don't trigger other popups if just found location
+        }
 
         if (this.treasure && this.treasure.cell === this.party.cell) {
             this.showTreasurePopup();
@@ -897,6 +995,23 @@ const AdventureManager = {
                 this.beastElement.style.display = "block";
             } else {
                 this.beastElement.style.display = "none";
+            }
+        }
+
+        // Explorer Locations
+        for (let i = 0; i < 4; i++) {
+            const loc = this.locations[i];
+            const el = this.locationElements[i];
+            if (loc && el) {
+                const lData = graphData[loc.cell];
+                if (lData) {
+                    el.setAttribute("transform", `translate(${lData.p[0]}, ${lData.p[1]})`);
+                    el.style.display = "block";
+                } else {
+                    el.style.display = "none";
+                }
+            } else if (el) {
+                el.style.display = "none";
             }
         }
     },
