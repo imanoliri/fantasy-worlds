@@ -1643,7 +1643,8 @@ const AdventureManager = {
                 // So we need: Has a BURG that is a PORT.
                 if (!hasPort) {
                     const burg = burgsData.find(b => b.cell_id === currentId);
-                    if (burg && this.isPort(currentId)) {
+                    // Check if this cell has a burg that is 'Naval' AND is technically a port
+                    if (burg && burg.type === "Naval" && this.isPort(currentId)) {
                         hasPort = true;
                     }
                 }
@@ -2092,7 +2093,7 @@ const AdventureManager = {
         const onShip = this.party.onShip;
 
         let shipHtml = '';
-        if (isPort) {
+        if (isPort && burg.type === "Naval") {
             if (onShip) {
                 shipHtml = `<button class="btn-recruit" style="background-color: #34495e;" onclick="AdventureManager.leaveShip()" title="Return to land travel">Leave Ship ⚓</button>`;
             } else {
