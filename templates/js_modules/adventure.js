@@ -19,6 +19,9 @@ const AdventureManager = {
     movementId: 0,
     knownBurgs: {},
 
+    treasure: null, // { cell: int, amount: int }
+    treasureElement: null,
+
     init() {
         if (this.partyElement) return;
 
@@ -33,6 +36,34 @@ const AdventureManager = {
         circle.style.zIndex = "100";
         circle.style.transition = "cx 0.2s linear, cy 0.2s linear";
         circle.style.display = "none";
+
+        // Create Treasure Element (Group)
+        const treasureGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        treasureGroup.setAttribute("id", "treasureMarker");
+        treasureGroup.style.display = "none";
+        treasureGroup.style.cursor = "pointer";
+        treasureGroup.setAttribute("pointer-events", "all");
+
+        // Add click listener
+        treasureGroup.onclick = (e) => {
+            e.stopPropagation();
+            this.handleTreasureClick();
+        };
+
+        const treasureCircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        treasureCircle.setAttribute("r", "12");
+        treasureCircle.setAttribute("fill", "#FFD700"); // Gold
+        treasureCircle.setAttribute("stroke", "#DAA520");
+        treasureCircle.setAttribute("stroke-width", "2");
+
+        const treasureText = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        treasureText.textContent = "💎";
+        treasureText.setAttribute("text-anchor", "middle");
+        treasureText.setAttribute("dy", "5");
+        treasureText.setAttribute("font-size", "16px");
+
+        treasureGroup.appendChild(treasureCircle);
+        treasureGroup.appendChild(treasureText);
 
         // Create path element (polyline)
         const pathLine = document.createElementNS("http://www.w3.org/2000/svg", "polyline");
@@ -57,9 +88,11 @@ const AdventureManager = {
         const svg = document.getElementById('mapSvg');
         svg.appendChild(previewLine);
         svg.appendChild(pathLine);
+        svg.appendChild(treasureGroup);
         svg.appendChild(circle); // Append circle after to be on top
 
         this.partyElement = circle;
+        this.treasureElement = treasureGroup;
         this.pathElement = pathLine;
         this.previewPathElement = previewLine;
     },
@@ -77,12 +110,14 @@ const AdventureManager = {
                 this.start();
             } else {
                 this.partyElement.style.display = "block";
+                if (this.treasure) this.treasureElement.style.display = "block";
                 this.render();
             }
         } else {
             btn.classList.remove('active');
             stats.style.display = 'none';
             if (this.partyElement) this.partyElement.style.display = 'none';
+            if (this.treasureElement) this.treasureElement.style.display = 'none';
         }
     },
 
@@ -90,11 +125,6 @@ const AdventureManager = {
         // Pick random start cell that is not water
         // We can try to pick a burg's cell if possible
         let startCell = -1;
-
-        // Try to find a burg to start at
-        // We don't have direct access to burg objects easily unless we parse DOM
-        // The DOM burgs have x,y. We can find closest cell.
-        // OR we just pick a random cell from graphData that has h >= 20
 
         const validCells = graphData.filter(c => c.h >= 20);
         if (validCells.length > 0) {
@@ -109,6 +139,9 @@ const AdventureManager = {
             this.party.gold = 10;
             this.party.tools = 10;
             this.partyElement.style.display = "block";
+
+            this.spawnTreasure(); // Spawn first treasure
+
             this.updateStats();
             this.render();
 
@@ -116,6 +149,19 @@ const AdventureManager = {
             this.showFeedback("Adventure started! Click to move.");
         } else {
             console.error("No valid land cell found");
+        }
+    },
+
+    spawnTreasure() {
+        const validCells = graphData.filter(c => c.h >= 20 && c.i !== this.party.cell);
+        if (validCells.length > 0) {
+            const randomCell = validCells[Math.floor(Math.random() * validCells.length)];
+            const amount = Math.floor(Math.random() * (60 - 20 + 1)) + 20; // 20 to 60
+            this.treasure = { cell: randomCell.i, amount: amount };
+            if (this.treasureElement) {
+                this.treasureElement.style.display = "block";
+                this.render();
+            }
         }
     },
 
@@ -248,6 +294,25 @@ const AdventureManager = {
         return path.reverse();
     },
 
+    handleTreasureClick() {
+        if (!this.active || !this.treasure) return;
+
+        // Calculate path to treasure
+        const path = this.findPath(this.party.cell, this.treasure.cell);
+
+        if (path && path.length > 0) {
+            this.drawPath(path);
+            this.moveAlongPath(path).then(() => {
+                this.drawPath([]);
+            });
+        } else if (this.party.cell === this.treasure.cell) {
+            // Already there
+            this.showTreasurePopup();
+        } else {
+            this.showFeedback("Cannot reach treasure!");
+        }
+    },
+
     async moveAlongPath(path) {
         this.isMoving = true;
         const currentId = this.movementId;
@@ -300,7 +365,9 @@ const AdventureManager = {
         // We need to find if there is a burg at this cell. Easiest is to search burgs_data (global var)
         const burg = burgsData.find(b => b.cell_id === this.party.cell);
 
-        if (burg) {
+        if (this.treasure && this.treasure.cell === this.party.cell) {
+            this.showTreasurePopup();
+        } else if (burg) {
             this.showBurgPopup(burg);
         }
     },
@@ -433,12 +500,79 @@ const AdventureManager = {
         }
     },
 
+    showTreasurePopup() {
+        if (!this.popupElement) {
+            // Create if missing (reuse burg logic mostly)
+            this.popupElement = document.createElement('div');
+            this.popupElement.className = 'burg-popup';
+            document.body.appendChild(this.popupElement);
+        }
+
+        // Ensure overlay
+        let overlay = document.getElementById('modalOverlay');
+        if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.id = 'modalOverlay';
+            overlay.className = 'modal-overlay';
+            document.body.appendChild(overlay);
+        }
+        overlay.style.display = 'block';
+
+        const cost = this.treasure.amount;
+        const canMine = this.party.tools >= cost;
+
+        this.popupElement.innerHTML = `
+            <h2>💎 Buried Treasure 💎</h2>
+            <div class="content-wrapper">
+                <div class="info">
+                    You found a buried treasure chest!<br>
+                    It seems to contain <strong>${this.treasure.amount} Gold</strong>.
+                </div>
+            </div>
+            <div class="actions">
+                ${canMine ?
+                `<button class="btn-recruit" onclick="AdventureManager.mineTreasure()">Mine Treasure (Cost: ${cost} 🛠️)</button>` :
+                `<div class="warning" style="color: #e74c3c; margin-bottom: 10px;">You do not have enough tools to mine this treasure (Need ${cost} 🛠️).</div>`
+            }
+                <button class="btn-leave" onclick="AdventureManager.closePopup()">Leave</button>
+            </div>
+        `;
+        this.popupElement.style.display = 'block';
+    },
+
+    mineTreasure() {
+        if (!this.treasure) return;
+        const cost = this.treasure.amount;
+
+        if (this.party.tools >= cost) {
+            this.party.tools -= cost;
+            this.party.gold += this.treasure.amount;
+            this.showFeedback(`Mined ${this.treasure.amount} Gold! Used ${cost} Tools.`);
+
+            this.closePopup();
+            this.spawnTreasure(); // Respawn
+            this.updateStats();
+        } else {
+            this.showFeedback("Not enough tools!");
+        }
+    },
+
     render() {
         const cell = graphData[this.party.cell];
         if (cell && this.partyElement) {
             // cell.p is [x, y]
             this.partyElement.setAttribute('cx', cell.p[0]);
             this.partyElement.setAttribute('cy', cell.p[1]);
+        }
+
+        if (this.treasure && this.treasureElement) {
+            const tData = graphData[this.treasure.cell];
+            if (tData) {
+                this.treasureElement.setAttribute("transform", `translate(${tData.p[0]}, ${tData.p[1]})`);
+                this.treasureElement.style.display = "block";
+            } else {
+                this.treasureElement.style.display = "none";
+            }
         }
     },
 
