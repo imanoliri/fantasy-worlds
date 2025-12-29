@@ -105,8 +105,10 @@
         <!-- Adventure Sidebar -->
         <div id="adventureSidebar" class="adventure-sidebar hidden">
             <div class="sidebar-header">
-                <h2>Adventure Mode</h2>
-                <button onclick="toggleAdventureMode()" class="close-btn">×</button>
+                <div class="sidebar-controls">
+                    <button class="adventure-btn start-btn" onclick="AdventureManager.start()">Start New</button>
+                    <button class="adventure-btn pause-btn" onclick="toggleAdventureMode()">Pause</button>
+                </div>
             </div>
 
             <div class="stats-panel">
