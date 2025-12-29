@@ -1818,6 +1818,10 @@ const AdventureManager = {
     },
 
     start() {
+        // Clear Adventure Log
+        const logContainer = document.getElementById('adventureLog');
+        if (logContainer) logContainer.innerHTML = '';
+
         // Pick random start cell from ACCESSIBLE cells
         let startCell = -1;
 
