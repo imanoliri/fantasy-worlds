@@ -1768,6 +1768,12 @@ const AdventureManager = {
             this.updateStats();
             this.render();
 
+            // Trigger Start Ping
+            const startNode = graphData[startCell];
+            if (startNode) {
+                this.showLocationPing(startNode.p[0], startNode.p[1]);
+            }
+
             // Initial message
             this.showFeedback("Adventure started! Click to move.");
         } else {
@@ -2342,6 +2348,45 @@ const AdventureManager = {
                 }
             }
         }
+    },
+
+    showLocationPing(x, y) {
+        const svg = document.getElementById('mapSvg');
+        if (!svg) return;
+
+        const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        circle.setAttribute("cx", x);
+        circle.setAttribute("cy", y);
+        circle.setAttribute("r", "120"); // Start Big
+        circle.setAttribute("fill", "none");
+        circle.setAttribute("stroke", "#e74c3c"); // Alizarin Red
+        circle.setAttribute("stroke-width", "1");
+        circle.style.pointerEvents = "none";
+        circle.style.opacity = "0"; // Start invisible
+        circle.style.transition = "all 2.0s ease-out"; // Slower (2.5s)
+        circle.style.zIndex = "200";
+
+        svg.appendChild(circle);
+
+        // Trigger animation in next frame
+        requestAnimationFrame(() => {
+            circle.setAttribute("r", "15"); // End Small (Pinpoint)
+            circle.style.opacity = "1";   // Fade In
+            circle.style.strokeWidth = "5"; // Thicker stroke
+        });
+
+        // Cleanup after animation + delay
+        setTimeout(() => {
+            circle.style.transition = "opacity 0.5s ease-out";
+            circle.style.opacity = "0";
+
+            setTimeout(() => {
+                if (circle.parentNode) {
+                    circle.parentNode.removeChild(circle);
+                }
+            }, 500);
+
+        }, 2000); // Wait for main animation (2.5s)
     }
 };
 
