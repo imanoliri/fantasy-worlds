@@ -18,6 +18,14 @@ const AdventureManager = {
     isMoving: false,
     movementId: 0,
     knownBurgs: {},
+    options: {
+        Treasure: true,
+        Hunt: true,
+        Battle: true,
+        Siege: true,
+        Diplomacy: true,
+        Explore: true
+    },
 
     accessibleCells: [], // Cache for valid land cells
     portDockingCells: {}, // Map of Port Cell ID -> Valid Water Cell ID
@@ -171,13 +179,13 @@ const AdventureManager = {
             } else {
                 this.partyElement.style.display = "block";
 
-                // Toggle Missions
-                MissionDiplomacy.toggle(true);
-                MissionSiege.toggle(true);
-                MissionBattle.toggle(true);
-                MissionHunt.toggle(true);
-                MissionTreasure.toggle(true);
-                MissionExplore.toggle(true);
+                // Toggle Missions based on Options
+                if (this.options.Diplomacy) MissionDiplomacy.toggle(true);
+                if (this.options.Siege) MissionSiege.toggle(true);
+                if (this.options.Battle) MissionBattle.toggle(true);
+                if (this.options.Hunt) MissionHunt.toggle(true);
+                if (this.options.Treasure) MissionTreasure.toggle(true);
+                if (this.options.Explore) MissionExplore.toggle(true);
 
                 this.render();
             }
@@ -229,13 +237,13 @@ const AdventureManager = {
             this.party.onShip = false;
             this.partyElement.style.display = "block";
 
-            // Spawn Missions
-            MissionTreasure.spawn();
-            MissionBattle.spawn();
-            MissionHunt.spawn();
-            MissionDiplomacy.spawn();
-            MissionSiege.spawn();
-            MissionExplore.spawn();
+            // Spawn Missions based on Options
+            if (this.options.Treasure) MissionTreasure.spawn();
+            if (this.options.Battle) MissionBattle.spawn();
+            if (this.options.Hunt) MissionHunt.spawn();
+            if (this.options.Diplomacy) MissionDiplomacy.spawn();
+            if (this.options.Siege) MissionSiege.spawn();
+            if (this.options.Explore) MissionExplore.spawn();
 
             this.updateStats();
             this.render();
@@ -712,12 +720,12 @@ const AdventureManager = {
             }
         }
 
-        MissionTreasure.updateVisuals();
-        MissionBattle.updateVisuals();
-        MissionHunt.updateVisuals();
-        MissionSiege.updateVisuals();
-        MissionDiplomacy.updateVisuals();
-        MissionExplore.updateVisuals();
+        if (this.options.Treasure) MissionTreasure.updateVisuals();
+        if (this.options.Battle) MissionBattle.updateVisuals();
+        if (this.options.Hunt) MissionHunt.updateVisuals();
+        if (this.options.Siege) MissionSiege.updateVisuals();
+        if (this.options.Diplomacy) MissionDiplomacy.updateVisuals();
+        if (this.options.Explore) MissionExplore.updateVisuals();
     },
 
     updateStats() {
@@ -774,6 +782,47 @@ const AdventureManager = {
 
         this.previewPathElement.setAttribute("points", points);
         this.previewPathElement.style.display = "block";
+    },
+
+    toggleOptions() {
+        const modal = document.getElementById('adventureOptionsModal');
+        if (modal.style.display === 'block') {
+            modal.style.display = 'none';
+        } else {
+            modal.style.display = 'block';
+        }
+    },
+
+    toggleMissionOption(type, enabled) {
+        if (this.options.hasOwnProperty(type)) {
+            this.options[type] = enabled;
+            this.showFeedback(`${type} missions ${enabled ? 'enabled' : 'disabled'}`);
+
+            // Live update for active adventure
+            if (this.active) {
+                const missionMap = {
+                    'Treasure': MissionTreasure,
+                    'Battle': MissionBattle,
+                    'Hunt': MissionHunt,
+                    'Diplomacy': MissionDiplomacy,
+                    'Siege': MissionSiege,
+                    'Explore': MissionExplore
+                };
+
+                const mission = missionMap[type];
+                if (mission) {
+                    if (enabled) {
+                        mission.init();
+                        mission.spawn(); // Try to spawn immediately
+                        mission.toggle(true);
+                    } else {
+                        mission.toggle(false); // Hide visuals
+                        // We might want to clear data too, but hiding is safer for now
+                    }
+                    this.render();
+                }
+            }
+        }
     }
 };
 

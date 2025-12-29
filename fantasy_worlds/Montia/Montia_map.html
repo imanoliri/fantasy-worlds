@@ -41949,6 +41949,12 @@
                 <h3>Adventure Log</h3>
                 <div id="adventureLog" class="adventure-log"></div>
             </div>
+
+            <div class="sidebar-options-btn-container"
+                style="padding: 10px; background: #34495e; text-align: center; border-top: 1px solid #2c3e50;">
+                <button class="adventure-btn options-btn" onclick="AdventureManager.toggleOptions()"
+                    style="background-color: #7f8c8d; width: 100%;">⚙️ Options</button>
+            </div>
         </div>
 
         <div class="tables-wrapper">
@@ -47518,6 +47524,41 @@
             </div>
         </div>
         <div id="tooltip" class="tooltip"></div>
+
+        <!-- Adventure Options Modal -->
+        <div id="adventureOptionsModal" class="modal-overlay">
+            <div class="burg-popup options-popup">
+                <h2>Adventure Options</h2>
+                <div class="options-container">
+                    <div class="options-column">
+                        <h3>Game Settings</h3>
+                        <label class="option-item"><input type="checkbox" id="optTreasure" checked
+                                onchange="AdventureManager.toggleMissionOption('Treasure', this.checked)"> Treasure
+                            Hunt</label>
+                        <label class="option-item"><input type="checkbox" id="optHunt" checked
+                                onchange="AdventureManager.toggleMissionOption('Hunt', this.checked)"> Beast
+                            Hunt</label>
+                        <label class="option-item"><input type="checkbox" id="optBattle" checked
+                                onchange="AdventureManager.toggleMissionOption('Battle', this.checked)"> Battles</label>
+                        <label class="option-item"><input type="checkbox" id="optSiege" checked
+                                onchange="AdventureManager.toggleMissionOption('Siege', this.checked)"> Sieges</label>
+                        <label class="option-item"><input type="checkbox" id="optDiplomacy" checked
+                                onchange="AdventureManager.toggleMissionOption('Diplomacy', this.checked)">
+                            Diplomacy</label>
+                        <label class="option-item"><input type="checkbox" id="optExplore" checked
+                                onchange="AdventureManager.toggleMissionOption('Explore', this.checked)">
+                            Exploration</label>
+                    </div>
+                    <div class="options-column">
+                        <h3>Visual Settings</h3>
+                        <p style="color: grey; font-style: italic;">(Coming Soon)</p>
+                    </div>
+                </div>
+                <div class="actions">
+                    <button class="btn-leave" onclick="AdventureManager.toggleOptions()">Close</button>
+                </div>
+            </div>
+        </div>
 
         <script>
             /* Injected Data */
