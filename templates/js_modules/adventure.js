@@ -47,18 +47,24 @@ const AdventureManager = {
         MissionExplore.init();
 
 
-        // Create party element (circle)
-        const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-        circle.setAttribute("r", "6");
-        circle.setAttribute("fill", "#e67e22"); // Pumpkin color
-        circle.setAttribute("stroke", "#2c3e50");
-        circle.setAttribute("stroke-width", "2");
-        circle.setAttribute("pointer-events", "none");
-        circle.setAttribute("id", "partyMarker");
-        circle.style.zIndex = "100";
-        circle.style.transition = "cx 0.2s linear, cy 0.2s linear";
-        circle.style.display = "none";
-        this.partyElement = circle;
+        // Create party element (Group with Circle + Text)
+        const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        group.setAttribute("id", "partyMarker");
+        group.style.zIndex = "100";
+        group.style.transition = "transform 0.2s linear";
+        group.style.display = "none";
+        group.style.pointerEvents = "none";
+
+        // Background Circle
+        const bgCircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        bgCircle.setAttribute("r", "10");
+        bgCircle.setAttribute("fill", "#e67e22"); // Pumpkin default
+        bgCircle.setAttribute("stroke", "#2c3e50");
+        bgCircle.setAttribute("stroke-width", "2");
+        group.appendChild(bgCircle);
+
+        this.partyElement = group;
+        this.partyBg = bgCircle;
 
 
         // Create path element (polyline)
@@ -87,7 +93,7 @@ const AdventureManager = {
         const svg = document.getElementById('mapSvg');
         svg.appendChild(previewLine);
         svg.appendChild(pathLine);
-        svg.appendChild(circle); // Append circle after to be on top
+        svg.appendChild(group); // Append party marker group after to be on top
     },
 
     calculateDockingPoints() {
@@ -710,13 +716,12 @@ const AdventureManager = {
     render() {
         const cell = graphData[this.party.cell];
         if (cell && this.partyElement) {
-            this.partyElement.setAttribute('cx', cell.p[0]);
-            this.partyElement.setAttribute('cy', cell.p[1]);
+            this.partyElement.setAttribute('transform', `translate(${cell.p[0]}, ${cell.p[1]})`);
 
             if (this.party.onShip) {
-                this.partyElement.setAttribute('fill', '#2980b9'); // Blue
+                if (this.partyBg) this.partyBg.setAttribute('fill', '#2980b9'); // Blue
             } else {
-                this.partyElement.setAttribute('fill', '#e67e22'); // Pumpkin
+                if (this.partyBg) this.partyBg.setAttribute('fill', '#e67e22'); // Pumpkin
             }
         }
 
