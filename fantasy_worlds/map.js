@@ -2077,6 +2077,7 @@ const AdventureManager = {
     async moveAlongPath(path) {
         this.isMoving = true;
         const currentId = this.movementId;
+        const startedWithFood = this.party.food > 0;
 
         for (let nextCell of path) {
             if (this.movementId !== currentId) {
@@ -2084,19 +2085,34 @@ const AdventureManager = {
             }
 
             if (!this.party.onShip) {
-                if (this.party.food <= 0) {
-                    this.showFeedback("Out of food! Party is starving.");
+                if (this.party.food > 0) {
+                    this.party.food--;
+                    // Floating text for food consumption
+                    const cellData = graphData[this.party.cell];
+                    if (cellData) this.showFloatingText("-1 🍎", cellData.p[0], cellData.p[1], "#e74c3c");
+                } else {
+                    // Starving
+                    if (startedWithFood) {
+                        this.showFeedback("Out of food! Travel interrupted.");
+                        this.isMoving = false;
+                        return;
+                    }
+
+                    // Penalty for moving while starving
+                    this.showFeedback("Party is starving! Soldiers dying...");
                     this.party.soldiers = Math.max(0, this.party.soldiers - 1);
+
+                    const cellData = graphData[this.party.cell];
+                    if (cellData) {
+                        this.showFloatingText("-1 ⚔️", cellData.p[0], cellData.p[1], "#e74c3c");
+                    }
+
                     if (this.party.soldiers === 0) {
                         this.showFeedback("Game Over! All soldiers died.");
                         this.isMoving = false;
                         return;
                     }
                 }
-                this.party.food--;
-                // Floating text for food consumption
-                const cellData = graphData[this.party.cell];
-                this.showFloatingText("-1 🍎", cellData.p[0], cellData.p[1], "#e74c3c"); // Red for loss
             }
 
             this.party.cell = nextCell;
