@@ -512,8 +512,8 @@ caption {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.85);
-    /* Darker overlay */
+    background: rgba(0, 0, 0, 0.5);
+    /* Lighter overlay */
     z-index: 10000;
     display: none;
     animation: fadeIn 0.5s ease-out;
@@ -525,20 +525,20 @@ caption {
 }
 
 .adventure-modal .modal-content {
-    background: #2c3e50;
-    /* Dark background */
-    color: #ecf0f1;
-    /* Light text */
+    background: #fdfbf7;
+    /* Parchment-like off-white */
+    color: #2c3e50;
+    /* Dark text */
     padding: 30px;
-    border-radius: 4px;
+    border-radius: 8px;
     width: 450px;
     max-width: 90%;
-    box-shadow: 0 0 30px rgba(192, 57, 43, 0.6);
-    /* Red glow */
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    /* Soft shadow */
     text-align: center;
     position: relative;
-    border: 3px solid #c0392b;
-    /* Red border */
+    border: 2px solid #bdc3c7;
+    /* Subtle border */
     font-family: 'Cinzel', serif;
     /* Thematic font */
     display: flex;
@@ -549,17 +549,19 @@ caption {
 .adventure-modal h2 {
     font-size: 2.5em;
     margin: 0 0 10px 0;
-    color: #e74c3c;
+    color: #c0392b;
+    /* Keep red for emphasis but less aggressive */
     text-transform: uppercase;
     letter-spacing: 2px;
-    text-shadow: 2px 2px 0px #000;
+    /* Removed text-shadow */
 }
 
 .adventure-modal p {
     font-family: 'Segoe UI', serif;
     font-size: 1.1em;
     line-height: 1.5;
-    color: #bdc3c7;
+    color: #7f8c8d;
+    /* Softer grey text */
     margin: 0 0 20px 0;
 }
 
@@ -571,9 +573,7 @@ caption {
 
 .adventure-modal button {
     padding: 1rem;
-    /* Larger padding */
     font-size: 1.2rem;
-    /* Larger font */
     font-family: 'Cinzel', serif;
     font-weight: bold;
     border: none;
@@ -581,12 +581,12 @@ caption {
     cursor: pointer;
     text-transform: uppercase;
     transition: all 0.2s ease;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .adventure-modal button:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 /* Burg Popup Card */
