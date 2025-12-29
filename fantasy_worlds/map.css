@@ -353,15 +353,129 @@ caption {
     border-color: #ba4a00;
 }
 
-.adventure-stats {
-    display: inline-flex;
-    gap: 15px;
-    background: rgba(0, 0, 0, 0.3);
-    padding: 2px 10px;
-    border-radius: 4px;
-    margin-left: 10px;
-    align-items: center;
+/* Adventure Sidebar */
+.adventure-sidebar {
+    width: 300px;
+    background: #2c3e50;
+    color: white;
+    box-shadow: -2px 0 5px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    z-index: 1000;
+    transition: transform 0.3s ease;
+    border-left: 1px solid #34495e;
 }
+
+.adventure-sidebar.hidden {
+    display: none;
+}
+
+.sidebar-header {
+    padding: 15px;
+    background: #34495e;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid #2c3e50;
+}
+
+.sidebar-header h2 {
+    margin: 0;
+    font-size: 1.1rem;
+    color: #ecf0f1;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    color: #bdc3c7;
+    font-size: 1.5rem;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.close-btn:hover {
+    color: white;
+}
+
+.stats-panel {
+    padding: 15px;
+    background: #2c3e50;
+}
+
+.stats-panel h3 {
+    margin-top: 0;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    color: #95a5a6;
+    border-bottom: 1px solid #34495e;
+    padding-bottom: 5px;
+    margin-bottom: 10px;
+}
+
+.stat-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+    font-size: 1rem;
+}
+
+.stat-row .icon {
+    width: 24px;
+    margin-right: 10px;
+}
+
+.stat-row .label {
+    flex-grow: 1;
+    color: #bdc3c7;
+}
+
+.stat-row .value {
+    font-weight: bold;
+    color: #fff;
+}
+
+.log-panel {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 15px;
+    background: #2c3e50;
+    border-top: 1px solid #34495e;
+    overflow: hidden;
+}
+
+.log-panel h3 {
+    margin-top: 0;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    color: #95a5a6;
+    margin-bottom: 10px;
+}
+
+.adventure-log {
+    flex-grow: 1;
+    background: #34495e;
+    border-radius: 4px;
+    padding: 10px;
+    overflow-y: auto;
+    font-family: 'Consolas', 'Monaco', monospace;
+    font-size: 0.85rem;
+    color: #ecf0f1;
+    border: 1px solid #2c3e50;
+}
+
+.log-entry {
+    margin-bottom: 6px;
+    line-height: 1.4;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding-bottom: 4px;
+}
+
+.log-entry:last-child {
+    border-bottom: none;
+}
+
 
 /* Modal Overlay Backdrop */
 .modal-overlay {

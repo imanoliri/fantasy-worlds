@@ -1316,7 +1316,8 @@ const MissionDiplomacy = {
         // Take top 3 unique IDs
         this.targets = capitals.slice(0, 3).map(b => b.id);
         this.solvedCount = 0;
-        AdventureManager.showFeedback("Diplomatic Tour Started! Visit 3 Capitals (Blue Rings).");
+        const targetNames = capitals.slice(0, 3).map(b => b.name).join(", ");
+        AdventureManager.showFeedback(`Diplomatic Tour Started! Visit 3 Capitals (Blue Rings): ${targetNames}.`);
         this.updateVisuals();
     },
 
@@ -1671,11 +1672,13 @@ const AdventureManager = {
     toggle() {
         this.active = !this.active;
         const btn = document.getElementById('toggleAdventure');
-        const stats = document.getElementById('adventureStats');
+        const sidebar = document.getElementById('adventureSidebar');
 
         if (this.active) {
             btn.classList.add('active');
-            stats.style.display = 'inline-flex';
+            if (sidebar) {
+                sidebar.classList.remove('hidden');
+            }
             this.init(); // Ensure element exists
             if (this.party.cell === 0) {
                 this.start();
@@ -1694,7 +1697,10 @@ const AdventureManager = {
             }
         } else {
             btn.classList.remove('active');
-            stats.style.display = 'none';
+            const sidebar = document.getElementById('adventureSidebar');
+            if (sidebar) {
+                sidebar.classList.add('hidden');
+            }
             if (this.partyElement) this.partyElement.style.display = 'none';
 
             // Toggle Missions
@@ -2152,7 +2158,6 @@ const AdventureManager = {
             this.party.gold -= cost;
             this.party.food += amount;
             this.updateStats();
-            this.showFeedback(`Bought ${amount} food!`);
         } else {
             this.showFeedback("Not enough gold!");
         }
@@ -2163,7 +2168,6 @@ const AdventureManager = {
             this.party.gold -= cost;
             this.party.tools += amount;
             this.updateStats();
-            this.showFeedback(`Bought ${amount} tools!`);
         } else {
             this.showFeedback("Not enough gold!");
         }
@@ -2191,7 +2195,6 @@ const AdventureManager = {
             this.party.soldiers += amount;
 
             this.updateStats();
-            this.showFeedback(`Recruited ${amount} soldiers!`);
         } else {
             if (this.party.gold < cost) {
                 this.showFeedback("Not enough gold!");
@@ -2230,12 +2233,18 @@ const AdventureManager = {
     },
 
     showFeedback(msg) {
-        const t = document.getElementById('tooltip');
-        t.innerHTML = msg;
-        t.style.display = 'block';
-        t.style.left = window.innerWidth / 2 + 'px';
-        t.style.top = '100px';
-        setTimeout(() => t.style.display = 'none', 2000);
+        // Log to sidebar instead of tooltip
+        const log = document.getElementById('adventureLog');
+        if (log) {
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            entry.textContent = msg;
+            log.appendChild(entry);
+            log.scrollTop = log.scrollHeight; // Auto scroll
+        } else {
+            // Fallback
+            console.log(msg);
+        }
     },
 
     drawPath(path) {

@@ -29,7 +29,8 @@ const MissionDiplomacy = {
         // Take top 3 unique IDs
         this.targets = capitals.slice(0, 3).map(b => b.id);
         this.solvedCount = 0;
-        AdventureManager.showFeedback("Diplomatic Tour Started! Visit 3 Capitals (Blue Rings).");
+        const targetNames = capitals.slice(0, 3).map(b => b.name).join(", ");
+        AdventureManager.showFeedback(`Diplomatic Tour Started! Visit 3 Capitals (Blue Rings): ${targetNames}.`);
         this.updateVisuals();
     },
 

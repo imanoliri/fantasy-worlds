@@ -137,12 +137,7 @@
             <button class="toggle-btn special" id="toggleAdventure" onclick="toggleAdventureMode()">⚔️
                 Adventure</button>
             <span>| Total Burgs: 355</span>
-            <div id="adventureStats" class="adventure-stats" style="display:none;">
-                <span title="Soldiers">🛡️ <span id="advSoldiers">0</span></span>
-                <span title="Tools">🛠️ <span id="advTools">0</span></span>
-                <span title="Food">🍎 <span id="advFood">0</span></span>
-                <span title="Gold">💰 <span id="advGold">0</span></span>
-            </div>
+
         </div>
     </header>
 
@@ -38108,6 +38103,43 @@
                 
                 
             </svg>
+        </div>
+
+        <!-- Adventure Sidebar -->
+        <div id="adventureSidebar" class="adventure-sidebar hidden">
+            <div class="sidebar-header">
+                <h2>Adventure Mode</h2>
+                <button onclick="toggleAdventureMode()" class="close-btn">×</button>
+            </div>
+
+            <div class="stats-panel">
+                <h3>Party Stats</h3>
+                <div class="stat-row">
+                    <span class="icon">🛡️</span>
+                    <span class="label">Soldiers:</span>
+                    <span id="advSoldiers" class="value">0</span>
+                </div>
+                <div class="stat-row">
+                    <span class="icon">🛠️</span>
+                    <span class="label">Tools:</span>
+                    <span id="advTools" class="value">0</span>
+                </div>
+                <div class="stat-row">
+                    <span class="icon">🍎</span>
+                    <span class="label">Food:</span>
+                    <span id="advFood" class="value">0</span>
+                </div>
+                <div class="stat-row">
+                    <span class="icon">💰</span>
+                    <span class="label">Gold:</span>
+                    <span id="advGold" class="value">0</span>
+                </div>
+            </div>
+
+            <div class="log-panel">
+                <h3>Adventure Log</h3>
+                <div id="adventureLog" class="adventure-log"></div>
+            </div>
         </div>
 
         <div class="tables-wrapper">
