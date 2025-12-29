@@ -150,10 +150,21 @@ const MissionHunt = {
             // WIN
             // Gain 1 gold for each 5 strength of the beast, rounding up.
             const goldReward = Math.ceil(beastStrength / 5);
+            // Food reward equal to beast strength
+            const foodReward = beastStrength;
 
             AdventureManager.party.gold += goldReward;
+            AdventureManager.party.food += foodReward;
 
-            AdventureManager.showFeedback(`SLAIN! Gained ${goldReward} Gold.`);
+            AdventureManager.showFeedback(`SLAIN! Gained ${goldReward} Gold & ${foodReward} Food.`);
+
+            // Floating Text (Win)
+            const cell = graphData[AdventureManager.party.cell];
+            if (cell) {
+                AdventureManager.showFloatingText(`VICTORY!`, cell.p[0], cell.p[1] - 60, "#2ecc71");
+                AdventureManager.showFloatingText(`+${goldReward} 💰`, cell.p[0], cell.p[1] - 40, "#f1c40f");
+                AdventureManager.showFloatingText(`+${foodReward} 🍎`, cell.p[0], cell.p[1] - 20, "#2ecc71");
+            }
 
             AdventureManager.closePopup();
             this.spawn(); // Respawn
@@ -162,15 +173,25 @@ const MissionHunt = {
             // LOSE
             AdventureManager.showFeedback("DEFEAT! The beast was too strong.");
 
+            // Lose 5 soldiers (or max available)
+            const loss = Math.min(AdventureManager.party.soldiers, 5);
+
             // Damage beast by half of nr of soldiers
             const damage = Math.floor(mySoldiers / 2);
             this.data.strength = Math.max(0, this.data.strength - damage);
 
-            // Lose 5 soldiers
-            AdventureManager.party.soldiers = Math.max(0, AdventureManager.party.soldiers - 5);
+            // Lose soldiers
+            AdventureManager.party.soldiers -= loss;
 
             AdventureManager.updateStats();
             AdventureManager.closePopup();
+
+            // Floating Text (Loss)
+            const cell = graphData[AdventureManager.party.cell];
+            if (cell) {
+                AdventureManager.showFloatingText(`DEFEAT!`, cell.p[0], cell.p[1] - 40, "#e74c3c");
+                if (loss > 0) AdventureManager.showFloatingText(`-${loss} ⚔️`, cell.p[0], cell.p[1] - 20, "#e74c3c");
+            }
 
             // Check if beast died from damage
             if (this.data.strength <= 0) {

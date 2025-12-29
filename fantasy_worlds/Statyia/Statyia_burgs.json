@@ -35,8 +35,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.0,
-            "Net_Gold": 0.5
+            "Net_Food": 0,
+            "Net_Gold": 5
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 4673,
@@ -81,8 +81,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 1.5
+            "Net_Food": 5,
+            "Net_Gold": 15
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 7189,
@@ -127,8 +127,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": -0.5,
-            "Net_Gold": 1.5
+            "Net_Food": -5,
+            "Net_Gold": 15
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 6061,
@@ -173,8 +173,8 @@
             "Soldier": 2
         },
         "net_production_burg": {
-            "Net_Food": -3.5,
-            "Net_Gold": 1.0
+            "Net_Food": -35,
+            "Net_Gold": 10
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 22533,
@@ -219,8 +219,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": -0.5,
-            "Net_Gold": 1.5
+            "Net_Food": -5,
+            "Net_Gold": 15
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 6447,
@@ -265,8 +265,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 1.0,
-            "Net_Gold": 2.5
+            "Net_Food": 10,
+            "Net_Gold": 25
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 9859,
@@ -311,8 +311,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 1.0
+            "Net_Food": 5,
+            "Net_Gold": 10
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 4573,
@@ -357,8 +357,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 1.0,
-            "Net_Gold": 0.0
+            "Net_Food": 10,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 4022,
@@ -403,8 +403,8 @@
             "Soldier": 1
         },
         "net_production_burg": {
-            "Net_Food": -3.0,
-            "Net_Gold": 1.5
+            "Net_Food": -30,
+            "Net_Gold": 15
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 15988,
@@ -449,8 +449,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 3203,
@@ -495,8 +495,8 @@
             "Soldier": 4
         },
         "net_production_burg": {
-            "Net_Food": -4.5,
-            "Net_Gold": 7.0
+            "Net_Food": -45,
+            "Net_Gold": 70
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 47915,
@@ -541,8 +541,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 3221,
@@ -587,8 +587,8 @@
             "Soldier": 2
         },
         "net_production_burg": {
-            "Net_Food": -4.0,
-            "Net_Gold": 1.5
+            "Net_Food": -40,
+            "Net_Gold": 15
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 23963,
@@ -633,8 +633,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 3435,
@@ -679,8 +679,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 1.5,
-            "Net_Gold": 0.0
+            "Net_Food": 15,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 4096,
@@ -725,8 +725,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 2.0,
-            "Net_Gold": 0.0
+            "Net_Food": 20,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 5319,
@@ -771,8 +771,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 3.5,
-            "Net_Gold": 0.0
+            "Net_Food": 35,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 7442,
@@ -817,8 +817,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 5.5,
-            "Net_Gold": 0.0
+            "Net_Food": 55,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 11015,
@@ -863,8 +863,8 @@
             "Soldier": 1
         },
         "net_production_burg": {
-            "Net_Food": 4.0,
-            "Net_Gold": -0.5
+            "Net_Food": 40,
+            "Net_Gold": -5
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 14061,
@@ -909,8 +909,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 9.0,
-            "Net_Gold": 1.5
+            "Net_Food": 90,
+            "Net_Gold": 15
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 19030,
@@ -955,8 +955,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 4.5,
-            "Net_Gold": 0.0
+            "Net_Food": 45,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 9584,
@@ -1001,8 +1001,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 2479,
@@ -1047,8 +1047,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 5.0,
-            "Net_Gold": 0.0
+            "Net_Food": 50,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 10037,
@@ -1093,8 +1093,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 5.0,
-            "Net_Gold": 1.0
+            "Net_Food": 50,
+            "Net_Gold": 10
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 10699,
@@ -1139,8 +1139,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1893,
@@ -1185,8 +1185,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 7.0,
-            "Net_Gold": 0.0
+            "Net_Food": 70,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 14711,
@@ -1231,8 +1231,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 1.5,
-            "Net_Gold": 0.0
+            "Net_Food": 15,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 4375,
@@ -1277,8 +1277,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1895,
@@ -1323,8 +1323,8 @@
             "Soldier": 1
         },
         "net_production_burg": {
-            "Net_Food": 5.0,
-            "Net_Gold": -0.5
+            "Net_Food": 50,
+            "Net_Gold": -5
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 16316,
@@ -1369,8 +1369,8 @@
             "Soldier": 2
         },
         "net_production_burg": {
-            "Net_Food": 6.5,
-            "Net_Gold": 0.0
+            "Net_Food": 65,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 23729,
@@ -1415,8 +1415,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 2.0,
-            "Net_Gold": 0.0
+            "Net_Food": 20,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 4936,
@@ -1461,8 +1461,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 11.0,
-            "Net_Gold": 1.5
+            "Net_Food": 110,
+            "Net_Gold": 15
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 23658,
@@ -1507,8 +1507,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1569,
@@ -1553,8 +1553,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 6.5,
-            "Net_Gold": 0.0
+            "Net_Food": 65,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 13093,
@@ -1599,8 +1599,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 7.0,
-            "Net_Gold": 0.0
+            "Net_Food": 70,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 14628,
@@ -1645,8 +1645,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1562,
@@ -1691,8 +1691,8 @@
             "Soldier": 2
         },
         "net_production_burg": {
-            "Net_Food": 4.5,
-            "Net_Gold": 0.0
+            "Net_Food": 45,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 18675,
@@ -1737,8 +1737,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 3.0,
-            "Net_Gold": 0.0
+            "Net_Food": 30,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 6976,
@@ -1783,8 +1783,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1265,
@@ -1829,8 +1829,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 6.0,
-            "Net_Gold": 0.0
+            "Net_Food": 60,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 12361,
@@ -1875,8 +1875,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 7.5,
-            "Net_Gold": 1.5
+            "Net_Food": 75,
+            "Net_Gold": 15
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 16367,
@@ -1921,8 +1921,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 2.0,
-            "Net_Gold": 0.0
+            "Net_Food": 20,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 3351,
@@ -1967,8 +1967,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 1.0,
-            "Net_Gold": 0.0
+            "Net_Food": 10,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 3238,
@@ -2013,8 +2013,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 4.5,
-            "Net_Gold": 0.0
+            "Net_Food": 45,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 9766,
@@ -2059,8 +2059,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 6.5,
-            "Net_Gold": 0.0
+            "Net_Food": 65,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 13608,
@@ -2105,8 +2105,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 8.5,
-            "Net_Gold": 1.5
+            "Net_Food": 85,
+            "Net_Gold": 15
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 18254,
@@ -2151,8 +2151,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 1.0,
-            "Net_Gold": 0.0
+            "Net_Food": 10,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 2994,
@@ -2197,8 +2197,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1369,
@@ -2243,8 +2243,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1588,
@@ -2289,8 +2289,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 4.5,
-            "Net_Gold": 0.0
+            "Net_Food": 45,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 9900,
@@ -2335,8 +2335,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 1.0,
-            "Net_Gold": 0.0
+            "Net_Food": 10,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 3157,
@@ -2381,8 +2381,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1822,
@@ -2427,8 +2427,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 6.5,
-            "Net_Gold": 0.0
+            "Net_Food": 65,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 13491,
@@ -2473,8 +2473,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 5.5,
-            "Net_Gold": 0.0
+            "Net_Food": 55,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 11769,
@@ -2519,8 +2519,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 6.5,
-            "Net_Gold": 0.0
+            "Net_Food": 65,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 13090,
@@ -2565,8 +2565,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 3.0,
-            "Net_Gold": 0.0
+            "Net_Food": 30,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 6389,
@@ -2611,8 +2611,8 @@
             "Soldier": 2
         },
         "net_production_burg": {
-            "Net_Food": 4.5,
-            "Net_Gold": 0.0
+            "Net_Food": 45,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 18996,
@@ -2657,8 +2657,8 @@
             "Soldier": 2
         },
         "net_production_burg": {
-            "Net_Food": 6.5,
-            "Net_Gold": 0.0
+            "Net_Food": 65,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 23272,
@@ -2703,8 +2703,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 7.5,
-            "Net_Gold": 2.0
+            "Net_Food": 75,
+            "Net_Gold": 20
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 14553,
@@ -2749,8 +2749,8 @@
             "Soldier": 2
         },
         "net_production_burg": {
-            "Net_Food": 5.5,
-            "Net_Gold": 0.0
+            "Net_Food": 55,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 21839,
@@ -2795,8 +2795,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1763,
@@ -2841,8 +2841,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1587,
@@ -2887,8 +2887,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1183,
@@ -2933,8 +2933,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 2.0,
-            "Net_Gold": 0.0
+            "Net_Food": 20,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 3823,
@@ -2979,8 +2979,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1763,
@@ -3025,8 +3025,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 2509,
@@ -3071,8 +3071,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 7.0,
-            "Net_Gold": 0.0
+            "Net_Food": 70,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 14051,
@@ -3117,8 +3117,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 6.0,
-            "Net_Gold": 0.0
+            "Net_Food": 60,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 12658,
@@ -3163,8 +3163,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1598,
@@ -3209,8 +3209,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1826,
@@ -3255,8 +3255,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 2.0,
-            "Net_Gold": 0.0
+            "Net_Food": 20,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 4732,
@@ -3301,8 +3301,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.0,
-            "Net_Gold": 0.0
+            "Net_Food": 0,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1091,
@@ -3347,8 +3347,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 6.0,
-            "Net_Gold": 0.0
+            "Net_Food": 60,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 12297,
@@ -3393,8 +3393,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 1.5,
-            "Net_Gold": 0.0
+            "Net_Food": 15,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 3779,
@@ -3439,8 +3439,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 9.0,
-            "Net_Gold": 1.5
+            "Net_Food": 90,
+            "Net_Gold": 15
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 19789,
@@ -3485,8 +3485,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 6.5,
-            "Net_Gold": 0.0
+            "Net_Food": 65,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 13100,
@@ -3531,8 +3531,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 6.0,
-            "Net_Gold": 2.0
+            "Net_Food": 60,
+            "Net_Gold": 20
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 12967,
@@ -3577,8 +3577,8 @@
             "Soldier": 1
         },
         "net_production_burg": {
-            "Net_Food": 5.0,
-            "Net_Gold": -0.5
+            "Net_Food": 50,
+            "Net_Gold": -5
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 17200,
@@ -3623,8 +3623,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 3.0,
-            "Net_Gold": 0.0
+            "Net_Food": 30,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 6533,
@@ -3669,8 +3669,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 7.5,
-            "Net_Gold": 1.5
+            "Net_Food": 75,
+            "Net_Gold": 15
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 16662,
@@ -3715,8 +3715,8 @@
             "Soldier": 1
         },
         "net_production_burg": {
-            "Net_Food": 3.0,
-            "Net_Gold": 0.5
+            "Net_Food": 30,
+            "Net_Gold": 5
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 12294,
@@ -3761,8 +3761,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 9.0,
-            "Net_Gold": 1.5
+            "Net_Food": 90,
+            "Net_Gold": 15
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 19375,
@@ -3807,8 +3807,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 8.0,
-            "Net_Gold": 1.5
+            "Net_Food": 80,
+            "Net_Gold": 15
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 17575,
@@ -3853,8 +3853,8 @@
             "Soldier": 1
         },
         "net_production_burg": {
-            "Net_Food": 4.5,
-            "Net_Gold": -0.5
+            "Net_Food": 45,
+            "Net_Gold": -5
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 15320,
@@ -3899,8 +3899,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 3.0,
-            "Net_Gold": 0.0
+            "Net_Food": 30,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 6658,
@@ -3945,8 +3945,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1394,
@@ -3991,8 +3991,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 6.0,
-            "Net_Gold": 1.0
+            "Net_Food": 60,
+            "Net_Gold": 10
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 11113,
@@ -4037,8 +4037,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 8.5,
-            "Net_Gold": 1.5
+            "Net_Food": 85,
+            "Net_Gold": 15
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 18750,
@@ -4083,8 +4083,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 5.0,
-            "Net_Gold": 1.0
+            "Net_Food": 50,
+            "Net_Gold": 10
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 9779,
@@ -4129,8 +4129,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1606,
@@ -4175,8 +4175,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 1.5,
-            "Net_Gold": 0.0
+            "Net_Food": 15,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 3827,
@@ -4221,8 +4221,8 @@
             "Soldier": 1
         },
         "net_production_burg": {
-            "Net_Food": 4.5,
-            "Net_Gold": 0.5
+            "Net_Food": 45,
+            "Net_Gold": 5
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 14392,
@@ -4267,8 +4267,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 7.5,
-            "Net_Gold": 1.5
+            "Net_Food": 75,
+            "Net_Gold": 15
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 16601,
@@ -4313,8 +4313,8 @@
             "Soldier": 2
         },
         "net_production_burg": {
-            "Net_Food": 7.5,
-            "Net_Gold": 0.0
+            "Net_Food": 75,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 25729,
@@ -4359,8 +4359,8 @@
             "Soldier": 1
         },
         "net_production_burg": {
-            "Net_Food": 2.5,
-            "Net_Gold": -0.5
+            "Net_Food": 25,
+            "Net_Gold": -5
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 10367,
@@ -4405,8 +4405,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 1.5,
-            "Net_Gold": 0.0
+            "Net_Food": 15,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 3108,
@@ -4451,8 +4451,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1785,
@@ -4497,8 +4497,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1631,
@@ -4543,8 +4543,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 3.5,
-            "Net_Gold": 0.0
+            "Net_Food": 35,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 7983,
@@ -4589,8 +4589,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 6.0,
-            "Net_Gold": 0.0
+            "Net_Food": 60,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 12686,
@@ -4635,8 +4635,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1601,
@@ -4681,8 +4681,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 7.0,
-            "Net_Gold": 0.0
+            "Net_Food": 70,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 14967,
@@ -4727,8 +4727,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 1.0,
-            "Net_Gold": 0.0
+            "Net_Food": 10,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 2948,
@@ -4773,8 +4773,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1610,
@@ -4819,8 +4819,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 3.0,
-            "Net_Gold": 0.0
+            "Net_Food": 30,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 6019,
@@ -4865,8 +4865,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 2.5,
-            "Net_Gold": 0.0
+            "Net_Food": 25,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 5840,
@@ -4911,8 +4911,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1609,
@@ -4957,8 +4957,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 3.0,
-            "Net_Gold": 0.0
+            "Net_Food": 30,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 6083,
@@ -5003,8 +5003,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 4.5,
-            "Net_Gold": 0.0
+            "Net_Food": 45,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 9668,
@@ -5049,8 +5049,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 3.0,
-            "Net_Gold": 0.0
+            "Net_Food": 30,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 6628,
@@ -5095,8 +5095,8 @@
             "Soldier": 3
         },
         "net_production_burg": {
-            "Net_Food": 6.5,
-            "Net_Gold": -0.5
+            "Net_Food": 65,
+            "Net_Gold": -5
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 27758,
@@ -5141,8 +5141,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 3.5,
-            "Net_Gold": 0.0
+            "Net_Food": 35,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 7212,
@@ -5187,8 +5187,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1467,
@@ -5233,8 +5233,8 @@
             "Soldier": 1
         },
         "net_production_burg": {
-            "Net_Food": 5.5,
-            "Net_Gold": -0.5
+            "Net_Food": 55,
+            "Net_Gold": -5
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 18183,
@@ -5279,8 +5279,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 3.0,
-            "Net_Gold": 0.0
+            "Net_Food": 30,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 7938,
@@ -5325,8 +5325,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 1.5,
-            "Net_Gold": 0.0
+            "Net_Food": 15,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 4136,
@@ -5371,8 +5371,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 1.0,
-            "Net_Gold": 0.0
+            "Net_Food": 10,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 2988,
@@ -5417,8 +5417,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1649,
@@ -5463,8 +5463,8 @@
             "Soldier": 4
         },
         "net_production_burg": {
-            "Net_Food": 12.5,
-            "Net_Gold": 0.0
+            "Net_Food": 125,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 45935,
@@ -5509,8 +5509,8 @@
             "Soldier": 2
         },
         "net_production_burg": {
-            "Net_Food": 5.0,
-            "Net_Gold": 0.0
+            "Net_Food": 50,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 20137,
@@ -5555,8 +5555,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1589,
@@ -5601,8 +5601,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 5.0,
-            "Net_Gold": 0.0
+            "Net_Food": 50,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 10752,
@@ -5647,8 +5647,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 3.0,
-            "Net_Gold": 0.0
+            "Net_Food": 30,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 6097,
@@ -5693,8 +5693,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 5.0,
-            "Net_Gold": 0.0
+            "Net_Food": 50,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 10486,
@@ -5739,8 +5739,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 3.5,
-            "Net_Gold": 0.0
+            "Net_Food": 35,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 7032,
@@ -5785,8 +5785,8 @@
             "Soldier": 1
         },
         "net_production_burg": {
-            "Net_Food": 5.0,
-            "Net_Gold": -0.5
+            "Net_Food": 50,
+            "Net_Gold": -5
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 17164,
@@ -5831,8 +5831,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 2.0,
-            "Net_Gold": 0.0
+            "Net_Food": 20,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 5464,
@@ -5877,8 +5877,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 3.0,
-            "Net_Gold": 0.0
+            "Net_Food": 30,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 5889,
@@ -5923,8 +5923,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 6.0,
-            "Net_Gold": 0.0
+            "Net_Food": 60,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 12135,
@@ -5969,8 +5969,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1919,
@@ -6015,8 +6015,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 2038,
@@ -6061,8 +6061,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 3.5,
-            "Net_Gold": 0.0
+            "Net_Food": 35,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 7073,
@@ -6107,8 +6107,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 6.5,
-            "Net_Gold": 1.0
+            "Net_Food": 65,
+            "Net_Gold": 10
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 11849,
@@ -6153,8 +6153,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1514,
@@ -6199,8 +6199,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 2.0,
-            "Net_Gold": 0.0
+            "Net_Food": 20,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 4113,
@@ -6245,8 +6245,8 @@
             "Soldier": 2
         },
         "net_production_burg": {
-            "Net_Food": 4.5,
-            "Net_Gold": 0.0
+            "Net_Food": 45,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 18552,
@@ -6291,8 +6291,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 2.0,
-            "Net_Gold": 0.0
+            "Net_Food": 20,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 4258,
@@ -6337,8 +6337,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 3.5,
-            "Net_Gold": 0.0
+            "Net_Food": 35,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 8703,
@@ -6383,8 +6383,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 6.0,
-            "Net_Gold": 0.0
+            "Net_Food": 60,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 12234,
@@ -6429,8 +6429,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1706,
@@ -6475,8 +6475,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 6.5,
-            "Net_Gold": 1.0
+            "Net_Food": 65,
+            "Net_Gold": 10
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 11780,
@@ -6521,8 +6521,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1746,
@@ -6567,8 +6567,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 2124,
@@ -6613,8 +6613,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1831,
@@ -6659,8 +6659,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 3.5,
-            "Net_Gold": 0.0
+            "Net_Food": 35,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 7282,
@@ -6705,8 +6705,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 1.0,
-            "Net_Gold": 0.0
+            "Net_Food": 10,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 2830,
@@ -6751,8 +6751,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 1.0,
-            "Net_Gold": 0.0
+            "Net_Food": 10,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 2856,
@@ -6797,8 +6797,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1412,
@@ -6843,8 +6843,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 6.5,
-            "Net_Gold": 0.0
+            "Net_Food": 65,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 13884,
@@ -6889,8 +6889,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 6.0,
-            "Net_Gold": 0.0
+            "Net_Food": 60,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 12532,
@@ -6935,8 +6935,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 1.0,
-            "Net_Gold": 0.0
+            "Net_Food": 10,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 2261,
@@ -6981,8 +6981,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1686,
@@ -7027,8 +7027,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1641,
@@ -7073,8 +7073,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 1.5,
-            "Net_Gold": 0.0
+            "Net_Food": 15,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 4521,
@@ -7119,8 +7119,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 5.5,
-            "Net_Gold": 0.0
+            "Net_Food": 55,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 11444,
@@ -7165,8 +7165,8 @@
             "Soldier": 1
         },
         "net_production_burg": {
-            "Net_Food": 2.5,
-            "Net_Gold": -0.5
+            "Net_Food": 25,
+            "Net_Gold": -5
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 11438,
@@ -7211,8 +7211,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 1.5,
-            "Net_Gold": 0.0
+            "Net_Food": 15,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 4106,
@@ -7257,8 +7257,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1660,
@@ -7303,8 +7303,8 @@
             "Soldier": 3
         },
         "net_production_burg": {
-            "Net_Food": 9.0,
-            "Net_Gold": -0.5
+            "Net_Food": 90,
+            "Net_Gold": -5
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 33968,
@@ -7349,8 +7349,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 3.0,
-            "Net_Gold": 0.0
+            "Net_Food": 30,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 6704,
@@ -7395,8 +7395,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 4.0,
-            "Net_Gold": 0.0
+            "Net_Food": 40,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 8305,
@@ -7441,8 +7441,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 1.5,
-            "Net_Gold": 0.0
+            "Net_Food": 15,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 2742,
@@ -7487,8 +7487,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1572,
@@ -7533,8 +7533,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.0,
-            "Net_Gold": 0.0
+            "Net_Food": 0,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1403,
@@ -7579,8 +7579,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 17.0,
-            "Net_Gold": 5.5
+            "Net_Food": 170,
+            "Net_Gold": 55
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 34090,
@@ -7625,8 +7625,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1463,
@@ -7671,8 +7671,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 2035,
@@ -7717,8 +7717,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 2308,
@@ -7763,8 +7763,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 1.5,
-            "Net_Gold": 0.0
+            "Net_Food": 15,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 3515,
@@ -7809,8 +7809,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.0,
-            "Net_Gold": 0.0
+            "Net_Food": 0,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 895,
@@ -7855,8 +7855,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 1.5,
-            "Net_Gold": 0.0
+            "Net_Food": 15,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 3467,
@@ -7901,8 +7901,8 @@
             "Soldier": 1
         },
         "net_production_burg": {
-            "Net_Food": 6.0,
-            "Net_Gold": 1.5
+            "Net_Food": 60,
+            "Net_Gold": 15
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 18167,
@@ -7947,8 +7947,8 @@
             "Soldier": 1
         },
         "net_production_burg": {
-            "Net_Food": 2.0,
-            "Net_Gold": -0.5
+            "Net_Food": 20,
+            "Net_Gold": -5
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 9636,
@@ -7993,8 +7993,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1510,
@@ -8039,8 +8039,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1577,
@@ -8085,8 +8085,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 6.0,
-            "Net_Gold": 0.0
+            "Net_Food": 60,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 12212,
@@ -8131,8 +8131,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1954,
@@ -8177,8 +8177,8 @@
             "Soldier": 1
         },
         "net_production_burg": {
-            "Net_Food": 5.0,
-            "Net_Gold": -0.5
+            "Net_Food": 50,
+            "Net_Gold": -5
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 17218,
@@ -8223,8 +8223,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 2.0,
-            "Net_Gold": 0.0
+            "Net_Food": 20,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 4585,
@@ -8269,8 +8269,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 5.0,
-            "Net_Gold": 0.0
+            "Net_Food": 50,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 10188,
@@ -8315,8 +8315,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 3.0,
-            "Net_Gold": 0.0
+            "Net_Food": 30,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 6623,
@@ -8361,8 +8361,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1608,
@@ -8407,8 +8407,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 4.5,
-            "Net_Gold": 1.0
+            "Net_Food": 45,
+            "Net_Gold": 10
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 8297,
@@ -8453,8 +8453,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 3.0,
-            "Net_Gold": 0.0
+            "Net_Food": 30,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 6094,
@@ -8499,8 +8499,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 3.5,
-            "Net_Gold": 0.0
+            "Net_Food": 35,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 7550,
@@ -8545,8 +8545,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 3.0,
-            "Net_Gold": 0.0
+            "Net_Food": 30,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 6463,
@@ -8591,8 +8591,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 4.5,
-            "Net_Gold": 0.0
+            "Net_Food": 45,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 9197,
@@ -8637,8 +8637,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 3.5,
-            "Net_Gold": 0.0
+            "Net_Food": 35,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 8223,
@@ -8683,8 +8683,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1606,
@@ -8729,8 +8729,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 2060,
@@ -8775,8 +8775,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1786,
@@ -8821,8 +8821,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1607,
@@ -8867,8 +8867,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 3.5,
-            "Net_Gold": 0.0
+            "Net_Food": 35,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 8214,
@@ -8913,8 +8913,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 5.0,
-            "Net_Gold": 1.0
+            "Net_Food": 50,
+            "Net_Gold": 10
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 10636,
@@ -8959,8 +8959,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 4.5,
-            "Net_Gold": 0.0
+            "Net_Food": 45,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 9201,
@@ -9005,8 +9005,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 3.0,
-            "Net_Gold": 0.0
+            "Net_Food": 30,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 5979,
@@ -9051,8 +9051,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 3.0,
-            "Net_Gold": 0.0
+            "Net_Food": 30,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 6474,
@@ -9097,8 +9097,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 6.0,
-            "Net_Gold": 2.0
+            "Net_Food": 60,
+            "Net_Gold": 20
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 13053,
@@ -9143,8 +9143,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 3.0,
-            "Net_Gold": 0.0
+            "Net_Food": 30,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 6983,
@@ -9189,8 +9189,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 4.5,
-            "Net_Gold": 0.0
+            "Net_Food": 45,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 9546,
@@ -9235,8 +9235,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.0,
-            "Net_Gold": 0.0
+            "Net_Food": 0,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 917,
@@ -9281,8 +9281,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 2.5,
-            "Net_Gold": 0.0
+            "Net_Food": 25,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 5640,
@@ -9327,8 +9327,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 3.0,
-            "Net_Gold": 0.0
+            "Net_Food": 30,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 6711,
@@ -9373,8 +9373,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 6.5,
-            "Net_Gold": 0.0
+            "Net_Food": 65,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 13530,
@@ -9419,8 +9419,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 2.0,
-            "Net_Gold": 0.0
+            "Net_Food": 20,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 4753,
@@ -9465,8 +9465,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 3.5,
-            "Net_Gold": 0.0
+            "Net_Food": 35,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 7425,
@@ -9511,8 +9511,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 5.0,
-            "Net_Gold": 0.0
+            "Net_Food": 50,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 10656,
@@ -9557,8 +9557,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 2087,
@@ -9603,8 +9603,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 1.5,
-            "Net_Gold": 0.0
+            "Net_Food": 15,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 3547,
@@ -9649,8 +9649,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1606,
@@ -9695,8 +9695,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 2.0,
-            "Net_Gold": 0.0
+            "Net_Food": 20,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 5465,
@@ -9741,8 +9741,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1642,
@@ -9787,8 +9787,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1873,
@@ -9833,8 +9833,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 7.5,
-            "Net_Gold": 1.5
+            "Net_Food": 75,
+            "Net_Gold": 15
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 16830,
@@ -9879,8 +9879,8 @@
             "Soldier": 2
         },
         "net_production_burg": {
-            "Net_Food": 4.5,
-            "Net_Gold": 0.0
+            "Net_Food": 45,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 19366,
@@ -9925,8 +9925,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1950,
@@ -9971,8 +9971,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 1.5,
-            "Net_Gold": 0.0
+            "Net_Food": 15,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 4184,
@@ -10017,8 +10017,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1473,
@@ -10063,8 +10063,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1534,
@@ -10109,8 +10109,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1463,
@@ -10155,8 +10155,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 1.0,
-            "Net_Gold": 0.0
+            "Net_Food": 10,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 2620,
@@ -10201,8 +10201,8 @@
             "Soldier": 1
         },
         "net_production_burg": {
-            "Net_Food": 5.0,
-            "Net_Gold": -0.5
+            "Net_Food": 50,
+            "Net_Gold": -5
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 16307,
@@ -10247,8 +10247,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 3.5,
-            "Net_Gold": 0.0
+            "Net_Food": 35,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 7344,
@@ -10293,8 +10293,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 7.0,
-            "Net_Gold": 0.0
+            "Net_Food": 70,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 14610,
@@ -10339,8 +10339,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 4.0,
-            "Net_Gold": 0.0
+            "Net_Food": 40,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 8025,
@@ -10385,8 +10385,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 3.5,
-            "Net_Gold": 0.0
+            "Net_Food": 35,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 8342,
@@ -10431,8 +10431,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 4.5,
-            "Net_Gold": 0.0
+            "Net_Food": 45,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 9532,
@@ -10477,8 +10477,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1717,
@@ -10523,8 +10523,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1910,
@@ -10569,8 +10569,8 @@
             "Soldier": 2
         },
         "net_production_burg": {
-            "Net_Food": 8.0,
-            "Net_Gold": 0.0
+            "Net_Food": 80,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 26450,
@@ -10615,8 +10615,8 @@
             "Soldier": 2
         },
         "net_production_burg": {
-            "Net_Food": 3.5,
-            "Net_Gold": 0.0
+            "Net_Food": 35,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 17176,
@@ -10661,8 +10661,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 2.5,
-            "Net_Gold": 0.0
+            "Net_Food": 25,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 5640,
@@ -10707,8 +10707,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 1.0,
-            "Net_Gold": 0.0
+            "Net_Food": 10,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 2321,
@@ -10753,8 +10753,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 3.5,
-            "Net_Gold": 0.0
+            "Net_Food": 35,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 5818,
@@ -10799,8 +10799,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 4.5,
-            "Net_Gold": 0.0
+            "Net_Food": 45,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 9852,
@@ -10845,8 +10845,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1706,
@@ -10891,8 +10891,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 3.5,
-            "Net_Gold": 0.0
+            "Net_Food": 35,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 7249,
@@ -10937,8 +10937,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.0,
-            "Net_Gold": 0.0
+            "Net_Food": 0,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1726,
@@ -10983,8 +10983,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.0,
-            "Net_Gold": 0.0
+            "Net_Food": 0,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1046,
@@ -11029,8 +11029,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 2.0,
-            "Net_Gold": 0.0
+            "Net_Food": 20,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 3383,
@@ -11075,8 +11075,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.0,
-            "Net_Gold": 0.0
+            "Net_Food": 0,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 949,
@@ -11121,8 +11121,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1142,
@@ -11167,8 +11167,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 2111,
@@ -11213,8 +11213,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 3.0,
-            "Net_Gold": 0.0
+            "Net_Food": 30,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 6601,
@@ -11259,8 +11259,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 1.5,
-            "Net_Gold": 0.0
+            "Net_Food": 15,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 3364,
@@ -11305,8 +11305,8 @@
             "Soldier": 2
         },
         "net_production_burg": {
-            "Net_Food": 5.5,
-            "Net_Gold": 0.0
+            "Net_Food": 55,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 21330,
@@ -11351,8 +11351,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 5.5,
-            "Net_Gold": 0.0
+            "Net_Food": 55,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 11800,
@@ -11397,8 +11397,8 @@
             "Soldier": 1
         },
         "net_production_burg": {
-            "Net_Food": 3.0,
-            "Net_Gold": -0.5
+            "Net_Food": 30,
+            "Net_Gold": -5
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 12131,
@@ -11443,8 +11443,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.0,
-            "Net_Gold": 0.0
+            "Net_Food": 0,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1037,
@@ -11489,8 +11489,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 1.0,
-            "Net_Gold": 0.0
+            "Net_Food": 10,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 2926,
@@ -11535,8 +11535,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 3.5,
-            "Net_Gold": 0.0
+            "Net_Food": 35,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 7305,
@@ -11581,8 +11581,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 3.0,
-            "Net_Gold": 0.0
+            "Net_Food": 30,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 6340,
@@ -11627,8 +11627,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 1.0,
-            "Net_Gold": 0.0
+            "Net_Food": 10,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 3160,
@@ -11673,8 +11673,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1655,
@@ -11719,8 +11719,8 @@
             "Soldier": 1
         },
         "net_production_burg": {
-            "Net_Food": 5.5,
-            "Net_Gold": -0.5
+            "Net_Food": 55,
+            "Net_Gold": -5
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 17501,
@@ -11765,8 +11765,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 2.0,
-            "Net_Gold": 0.0
+            "Net_Food": 20,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 4472,
@@ -11811,8 +11811,8 @@
             "Soldier": 2
         },
         "net_production_burg": {
-            "Net_Food": 5.5,
-            "Net_Gold": 0.0
+            "Net_Food": 55,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 21241,
@@ -11857,8 +11857,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1736,
@@ -11903,8 +11903,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 8.0,
-            "Net_Gold": 1.5
+            "Net_Food": 80,
+            "Net_Gold": 15
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 17785,
@@ -11949,8 +11949,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 6.0,
-            "Net_Gold": 0.0
+            "Net_Food": 60,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 12598,
@@ -11995,8 +11995,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.0,
-            "Net_Gold": 0.0
+            "Net_Food": 0,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1003,
@@ -12041,8 +12041,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1586,
@@ -12087,8 +12087,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 1.0,
-            "Net_Gold": 0.0
+            "Net_Food": 10,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 2916,
@@ -12133,8 +12133,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1577,
@@ -12179,8 +12179,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1754,
@@ -12225,8 +12225,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 3.0,
-            "Net_Gold": 0.0
+            "Net_Food": 30,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 6774,
@@ -12271,8 +12271,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 2020,
@@ -12317,8 +12317,8 @@
             "Soldier": 1
         },
         "net_production_burg": {
-            "Net_Food": 4.5,
-            "Net_Gold": -0.5
+            "Net_Food": 45,
+            "Net_Gold": -5
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 15044,
@@ -12363,8 +12363,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 2.0,
-            "Net_Gold": 0.0
+            "Net_Food": 20,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 5084,
@@ -12409,8 +12409,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 3.0,
-            "Net_Gold": 0.0
+            "Net_Food": 30,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 6679,
@@ -12455,8 +12455,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 1.5,
-            "Net_Gold": 0.0
+            "Net_Food": 15,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 4016,
@@ -12501,8 +12501,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 6.0,
-            "Net_Gold": 0.0
+            "Net_Food": 60,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 12312,
@@ -12547,8 +12547,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 5.0,
-            "Net_Gold": 0.0
+            "Net_Food": 50,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 10173,
@@ -12593,8 +12593,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 9.5,
-            "Net_Gold": 1.5
+            "Net_Food": 95,
+            "Net_Gold": 15
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 20156,
@@ -12639,8 +12639,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 2041,
@@ -12685,8 +12685,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 1.0,
-            "Net_Gold": 0.0
+            "Net_Food": 10,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 2393,
@@ -12731,8 +12731,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 1.0,
-            "Net_Gold": 0.0
+            "Net_Food": 10,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 2790,
@@ -12777,8 +12777,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 3.0,
-            "Net_Gold": 1.0
+            "Net_Food": 30,
+            "Net_Gold": 10
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 7647,
@@ -12823,8 +12823,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 8.0,
-            "Net_Gold": 1.5
+            "Net_Food": 80,
+            "Net_Gold": 15
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 17159,
@@ -12869,8 +12869,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 4.0,
-            "Net_Gold": 0.0
+            "Net_Food": 40,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 9080,
@@ -12915,8 +12915,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 3.5,
-            "Net_Gold": 0.0
+            "Net_Food": 35,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 7681,
@@ -12961,8 +12961,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 1.5,
-            "Net_Gold": 0.0
+            "Net_Food": 15,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 4322,
@@ -13007,8 +13007,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 3.5,
-            "Net_Gold": 0.0
+            "Net_Food": 35,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 7591,
@@ -13053,8 +13053,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 6.5,
-            "Net_Gold": 1.0
+            "Net_Food": 65,
+            "Net_Gold": 10
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 11646,
@@ -13099,8 +13099,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 5.0,
-            "Net_Gold": 0.0
+            "Net_Food": 50,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 10654,
@@ -13145,8 +13145,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 3.0,
-            "Net_Gold": 0.0
+            "Net_Food": 30,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 6517,
@@ -13191,8 +13191,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 1.0,
-            "Net_Gold": 0.0
+            "Net_Food": 10,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 2756,
@@ -13237,8 +13237,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 11.0,
-            "Net_Gold": 1.5
+            "Net_Food": 110,
+            "Net_Gold": 15
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 23268,
@@ -13283,8 +13283,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1663,
@@ -13329,8 +13329,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1766,
@@ -13375,8 +13375,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 2.5,
-            "Net_Gold": 0.0
+            "Net_Food": 25,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 6399,
@@ -13421,8 +13421,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 6.5,
-            "Net_Gold": 0.0
+            "Net_Food": 65,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 13511,
@@ -13467,8 +13467,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 7.5,
-            "Net_Gold": 2.0
+            "Net_Food": 75,
+            "Net_Gold": 20
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 14864,
@@ -13513,8 +13513,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1133,
@@ -13559,8 +13559,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 1.5,
-            "Net_Gold": 0.0
+            "Net_Food": 15,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 4227,
@@ -13605,8 +13605,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1730,
@@ -13651,8 +13651,8 @@
             "Soldier": 2
         },
         "net_production_burg": {
-            "Net_Food": 7.0,
-            "Net_Gold": 0.0
+            "Net_Food": 70,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 25101,
@@ -13697,8 +13697,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.0,
-            "Net_Gold": 0.0
+            "Net_Food": 0,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1006,
@@ -13743,8 +13743,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1511,
@@ -13789,8 +13789,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 1.5,
-            "Net_Gold": 0.0
+            "Net_Food": 15,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 3352,
@@ -13835,8 +13835,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.0,
-            "Net_Gold": 0.0
+            "Net_Food": 0,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 976,
@@ -13881,8 +13881,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 2.0,
-            "Net_Gold": 0.0
+            "Net_Food": 20,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 4731,
@@ -13927,8 +13927,8 @@
             "Soldier": 3
         },
         "net_production_burg": {
-            "Net_Food": 6.5,
-            "Net_Gold": -0.5
+            "Net_Food": 65,
+            "Net_Gold": -5
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 28600,
@@ -13973,8 +13973,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 7.5,
-            "Net_Gold": 0.0
+            "Net_Food": 75,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 15449,
@@ -14019,8 +14019,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1202,
@@ -14065,8 +14065,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 5.5,
-            "Net_Gold": 0.0
+            "Net_Food": 55,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 11337,
@@ -14111,8 +14111,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 1.5,
-            "Net_Gold": 0.0
+            "Net_Food": 15,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 3402,
@@ -14157,8 +14157,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 3.0,
-            "Net_Gold": 0.0
+            "Net_Food": 30,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 6954,
@@ -14203,8 +14203,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1835,
@@ -14249,8 +14249,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.0,
-            "Net_Gold": 0.0
+            "Net_Food": 0,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 993,
@@ -14295,8 +14295,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1327,
@@ -14341,8 +14341,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1928,
@@ -14387,8 +14387,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 1.5,
-            "Net_Gold": 0.0
+            "Net_Food": 15,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 3608,
@@ -14433,8 +14433,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 3.0,
-            "Net_Gold": 0.0
+            "Net_Food": 30,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 6933,
@@ -14479,8 +14479,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1546,
@@ -14525,8 +14525,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 1.5,
-            "Net_Gold": 0.0
+            "Net_Food": 15,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 4370,
@@ -14571,8 +14571,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 2.0,
-            "Net_Gold": 0.0
+            "Net_Food": 20,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 4502,
@@ -14617,8 +14617,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 3.5,
-            "Net_Gold": 0.0
+            "Net_Food": 35,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 7309,
@@ -14663,8 +14663,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.0,
-            "Net_Gold": 0.0
+            "Net_Food": 0,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1081,
@@ -14709,8 +14709,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 4.5,
-            "Net_Gold": 1.0
+            "Net_Food": 45,
+            "Net_Gold": 10
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 9210,
@@ -14755,8 +14755,8 @@
             "Soldier": 2
         },
         "net_production_burg": {
-            "Net_Food": 7.5,
-            "Net_Gold": 0.0
+            "Net_Food": 75,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 25685,
@@ -14801,8 +14801,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 2.0,
-            "Net_Gold": 0.0
+            "Net_Food": 20,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 5138,
@@ -14847,8 +14847,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1633,
@@ -14893,8 +14893,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 6.0,
-            "Net_Gold": 0.0
+            "Net_Food": 60,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 12114,
@@ -14939,8 +14939,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 3.0,
-            "Net_Gold": 0.0
+            "Net_Food": 30,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 6443,
@@ -14985,8 +14985,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 3.5,
-            "Net_Gold": 0.0
+            "Net_Food": 35,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 6140,
@@ -15031,8 +15031,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 7.0,
-            "Net_Gold": 0.0
+            "Net_Food": 70,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 14893,
@@ -15077,8 +15077,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 4.0,
-            "Net_Gold": 0.0
+            "Net_Food": 40,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 8512,
@@ -15123,8 +15123,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 6.0,
-            "Net_Gold": 0.0
+            "Net_Food": 60,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 12260,
@@ -15169,8 +15169,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1758,
@@ -15215,8 +15215,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 1.0,
-            "Net_Gold": 0.0
+            "Net_Food": 10,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 3258,
@@ -15261,8 +15261,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.0,
-            "Net_Gold": 0.0
+            "Net_Food": 0,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1040,
@@ -15307,8 +15307,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 1.5,
-            "Net_Gold": 0.0
+            "Net_Food": 15,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 4137,
@@ -15353,8 +15353,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1696,
@@ -15399,8 +15399,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 2.0,
-            "Net_Gold": 0.0
+            "Net_Food": 20,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 4752,
@@ -15445,8 +15445,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1777,
@@ -15491,8 +15491,8 @@
             "Soldier": 2
         },
         "net_production_burg": {
-            "Net_Food": 5.5,
-            "Net_Gold": 0.0
+            "Net_Food": 55,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 20973,
@@ -15537,8 +15537,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 2.0,
-            "Net_Gold": 0.0
+            "Net_Food": 20,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 5236,
@@ -15583,8 +15583,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 6.0,
-            "Net_Gold": 0.0
+            "Net_Food": 60,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 12744,
@@ -15629,8 +15629,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1799,
@@ -15675,8 +15675,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 1.5,
-            "Net_Gold": 0.0
+            "Net_Food": 15,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 3509,
@@ -15721,8 +15721,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1111,
@@ -15767,8 +15767,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 1.5,
-            "Net_Gold": 0.0
+            "Net_Food": 15,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 4127,
@@ -15813,8 +15813,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1708,
@@ -15859,8 +15859,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1603,
@@ -15905,8 +15905,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 1.0,
-            "Net_Gold": 0.0
+            "Net_Food": 10,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 2934,
@@ -15951,8 +15951,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 5.5,
-            "Net_Gold": 0.0
+            "Net_Food": 55,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 11990,
@@ -15997,8 +15997,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1764,
@@ -16043,8 +16043,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 2.5,
-            "Net_Gold": 0.0
+            "Net_Food": 25,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 6543,
@@ -16089,8 +16089,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 3.5,
-            "Net_Gold": 0.0
+            "Net_Food": 35,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 7424,
@@ -16135,8 +16135,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 1.0,
-            "Net_Gold": 0.0
+            "Net_Food": 10,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 3089,
@@ -16181,8 +16181,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 1.5,
-            "Net_Gold": 0.0
+            "Net_Food": 15,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 4159,
@@ -16227,8 +16227,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 1.0,
-            "Net_Gold": 0.0
+            "Net_Food": 10,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 2212,
@@ -16273,8 +16273,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 2.0,
-            "Net_Gold": 0.0
+            "Net_Food": 20,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 4637,
@@ -16319,8 +16319,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 9.5,
-            "Net_Gold": 1.5
+            "Net_Food": 95,
+            "Net_Gold": 15
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 20800,
@@ -16365,8 +16365,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1877,
@@ -16411,8 +16411,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1686,
@@ -16457,8 +16457,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 4.5,
-            "Net_Gold": 0.0
+            "Net_Food": 45,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 9031,
@@ -16503,8 +16503,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 5.5,
-            "Net_Gold": 0.0
+            "Net_Food": 55,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 11174,
@@ -16549,8 +16549,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 4.5,
-            "Net_Gold": 0.0
+            "Net_Food": 45,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 9168,
@@ -16595,8 +16595,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 4.0,
-            "Net_Gold": 0.0
+            "Net_Food": 40,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 8188,
@@ -16641,8 +16641,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 2310,
@@ -16687,8 +16687,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 3.0,
-            "Net_Gold": 0.0
+            "Net_Food": 30,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 6319,
@@ -16733,8 +16733,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 1.0,
-            "Net_Gold": 0.0
+            "Net_Food": 10,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 2413,
@@ -16779,8 +16779,8 @@
             "Soldier": 2
         },
         "net_production_burg": {
-            "Net_Food": 6.0,
-            "Net_Gold": 0.0
+            "Net_Food": 60,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 22291,
@@ -16825,8 +16825,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 3.0,
-            "Net_Gold": 0.0
+            "Net_Food": 30,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 6078,
@@ -16871,8 +16871,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1535,
@@ -16917,8 +16917,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 4.0,
-            "Net_Gold": 0.0
+            "Net_Food": 40,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 8432,
@@ -16963,8 +16963,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 1.5,
-            "Net_Gold": 0.0
+            "Net_Food": 15,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 4033,
@@ -17009,8 +17009,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 1.5,
-            "Net_Gold": 0.0
+            "Net_Food": 15,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 4145,
@@ -17055,8 +17055,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1666,
@@ -17101,8 +17101,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1765,
@@ -17147,8 +17147,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 1.0,
-            "Net_Gold": 0.0
+            "Net_Food": 10,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 2649,
@@ -17193,8 +17193,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 6.5,
-            "Net_Gold": 0.0
+            "Net_Food": 65,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 13371,
@@ -17239,8 +17239,8 @@
             "Soldier": 1
         },
         "net_production_burg": {
-            "Net_Food": 4.5,
-            "Net_Gold": -0.5
+            "Net_Food": 45,
+            "Net_Gold": -5
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 15523,
@@ -17285,8 +17285,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 1.5,
-            "Net_Gold": 0.0
+            "Net_Food": 15,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 4303,
@@ -17331,8 +17331,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 3.0,
-            "Net_Gold": 0.0
+            "Net_Food": 30,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 6984,
@@ -17377,8 +17377,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 2.5,
-            "Net_Gold": 0.0
+            "Net_Food": 25,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 5691,
@@ -17423,8 +17423,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 5.5,
-            "Net_Gold": 0.0
+            "Net_Food": 55,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 11296,
@@ -17469,8 +17469,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 3.0,
-            "Net_Gold": 0.0
+            "Net_Food": 30,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 6543,
@@ -17515,8 +17515,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 4.5,
-            "Net_Gold": 0.0
+            "Net_Food": 45,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 9298,
@@ -17561,8 +17561,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 2.0,
-            "Net_Gold": 0.0
+            "Net_Food": 20,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 5259,
@@ -17607,8 +17607,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1134,
@@ -17653,8 +17653,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 3.0,
-            "Net_Gold": 1.0
+            "Net_Food": 30,
+            "Net_Gold": 10
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 7016,
@@ -17699,8 +17699,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1846,
@@ -17745,8 +17745,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 2.0,
-            "Net_Gold": 0.0
+            "Net_Food": 20,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 4690,
@@ -17791,8 +17791,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 1.5,
-            "Net_Gold": 0.0
+            "Net_Food": 15,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 4226,
@@ -17837,8 +17837,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1604,
@@ -17883,8 +17883,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 3.0,
-            "Net_Gold": 1.0
+            "Net_Food": 30,
+            "Net_Gold": 10
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 6636,
@@ -17929,8 +17929,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 3.0,
-            "Net_Gold": 0.0
+            "Net_Food": 30,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 6105,
@@ -17975,8 +17975,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1955,
@@ -18021,8 +18021,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 3.5,
-            "Net_Gold": 0.0
+            "Net_Food": 35,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 7390,
@@ -18067,8 +18067,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1104,
@@ -18113,8 +18113,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 4.0,
-            "Net_Gold": 0.0
+            "Net_Food": 40,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 8139,
@@ -18159,8 +18159,8 @@
             "Soldier": 1
         },
         "net_production_burg": {
-            "Net_Food": 5.5,
-            "Net_Gold": -0.5
+            "Net_Food": 55,
+            "Net_Gold": -5
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 18177,
@@ -18205,8 +18205,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 3.5,
-            "Net_Gold": 0.0
+            "Net_Food": 35,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 7575,
@@ -18251,8 +18251,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1753,
@@ -18297,8 +18297,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 6.0,
-            "Net_Gold": 0.0
+            "Net_Food": 60,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 12895,
@@ -18343,8 +18343,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 3.5,
-            "Net_Gold": 0.0
+            "Net_Food": 35,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 7989,
@@ -18389,8 +18389,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1760,
@@ -18435,8 +18435,8 @@
             "Soldier": 2
         },
         "net_production_burg": {
-            "Net_Food": 4.5,
-            "Net_Gold": 0.0
+            "Net_Food": 45,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 19117,
@@ -18481,8 +18481,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1786,
@@ -18527,8 +18527,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1162,
@@ -18573,8 +18573,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 1.5,
-            "Net_Gold": 0.0
+            "Net_Food": 15,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 3063,
@@ -18619,8 +18619,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 5.5,
-            "Net_Gold": 0.0
+            "Net_Food": 55,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 11940,
@@ -18665,8 +18665,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 1.5,
-            "Net_Gold": 0.0
+            "Net_Food": 15,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 4091,
@@ -18711,8 +18711,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1132,
@@ -18757,8 +18757,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 1.0,
-            "Net_Gold": 0.0
+            "Net_Food": 10,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 3057,
@@ -18803,8 +18803,8 @@
             "Soldier": 1
         },
         "net_production_burg": {
-            "Net_Food": 5.0,
-            "Net_Gold": -0.5
+            "Net_Food": 50,
+            "Net_Gold": -5
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 16550,
@@ -18849,8 +18849,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 1.5,
-            "Net_Gold": 0.0
+            "Net_Food": 15,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 3571,
@@ -18895,8 +18895,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 3.0,
-            "Net_Gold": 0.0
+            "Net_Food": 30,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 5973,
@@ -18941,8 +18941,8 @@
             "Soldier": 1
         },
         "net_production_burg": {
-            "Net_Food": 4.5,
-            "Net_Gold": -0.5
+            "Net_Food": 45,
+            "Net_Gold": -5
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 15873,
@@ -18987,8 +18987,8 @@
             "Soldier": 1
         },
         "net_production_burg": {
-            "Net_Food": 3.5,
-            "Net_Gold": -0.5
+            "Net_Food": 35,
+            "Net_Gold": -5
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 13484,
@@ -19033,8 +19033,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.0,
-            "Net_Gold": 0.0
+            "Net_Food": 0,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1037,
@@ -19079,8 +19079,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 1.5,
-            "Net_Gold": 0.0
+            "Net_Food": 15,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 3423,
@@ -19125,8 +19125,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 4.0,
-            "Net_Gold": 0.0
+            "Net_Food": 40,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 8066,
@@ -19171,8 +19171,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.0,
-            "Net_Gold": 0.0
+            "Net_Food": 0,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 919,
@@ -19217,8 +19217,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 8.0,
-            "Net_Gold": 1.5
+            "Net_Food": 80,
+            "Net_Gold": 15
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 17372,
@@ -19263,8 +19263,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1203,
@@ -19309,8 +19309,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.0,
-            "Net_Gold": 0.0
+            "Net_Food": 0,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1053,
@@ -19355,8 +19355,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.0,
-            "Net_Gold": 0.0
+            "Net_Food": 0,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1049,
@@ -19401,8 +19401,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 1.0,
-            "Net_Gold": 0.0
+            "Net_Food": 10,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 3285,
@@ -19447,8 +19447,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1617,
@@ -19493,8 +19493,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1573,
@@ -19539,8 +19539,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 10.0,
-            "Net_Gold": 1.5
+            "Net_Food": 100,
+            "Net_Gold": 15
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 21584,
@@ -19585,8 +19585,8 @@
             "Soldier": 1
         },
         "net_production_burg": {
-            "Net_Food": 4.5,
-            "Net_Gold": -0.5
+            "Net_Food": 45,
+            "Net_Gold": -5
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 15726,
@@ -19631,8 +19631,8 @@
             "Soldier": 1
         },
         "net_production_burg": {
-            "Net_Food": 7.0,
-            "Net_Gold": 1.5
+            "Net_Food": 70,
+            "Net_Gold": 15
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 19425,
@@ -19677,8 +19677,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 1.5,
-            "Net_Gold": 0.0
+            "Net_Food": 15,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 4088,
@@ -19723,8 +19723,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 1.5,
-            "Net_Gold": 0.0
+            "Net_Food": 15,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 3611,
@@ -19769,8 +19769,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 5.5,
-            "Net_Gold": 0.0
+            "Net_Food": 55,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 11643,
@@ -19815,8 +19815,8 @@
             "Soldier": 1
         },
         "net_production_burg": {
-            "Net_Food": 5.5,
-            "Net_Gold": -0.5
+            "Net_Food": 55,
+            "Net_Gold": -5
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 18125,
@@ -19861,8 +19861,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 3.0,
-            "Net_Gold": 0.0
+            "Net_Food": 30,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 6568,
@@ -19907,8 +19907,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 2.0,
-            "Net_Gold": 0.0
+            "Net_Food": 20,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 5063,
@@ -19953,8 +19953,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1172,
@@ -19999,8 +19999,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 4.5,
-            "Net_Gold": 0.0
+            "Net_Food": 45,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 9960,
@@ -20045,8 +20045,8 @@
             "Soldier": 1
         },
         "net_production_burg": {
-            "Net_Food": 5.0,
-            "Net_Gold": 1.5
+            "Net_Food": 50,
+            "Net_Gold": 15
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 15604,
@@ -20091,8 +20091,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1902,
@@ -20137,8 +20137,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1682,
@@ -20183,8 +20183,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 4.5,
-            "Net_Gold": 0.0
+            "Net_Food": 45,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 9997,
@@ -20229,8 +20229,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1802,
@@ -20275,8 +20275,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1899,
@@ -20321,8 +20321,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.0,
-            "Net_Gold": 0.0
+            "Net_Food": 0,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1070,
@@ -20367,8 +20367,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 3.5,
-            "Net_Gold": 0.0
+            "Net_Food": 35,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 8156,
@@ -20413,8 +20413,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 3.0,
-            "Net_Gold": 0.0
+            "Net_Food": 30,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 6008,
@@ -20459,8 +20459,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 5.0,
-            "Net_Gold": 0.0
+            "Net_Food": 50,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 10156,
@@ -20505,8 +20505,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 8.0,
-            "Net_Gold": 1.5
+            "Net_Food": 80,
+            "Net_Gold": 15
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 17467,
@@ -20551,8 +20551,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 5.0,
-            "Net_Gold": 1.0
+            "Net_Food": 50,
+            "Net_Gold": 10
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 10136,
@@ -20597,8 +20597,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 3.0,
-            "Net_Gold": 0.0
+            "Net_Food": 30,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 6452,
@@ -20643,8 +20643,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 1.5,
-            "Net_Gold": 0.0
+            "Net_Food": 15,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 3375,
@@ -20689,8 +20689,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.0,
-            "Net_Gold": 0.0
+            "Net_Food": 0,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1081,
@@ -20735,8 +20735,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 3.5,
-            "Net_Gold": 0.0
+            "Net_Food": 35,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 8994,
@@ -20781,8 +20781,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1862,
@@ -20827,8 +20827,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 2.0,
-            "Net_Gold": 0.0
+            "Net_Food": 20,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 4855,
@@ -20873,8 +20873,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 5.0,
-            "Net_Gold": 0.0
+            "Net_Food": 50,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 10873,
@@ -20919,8 +20919,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 1.5,
-            "Net_Gold": 0.0
+            "Net_Food": 15,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 3524,
@@ -20965,8 +20965,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1706,
@@ -21011,8 +21011,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 3.0,
-            "Net_Gold": 1.0
+            "Net_Food": 30,
+            "Net_Gold": 10
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 6538,
@@ -21057,8 +21057,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1141,
@@ -21103,8 +21103,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1235,
@@ -21149,8 +21149,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1745,
@@ -21195,8 +21195,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1918,
@@ -21241,8 +21241,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 3.5,
-            "Net_Gold": 0.0
+            "Net_Food": 35,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 7205,
@@ -21287,8 +21287,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1220,
@@ -21333,8 +21333,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1715,
@@ -21379,8 +21379,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1173,
@@ -21425,8 +21425,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 1.5,
-            "Net_Gold": 0.0
+            "Net_Food": 15,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 3160,
@@ -21471,8 +21471,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 2.0,
-            "Net_Gold": 0.0
+            "Net_Food": 20,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 4766,
@@ -21517,8 +21517,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1111,
@@ -21563,8 +21563,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 2129,
@@ -21609,8 +21609,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 6.0,
-            "Net_Gold": 0.0
+            "Net_Food": 60,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 12454,
@@ -21655,8 +21655,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 6.0,
-            "Net_Gold": 0.0
+            "Net_Food": 60,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 12524,
@@ -21701,8 +21701,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 4.5,
-            "Net_Gold": 0.0
+            "Net_Food": 45,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 9086,
@@ -21747,8 +21747,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 9.0,
-            "Net_Gold": 2.0
+            "Net_Food": 90,
+            "Net_Gold": 20
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 17063,
@@ -21793,8 +21793,8 @@
             "Soldier": 1
         },
         "net_production_burg": {
-            "Net_Food": 7.5,
-            "Net_Gold": 1.5
+            "Net_Food": 75,
+            "Net_Gold": 15
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 21313,
@@ -21839,8 +21839,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 1.5,
-            "Net_Gold": 0.0
+            "Net_Food": 15,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 3144,
@@ -21885,8 +21885,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 3.5,
-            "Net_Gold": 0.0
+            "Net_Food": 35,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 7120,
@@ -21931,8 +21931,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 7.5,
-            "Net_Gold": 0.0
+            "Net_Food": 75,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 15414,
@@ -21977,8 +21977,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1102,
@@ -22023,8 +22023,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 8.0,
-            "Net_Gold": 1.5
+            "Net_Food": 80,
+            "Net_Gold": 15
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 17420,
@@ -22069,8 +22069,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 2026,
@@ -22115,8 +22115,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 4.0,
-            "Net_Gold": 0.0
+            "Net_Food": 40,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 8395,
@@ -22161,8 +22161,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1170,
@@ -22207,8 +22207,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.0,
-            "Net_Gold": 0.0
+            "Net_Food": 0,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 879,
@@ -22253,8 +22253,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 1.0,
-            "Net_Gold": 0.0
+            "Net_Food": 10,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 2735,
@@ -22299,8 +22299,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 2.0,
-            "Net_Gold": 0.0
+            "Net_Food": 20,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 4439,
@@ -22345,8 +22345,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 4.5,
-            "Net_Gold": 0.0
+            "Net_Food": 45,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 9215,
@@ -22391,8 +22391,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 3.5,
-            "Net_Gold": 0.0
+            "Net_Food": 35,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 7011,
@@ -22437,8 +22437,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 5.0,
-            "Net_Gold": 0.0
+            "Net_Food": 50,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 10723,
@@ -22483,8 +22483,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 2.0,
-            "Net_Gold": 0.0
+            "Net_Food": 20,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 4962,
@@ -22529,8 +22529,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 4.0,
-            "Net_Gold": 0.0
+            "Net_Food": 40,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 8728,
@@ -22575,8 +22575,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.0,
-            "Net_Gold": 0.0
+            "Net_Food": 0,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 974,
@@ -22621,8 +22621,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1856,
@@ -22667,8 +22667,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 2.0,
-            "Net_Gold": 0.0
+            "Net_Food": 20,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 4490,
@@ -22713,8 +22713,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 4.0,
-            "Net_Gold": 0.0
+            "Net_Food": 40,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 8991,
@@ -22759,8 +22759,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 1.0,
-            "Net_Gold": 0.0
+            "Net_Food": 10,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 2808,
@@ -22805,8 +22805,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1849,
@@ -22851,8 +22851,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1207,
@@ -22897,8 +22897,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1738,
@@ -22943,8 +22943,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 10.0,
-            "Net_Gold": 3.5
+            "Net_Food": 100,
+            "Net_Gold": 35
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 21698,
@@ -22989,8 +22989,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 1467,
@@ -23035,8 +23035,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 1.0,
-            "Net_Gold": 0.0
+            "Net_Food": 10,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 2662,
@@ -23081,8 +23081,8 @@
             "Soldier": 2
         },
         "net_production_burg": {
-            "Net_Food": 5.5,
-            "Net_Gold": 0.0
+            "Net_Food": 55,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 21089,
@@ -23127,8 +23127,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 11.0,
-            "Net_Gold": 3.5
+            "Net_Food": 110,
+            "Net_Gold": 35
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 22278,
@@ -23173,8 +23173,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 1.5,
-            "Net_Gold": 0.0
+            "Net_Food": 15,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 3078,
@@ -23219,8 +23219,8 @@
             "Soldier": 0
         },
         "net_production_burg": {
-            "Net_Food": 0.5,
-            "Net_Gold": 0.0
+            "Net_Food": 5,
+            "Net_Gold": 0
         },
         "area_requirements_burg": {
             "Farmland_to_Feed_Burg_ha_Min": 2658,

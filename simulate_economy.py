@@ -162,14 +162,14 @@ def get_net_production_and_consumption_per_quartier_type_for_burg(quartiers, con
 
 def get_net_production_and_consumption_for_quartier(quartier_number, citizen_config):
     return {
-            'Net_Food': quartier_number * citizen_config.get('Production_Food', 0) + quartier_number * citizen_config.get('Consumption_Food', 0),
-            'Net_Gold': quartier_number * citizen_config.get('Production_Gold', 0) + quartier_number * citizen_config.get('Consumption_Gold', 0)
+            'Net_Food': int(quartier_number * citizen_config.get('Production_Food', 0) + quartier_number * citizen_config.get('Consumption_Food', 0)),
+            'Net_Gold': int(quartier_number * citizen_config.get('Production_Gold', 0) + quartier_number * citizen_config.get('Consumption_Gold', 0))
     }
 
 def get_net_production_from_per_quartier_type(net_production_per_quartier_type):
     return {
-            'Net_Food': sum(net_quartier.get('Net_Food') for net_quartier in net_production_per_quartier_type.values()),
-            'Net_Gold': sum(net_quartier.get('Net_Gold') for net_quartier in net_production_per_quartier_type.values())
+            'Net_Food': int(sum(net_quartier.get('Net_Food') for net_quartier in net_production_per_quartier_type.values())),
+            'Net_Gold': int(sum(net_quartier.get('Net_Gold') for net_quartier in net_production_per_quartier_type.values()))
     }
 
 

@@ -353,15 +353,144 @@ caption {
     border-color: #ba4a00;
 }
 
-.adventure-stats {
-    display: inline-flex;
-    gap: 15px;
-    background: rgba(0, 0, 0, 0.3);
-    padding: 2px 10px;
-    border-radius: 4px;
-    margin-left: 10px;
-    align-items: center;
+/* Adventure Sidebar */
+.adventure-sidebar {
+    width: 300px;
+    background: #2c3e50;
+    color: white;
+    box-shadow: -2px 0 5px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    z-index: 1000;
+    transition: transform 0.3s ease;
+    border-left: 1px solid #34495e;
 }
+
+.adventure-sidebar.hidden {
+    display: none;
+}
+
+.sidebar-header {
+    padding: 15px;
+    background: #34495e;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-bottom: 2px solid #2c3e50;
+}
+
+.sidebar-controls {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+}
+
+.adventure-btn {
+    flex: 1;
+    padding: 8px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    color: white;
+    transition: background-color 0.2s;
+    font-size: 0.9rem;
+}
+
+.start-btn {
+    background-color: #27ae60;
+}
+
+.start-btn:hover {
+    background-color: #2ecc71;
+}
+
+.pause-btn {
+    background-color: #c0392b;
+}
+
+.pause-btn:hover {
+    background-color: #e74c3c;
+}
+
+.stats-panel {
+    padding: 15px;
+    background: #2c3e50;
+}
+
+.stats-panel h3 {
+    margin-top: 0;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    color: #95a5a6;
+    border-bottom: 1px solid #34495e;
+    padding-bottom: 5px;
+    margin-bottom: 10px;
+}
+
+.stat-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+    font-size: 1rem;
+}
+
+.stat-row .icon {
+    width: 24px;
+    margin-right: 10px;
+}
+
+.stat-row .label {
+    flex-grow: 1;
+    color: #bdc3c7;
+}
+
+.stat-row .value {
+    font-weight: bold;
+    color: #fff;
+}
+
+.log-panel {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 15px;
+    background: #2c3e50;
+    border-top: 1px solid #34495e;
+    overflow: hidden;
+}
+
+.log-panel h3 {
+    margin-top: 0;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    color: #95a5a6;
+    margin-bottom: 10px;
+}
+
+.adventure-log {
+    flex-grow: 1;
+    background: #34495e;
+    border-radius: 4px;
+    padding: 10px;
+    overflow-y: auto;
+    font-family: 'Consolas', 'Monaco', monospace;
+    font-size: 0.85rem;
+    color: #ecf0f1;
+    border: 1px solid #2c3e50;
+}
+
+.log-entry {
+    margin-bottom: 6px;
+    line-height: 1.4;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding-bottom: 4px;
+}
+
+.log-entry:last-child {
+    border-bottom: none;
+}
+
 
 /* Modal Overlay Backdrop */
 .modal-overlay {
@@ -374,6 +503,90 @@ caption {
     z-index: 9998;
     display: none;
     animation: fadeIn 0.2s ease-out;
+}
+
+/* Adventure Modal (Game Over / Options) */
+.adventure-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    /* Lighter overlay */
+    z-index: 10000;
+    display: none;
+    animation: fadeIn 0.5s ease-out;
+    display: flex;
+    /* Centering */
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(2px);
+}
+
+.adventure-modal .modal-content {
+    background: #fdfbf7;
+    /* Parchment-like off-white */
+    color: #2c3e50;
+    /* Dark text */
+    padding: 30px;
+    border-radius: 8px;
+    width: 450px;
+    max-width: 90%;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    /* Soft shadow */
+    text-align: center;
+    position: relative;
+    border: 2px solid #bdc3c7;
+    /* Subtle border */
+    font-family: 'Cinzel', serif;
+    /* Thematic font */
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.adventure-modal h2 {
+    font-size: 2.5em;
+    margin: 0 0 10px 0;
+    color: #c0392b;
+    /* Keep red for emphasis but less aggressive */
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    /* Removed text-shadow */
+}
+
+.adventure-modal p {
+    font-family: 'Segoe UI', serif;
+    font-size: 1.1em;
+    line-height: 1.5;
+    color: #7f8c8d;
+    /* Softer grey text */
+    margin: 0 0 20px 0;
+}
+
+.adventure-modal .actions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+}
+
+.adventure-modal button {
+    padding: 1rem;
+    font-size: 1.2rem;
+    font-family: 'Cinzel', serif;
+    font-weight: bold;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.adventure-modal button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 /* Burg Popup Card */
@@ -551,4 +764,54 @@ caption {
 /* Diplomacy Pulse Animation */
 .diplomacy-ring {
     filter: drop-shadow(0 0 4px #4169E1);
+}
+
+/* Adventure Options Modal Styles */
+.options-popup {
+    display: block;
+    width: 600px;
+    max-width: 90%;
+    border: 2px solid #2c3e50;
+    padding: 30px;
+}
+
+.options-container {
+    display: flex;
+    gap: 30px;
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.options-column {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.options-column h3 {
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 10px;
+    margin-top: 0;
+    color: #34495e;
+}
+
+.option-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1rem;
+    color: #2c3e50;
+    cursor: pointer;
+}
+
+.option-item input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+.option-item:hover {
+    background-color: #f8f9fa;
+    border-radius: 4px;
 }

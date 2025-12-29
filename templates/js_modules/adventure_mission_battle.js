@@ -179,6 +179,14 @@ const MissionBattle = {
 
             AdventureManager.showFeedback(`VICTORY! Gained ${goldReward} Gold & ${soldierReward} Soldiers.`);
 
+            // Floating Text (Win)
+            const cell = graphData[AdventureManager.party.cell];
+            if (cell) {
+                AdventureManager.showFloatingText(`VICTORY!`, cell.p[0], cell.p[1] - 60, "#2ecc71");
+                AdventureManager.showFloatingText(`+${goldReward} 💰`, cell.p[0], cell.p[1] - 40, "#f1c40f");
+                AdventureManager.showFloatingText(`+${soldierReward} ⚔️`, cell.p[0], cell.p[1] - 20, "#9b59b6");
+            }
+
             AdventureManager.closePopup();
             this.spawn(); // Respawn
             AdventureManager.updateStats();
@@ -186,10 +194,18 @@ const MissionBattle = {
             // LOSE
             // Retain half of starting army, round down to nearest 5, min 5
             const retained = Math.max(5, Math.floor((mySoldiers / 2) / 5) * 5);
+            const lost = mySoldiers - retained;
             AdventureManager.party.soldiers = retained;
 
             AdventureManager.updateStats();
             AdventureManager.closePopup();
+
+            // Floating Text (Loss)
+            const cell = graphData[AdventureManager.party.cell];
+            if (cell) {
+                AdventureManager.showFloatingText(`DEFEAT!`, cell.p[0], cell.p[1] - 40, "#e74c3c");
+                if (lost > 0) AdventureManager.showFloatingText(`-${lost} ⚔️`, cell.p[0], cell.p[1] - 20, "#e74c3c");
+            }
 
             // Damage enemy
             const damage = mySoldiers;

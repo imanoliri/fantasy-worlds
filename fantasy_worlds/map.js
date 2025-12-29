@@ -622,6 +622,13 @@ const MissionTreasure = {
             AdventureManager.party.gold += this.data.amount;
             AdventureManager.showFeedback(`Mined ${this.data.amount} Gold! Used ${cost} Tools.`);
 
+            // Floating Text
+            const cell = graphData[AdventureManager.party.cell];
+            if (cell) {
+                AdventureManager.showFloatingText(`-${cost} 🛠️`, cell.p[0], cell.p[1] - 20, "#e74c3c");
+                AdventureManager.showFloatingText(`+${this.data.amount} 💰`, cell.p[0], cell.p[1] - 40, "#f1c40f");
+            }
+
             AdventureManager.closePopup();
             this.spawn(); // Respawn
             AdventureManager.updateStats();
@@ -815,6 +822,14 @@ const MissionBattle = {
 
             AdventureManager.showFeedback(`VICTORY! Gained ${goldReward} Gold & ${soldierReward} Soldiers.`);
 
+            // Floating Text (Win)
+            const cell = graphData[AdventureManager.party.cell];
+            if (cell) {
+                AdventureManager.showFloatingText(`VICTORY!`, cell.p[0], cell.p[1] - 60, "#2ecc71");
+                AdventureManager.showFloatingText(`+${goldReward} 💰`, cell.p[0], cell.p[1] - 40, "#f1c40f");
+                AdventureManager.showFloatingText(`+${soldierReward} ⚔️`, cell.p[0], cell.p[1] - 20, "#9b59b6");
+            }
+
             AdventureManager.closePopup();
             this.spawn(); // Respawn
             AdventureManager.updateStats();
@@ -822,10 +837,18 @@ const MissionBattle = {
             // LOSE
             // Retain half of starting army, round down to nearest 5, min 5
             const retained = Math.max(5, Math.floor((mySoldiers / 2) / 5) * 5);
+            const lost = mySoldiers - retained;
             AdventureManager.party.soldiers = retained;
 
             AdventureManager.updateStats();
             AdventureManager.closePopup();
+
+            // Floating Text (Loss)
+            const cell = graphData[AdventureManager.party.cell];
+            if (cell) {
+                AdventureManager.showFloatingText(`DEFEAT!`, cell.p[0], cell.p[1] - 40, "#e74c3c");
+                if (lost > 0) AdventureManager.showFloatingText(`-${lost} ⚔️`, cell.p[0], cell.p[1] - 20, "#e74c3c");
+            }
 
             // Damage enemy
             const damage = mySoldiers;
@@ -998,10 +1021,21 @@ const MissionHunt = {
             // WIN
             // Gain 1 gold for each 5 strength of the beast, rounding up.
             const goldReward = Math.ceil(beastStrength / 5);
+            // Food reward equal to beast strength
+            const foodReward = beastStrength;
 
             AdventureManager.party.gold += goldReward;
+            AdventureManager.party.food += foodReward;
 
-            AdventureManager.showFeedback(`SLAIN! Gained ${goldReward} Gold.`);
+            AdventureManager.showFeedback(`SLAIN! Gained ${goldReward} Gold & ${foodReward} Food.`);
+
+            // Floating Text (Win)
+            const cell = graphData[AdventureManager.party.cell];
+            if (cell) {
+                AdventureManager.showFloatingText(`VICTORY!`, cell.p[0], cell.p[1] - 60, "#2ecc71");
+                AdventureManager.showFloatingText(`+${goldReward} 💰`, cell.p[0], cell.p[1] - 40, "#f1c40f");
+                AdventureManager.showFloatingText(`+${foodReward} 🍎`, cell.p[0], cell.p[1] - 20, "#2ecc71");
+            }
 
             AdventureManager.closePopup();
             this.spawn(); // Respawn
@@ -1010,15 +1044,25 @@ const MissionHunt = {
             // LOSE
             AdventureManager.showFeedback("DEFEAT! The beast was too strong.");
 
+            // Lose 5 soldiers (or max available)
+            const loss = Math.min(AdventureManager.party.soldiers, 5);
+
             // Damage beast by half of nr of soldiers
             const damage = Math.floor(mySoldiers / 2);
             this.data.strength = Math.max(0, this.data.strength - damage);
 
-            // Lose 5 soldiers
-            AdventureManager.party.soldiers = Math.max(0, AdventureManager.party.soldiers - 5);
+            // Lose soldiers
+            AdventureManager.party.soldiers -= loss;
 
             AdventureManager.updateStats();
             AdventureManager.closePopup();
+
+            // Floating Text (Loss)
+            const cell = graphData[AdventureManager.party.cell];
+            if (cell) {
+                AdventureManager.showFloatingText(`DEFEAT!`, cell.p[0], cell.p[1] - 40, "#e74c3c");
+                if (loss > 0) AdventureManager.showFloatingText(`-${loss} ⚔️`, cell.p[0], cell.p[1] - 20, "#e74c3c");
+            }
 
             // Check if beast died from damage
             if (this.data.strength <= 0) {
@@ -1249,6 +1293,14 @@ const MissionSiege = {
 
             AdventureManager.showFeedback(`SIEGE BROKEN! Hero of the city! +${goldReward} Gold.`);
 
+            // Floating Text (Win)
+            const cell = graphData[AdventureManager.party.cell];
+            if (cell) {
+                AdventureManager.showFloatingText(`SIEGE BROKEN!`, cell.p[0], cell.p[1] - 60, "#2ecc71");
+                AdventureManager.showFloatingText(`+${goldReward} 💰`, cell.p[0], cell.p[1] - 40, "#f1c40f");
+                AdventureManager.showFloatingText(`+${soldierReward} ⚔️`, cell.p[0], cell.p[1] - 20, "#9b59b6");
+            }
+
             AdventureManager.closePopup();
             this.data = null;
             this.updateVisuals();
@@ -1259,10 +1311,18 @@ const MissionSiege = {
         } else {
             // LOSE
             const retained = Math.max(5, Math.floor((mySoldiers / 2) / 5) * 5);
+            const lost = mySoldiers - retained;
             AdventureManager.party.soldiers = retained;
 
             AdventureManager.updateStats();
             AdventureManager.closePopup();
+
+            // Floating Text (Loss)
+            const cell = graphData[AdventureManager.party.cell];
+            if (cell) {
+                AdventureManager.showFloatingText(`DEFEAT!`, cell.p[0], cell.p[1] - 40, "#e74c3c");
+                if (lost > 0) AdventureManager.showFloatingText(`-${lost} ⚔️`, cell.p[0], cell.p[1] - 20, "#e74c3c");
+            }
 
             // Damage enemy
             const damage = mySoldiers;
@@ -1316,7 +1376,8 @@ const MissionDiplomacy = {
         // Take top 3 unique IDs
         this.targets = capitals.slice(0, 3).map(b => b.id);
         this.solvedCount = 0;
-        AdventureManager.showFeedback("Diplomatic Tour Started! Visit 3 Capitals (Blue Rings).");
+        const targetNames = capitals.slice(0, 3).map(b => b.name).join(", ");
+        AdventureManager.showFeedback(`Diplomatic Tour Started! Visit 3 Capitals with Blue Rings: ${targetNames}.`);
         this.updateVisuals();
     },
 
@@ -1366,16 +1427,33 @@ const MissionDiplomacy = {
             this.updateVisuals(); // Update rings
             AdventureManager.closePopup();
 
+            // Floating Text (Cost & Success)
+            const cell = graphData[AdventureManager.party.cell];
+            if (cell) {
+                AdventureManager.showFloatingText(`MISSION SUCCESS!`, cell.p[0], cell.p[1] - 40, "#2ecc71");
+                AdventureManager.showFloatingText(`-5 💰`, cell.p[0], cell.p[1] - 20, "#e74c3c");
+            }
+
             if (this.solvedCount >= 3) {
                 AdventureManager.party.gold += 35;
                 AdventureManager.showFeedback("Diplomatic Tour Complete! +35 Gold. Starting new tour...");
                 AdventureManager.updateStats();
+
+                if (cell) {
+                    AdventureManager.showFloatingText(`TOUR COMPLETE!`, cell.p[0], cell.p[1] - 60, "#2ecc71");
+                    AdventureManager.showFloatingText(`+35 💰`, cell.p[0], cell.p[1] - 40, "#f1c40f");
+                }
+
                 setTimeout(() => this.startTour(), 2000);
             } else {
                 AdventureManager.showFeedback(`Diplomatic Mission Successful! (${this.solvedCount}/3)`);
             }
         } else {
             AdventureManager.showFeedback("Not enough gold (Need 5 💰)!");
+            const cell = graphData[AdventureManager.party.cell];
+            if (cell) {
+                AdventureManager.showFloatingText(`NEED 5 💰`, cell.p[0], cell.p[1] - 20, "#e74c3c");
+            }
         }
     }
 };
@@ -1502,6 +1580,14 @@ const MissionExplore = {
         // Found a location!
         AdventureManager.party.gold += 5;
         AdventureManager.showFeedback("Location Discovered! +5 Gold 🔍");
+
+        // Floating Text
+        const cell = graphData[AdventureManager.party.cell];
+        if (cell) {
+            AdventureManager.showFloatingText(`FOUND!`, cell.p[0], cell.p[1] - 40, "#9b59b6");
+            AdventureManager.showFloatingText(`+5 💰`, cell.p[0], cell.p[1] - 20, "#f1c40f");
+        }
+
         this.spawnLocation(index); // Respawn immediately
         AdventureManager.updateStats();
         this.updateVisuals(); // Update to remove old, show new
@@ -1531,6 +1617,14 @@ const AdventureManager = {
     isMoving: false,
     movementId: 0,
     knownBurgs: {},
+    options: {
+        Treasure: true,
+        Hunt: true,
+        Battle: true,
+        Siege: true,
+        Diplomacy: true,
+        Explore: true
+    },
 
     accessibleCells: [], // Cache for valid land cells
     portDockingCells: {}, // Map of Port Cell ID -> Valid Water Cell ID
@@ -1552,18 +1646,24 @@ const AdventureManager = {
         MissionExplore.init();
 
 
-        // Create party element (circle)
-        const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-        circle.setAttribute("r", "6");
-        circle.setAttribute("fill", "#e67e22"); // Pumpkin color
-        circle.setAttribute("stroke", "#2c3e50");
-        circle.setAttribute("stroke-width", "2");
-        circle.setAttribute("pointer-events", "none");
-        circle.setAttribute("id", "partyMarker");
-        circle.style.zIndex = "100";
-        circle.style.transition = "cx 0.2s linear, cy 0.2s linear";
-        circle.style.display = "none";
-        this.partyElement = circle;
+        // Create party element (Group with Circle + Text)
+        const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        group.setAttribute("id", "partyMarker");
+        group.style.zIndex = "100";
+        group.style.transition = "transform 0.2s linear";
+        group.style.display = "none";
+        group.style.pointerEvents = "none";
+
+        // Background Circle
+        const bgCircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        bgCircle.setAttribute("r", "10");
+        bgCircle.setAttribute("fill", "#e67e22"); // Pumpkin default
+        bgCircle.setAttribute("stroke", "#2c3e50");
+        bgCircle.setAttribute("stroke-width", "2");
+        group.appendChild(bgCircle);
+
+        this.partyElement = group;
+        this.partyBg = bgCircle;
 
 
         // Create path element (polyline)
@@ -1592,7 +1692,7 @@ const AdventureManager = {
         const svg = document.getElementById('mapSvg');
         svg.appendChild(previewLine);
         svg.appendChild(pathLine);
-        svg.appendChild(circle); // Append circle after to be on top
+        svg.appendChild(group); // Append party marker group after to be on top
     },
 
     calculateDockingPoints() {
@@ -1671,30 +1771,37 @@ const AdventureManager = {
     toggle() {
         this.active = !this.active;
         const btn = document.getElementById('toggleAdventure');
-        const stats = document.getElementById('adventureStats');
+        const sidebar = document.getElementById('adventureSidebar');
 
         if (this.active) {
             btn.classList.add('active');
-            stats.style.display = 'inline-flex';
+            if (sidebar) {
+                sidebar.classList.remove('hidden');
+            }
             this.init(); // Ensure element exists
             if (this.party.cell === 0) {
                 this.start();
             } else {
                 this.partyElement.style.display = "block";
 
-                // Toggle Missions
-                MissionDiplomacy.toggle(true);
-                MissionSiege.toggle(true);
-                MissionBattle.toggle(true);
-                MissionHunt.toggle(true);
-                MissionTreasure.toggle(true);
-                MissionExplore.toggle(true);
+                // Toggle Missions based on Options
+                if (this.options.Diplomacy) MissionDiplomacy.toggle(true);
+                if (this.options.Siege) MissionSiege.toggle(true);
+                if (this.options.Battle) MissionBattle.toggle(true);
+                if (this.options.Hunt) MissionHunt.toggle(true);
+                if (this.options.Treasure) MissionTreasure.toggle(true);
+                if (this.options.Explore) MissionExplore.toggle(true);
 
                 this.render();
             }
         } else {
+            this.movementId++; // Cancel any ongoing movement
+            this.isMoving = false;
             btn.classList.remove('active');
-            stats.style.display = 'none';
+            const sidebar = document.getElementById('adventureSidebar');
+            if (sidebar) {
+                sidebar.classList.add('hidden');
+            }
             if (this.partyElement) this.partyElement.style.display = 'none';
 
             // Toggle Missions
@@ -1704,10 +1811,17 @@ const AdventureManager = {
             MissionHunt.toggle(false);
             MissionTreasure.toggle(false);
             MissionExplore.toggle(false);
+
+            if (this.pathElement) this.pathElement.style.display = 'none';
+            if (this.previewPathElement) this.previewPathElement.style.display = 'none';
         }
     },
 
     start() {
+        // Clear Adventure Log
+        const logContainer = document.getElementById('adventureLog');
+        if (logContainer) logContainer.innerHTML = '';
+
         // Pick random start cell from ACCESSIBLE cells
         let startCell = -1;
 
@@ -1732,16 +1846,22 @@ const AdventureManager = {
             this.party.onShip = false;
             this.partyElement.style.display = "block";
 
-            // Spawn Missions
-            MissionTreasure.spawn();
-            MissionBattle.spawn();
-            MissionHunt.spawn();
-            MissionDiplomacy.spawn();
-            MissionSiege.spawn();
-            MissionExplore.spawn();
+            // Spawn Missions based on Options
+            if (this.options.Treasure) MissionTreasure.spawn();
+            if (this.options.Battle) MissionBattle.spawn();
+            if (this.options.Hunt) MissionHunt.spawn();
+            if (this.options.Diplomacy) MissionDiplomacy.spawn();
+            if (this.options.Siege) MissionSiege.spawn();
+            if (this.options.Explore) MissionExplore.spawn();
 
             this.updateStats();
             this.render();
+
+            // Trigger Start Ping
+            const startNode = graphData[startCell];
+            if (startNode) {
+                this.showLocationPing(startNode.p[0], startNode.p[1]);
+            }
 
             // Initial message
             this.showFeedback("Adventure started! Click to move.");
@@ -1781,6 +1901,7 @@ const AdventureManager = {
 
     handleRightClick(target) {
         if (!this.active) return;
+        if (this.isMoving) return;
 
         const cellId = this.getTargetCellId(target);
         if (cellId !== null) {
@@ -1923,6 +2044,9 @@ const AdventureManager = {
     handleMissionClick(mission, index = null) {
         if (!this.active) return;
 
+        this.drawPreviewPath([]);
+        this.movementId++;
+
         let targetCell = null;
         if (index !== null) {
             targetCell = mission.getTargetCell(index);
@@ -1957,6 +2081,7 @@ const AdventureManager = {
     async moveAlongPath(path) {
         this.isMoving = true;
         const currentId = this.movementId;
+        const startedWithFood = this.party.food > 0;
 
         for (let nextCell of path) {
             if (this.movementId !== currentId) {
@@ -1964,16 +2089,35 @@ const AdventureManager = {
             }
 
             if (!this.party.onShip) {
-                if (this.party.food <= 0) {
-                    this.showFeedback("Out of food! Party is starving.");
-                    this.party.soldiers = Math.max(0, this.party.soldiers - 1);
-                    if (this.party.soldiers === 0) {
-                        this.showFeedback("Game Over! All soldiers died.");
+                if (this.party.food > 0) {
+                    this.party.food--;
+                    // Floating text for food consumption
+                    const cellData = graphData[this.party.cell];
+                    if (cellData) this.showFloatingText("-1 🍎", cellData.p[0], cellData.p[1], "#e74c3c");
+                } else {
+                    // Starving
+                    if (startedWithFood) {
+                        this.showFeedback("Out of food! Travel interrupted.");
                         this.isMoving = false;
                         return;
                     }
+
+                    // Penalty for moving while starving
+                    this.showFeedback("Party is starving! Soldiers dying...");
+                    this.party.soldiers = Math.max(0, this.party.soldiers - 1);
+
+                    const cellData = graphData[this.party.cell];
+                    if (cellData) {
+                        this.showFloatingText("-1 ⚔️", cellData.p[0], cellData.p[1], "#e74c3c");
+                    }
+
+                    if (this.party.soldiers === 0) {
+                        this.showFeedback("Game Over! All soldiers died.");
+                        this.isMoving = false;
+                        this.updateStats();
+                        return;
+                    }
                 }
-                this.party.food--;
             }
 
             this.party.cell = nextCell;
@@ -2061,10 +2205,17 @@ const AdventureManager = {
         const netFood = parseFloat(burg.net_food);
 
         if (netFood > 0) {
-            const surplusCap = Math.floor(netFood * 10);
+            const surplusCap = Math.floor(netFood);
             if (this.party.food < surplusCap) {
+                const gained = surplusCap - this.party.food;
                 this.party.food = surplusCap;
                 notificationHtml = `<div class="notification">Abundant food! Supplies reset to ${surplusCap}.</div>`;
+
+                const burgCell = graphData[burg.cell_id]; // Need coordinates
+                if (burgCell) {
+                    this.showFloatingText(`+${gained} 🍎`, burgCell.p[0], burgCell.p[1], "#2ecc71"); // Green for gain
+                }
+
                 this.updateStats();
             }
         }
@@ -2107,7 +2258,7 @@ const AdventureManager = {
                 <div class="info">
                     Type: ${burg.type}<br>
                     Pop: ${burg.population_fmt}<br>
-                    Food Surplus: ${parseFloat(burg.net_food).toFixed(2)}<br>
+                    Food Surplus: ${Math.floor(parseFloat(burg.net_food))}<br>
                     ${craftsmanQuartiers > 0 ? `Craftsman Quartiers: ${craftsmanQuartiers}<br>` : ''}
                     ${soldierQuartiers > 0 ? `Soldier Quartiers: ${soldierQuartiers}<br>` : ''}
                 </div>
@@ -2133,6 +2284,13 @@ const AdventureManager = {
             this.party.onShip = true;
             this.updateStats();
             this.showFeedback("Ship rented! Water travel enabled ⛵");
+
+            const cell = graphData[this.party.cell];
+            if (cell) {
+                this.showFloatingText(`-${cost} 💰`, cell.p[0], cell.p[1], "#e74c3c");
+                this.showFloatingText(`+Ship ⛵`, cell.p[0], cell.p[1] - 20, "#3498db");
+            }
+
             this.closePopup();
             this.render();
         } else {
@@ -2152,7 +2310,12 @@ const AdventureManager = {
             this.party.gold -= cost;
             this.party.food += amount;
             this.updateStats();
-            this.showFeedback(`Bought ${amount} food!`);
+
+            const cell = graphData[this.party.cell];
+            if (cell) {
+                this.showFloatingText(`-${cost} 💰`, cell.p[0], cell.p[1], "#e74c3c");
+                this.showFloatingText(`+${amount} 🍎`, cell.p[0], cell.p[1] - 20, "#2ecc71");
+            }
         } else {
             this.showFeedback("Not enough gold!");
         }
@@ -2163,7 +2326,12 @@ const AdventureManager = {
             this.party.gold -= cost;
             this.party.tools += amount;
             this.updateStats();
-            this.showFeedback(`Bought ${amount} tools!`);
+
+            const cell = graphData[this.party.cell];
+            if (cell) {
+                this.showFloatingText(`-${cost} 💰`, cell.p[0], cell.p[1], "#e74c3c");
+                this.showFloatingText(`+${amount} 🛠️`, cell.p[0], cell.p[1] - 20, "#f1c40f");
+            }
         } else {
             this.showFeedback("Not enough gold!");
         }
@@ -2191,7 +2359,13 @@ const AdventureManager = {
             this.party.soldiers += amount;
 
             this.updateStats();
-            this.showFeedback(`Recruited ${amount} soldiers!`);
+
+            const cell = graphData[this.party.cell];
+            if (cell) {
+                this.showFloatingText(`-${cost} 💰`, cell.p[0], cell.p[1], "#e74c3c");
+                this.showFloatingText(`-${toolsCost} 🛠️`, cell.p[0], cell.p[1] - 20, "#e74c3c");
+                this.showFloatingText(`+${amount} ⚔️`, cell.p[0], cell.p[1] - 40, "#9b59b6");
+            }
         } else {
             if (this.party.gold < cost) {
                 this.showFeedback("Not enough gold!");
@@ -2204,22 +2378,21 @@ const AdventureManager = {
     render() {
         const cell = graphData[this.party.cell];
         if (cell && this.partyElement) {
-            this.partyElement.setAttribute('cx', cell.p[0]);
-            this.partyElement.setAttribute('cy', cell.p[1]);
+            this.partyElement.setAttribute('transform', `translate(${cell.p[0]}, ${cell.p[1]})`);
 
             if (this.party.onShip) {
-                this.partyElement.setAttribute('fill', '#2980b9'); // Blue
+                if (this.partyBg) this.partyBg.setAttribute('fill', '#2980b9'); // Blue
             } else {
-                this.partyElement.setAttribute('fill', '#e67e22'); // Pumpkin
+                if (this.partyBg) this.partyBg.setAttribute('fill', '#e67e22'); // Pumpkin
             }
         }
 
-        MissionTreasure.updateVisuals();
-        MissionBattle.updateVisuals();
-        MissionHunt.updateVisuals();
-        MissionSiege.updateVisuals();
-        MissionDiplomacy.updateVisuals();
-        MissionExplore.updateVisuals();
+        if (this.options.Treasure) MissionTreasure.updateVisuals();
+        if (this.options.Battle) MissionBattle.updateVisuals();
+        if (this.options.Hunt) MissionHunt.updateVisuals();
+        if (this.options.Siege) MissionSiege.updateVisuals();
+        if (this.options.Diplomacy) MissionDiplomacy.updateVisuals();
+        if (this.options.Explore) MissionExplore.updateVisuals();
     },
 
     updateStats() {
@@ -2227,15 +2400,50 @@ const AdventureManager = {
         if (document.getElementById('advFood')) document.getElementById('advFood').textContent = this.party.food;
         if (document.getElementById('advGold')) document.getElementById('advGold').textContent = this.party.gold;
         if (document.getElementById('advTools')) document.getElementById('advTools').textContent = this.party.tools;
+
+        // Game Over Check
+        if (this.party.soldiers <= 0 && this.active) {
+            this.showFeedback("GAME OVER! All soldiers are dead.");
+            // Prevent further updates/clicks
+            const modal = document.getElementById('gameOverModal');
+            if (modal) {
+                modal.style.display = 'flex';
+                this.isGameOver = true; // Flag to prevent movement
+            }
+        }
+    },
+
+    closeGameOver() {
+        const modal = document.getElementById('gameOverModal');
+        if (modal) modal.style.display = 'none';
+        // User wants to look around, so we don't toggle() or reset.
+        // isGameOver remains true, blocking movement.
+    },
+
+    restartGame() {
+        const modal = document.getElementById('gameOverModal');
+        if (modal) modal.style.display = 'none';
+        this.isGameOver = false;
+
+        // Reset and Start New
+        if (this.active) this.toggle(); // Turn off first if on
+        this.toggle(); // Turn on
+        this.start(); // Start new
     },
 
     showFeedback(msg) {
-        const t = document.getElementById('tooltip');
-        t.innerHTML = msg;
-        t.style.display = 'block';
-        t.style.left = window.innerWidth / 2 + 'px';
-        t.style.top = '100px';
-        setTimeout(() => t.style.display = 'none', 2000);
+        // Log to sidebar instead of tooltip
+        const log = document.getElementById('adventureLog');
+        if (log) {
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            entry.textContent = msg;
+            log.appendChild(entry);
+            log.scrollTop = log.scrollHeight; // Auto scroll
+        } else {
+            // Fallback
+            console.log(msg);
+        }
     },
 
     drawPath(path) {
@@ -2270,6 +2478,123 @@ const AdventureManager = {
 
         this.previewPathElement.setAttribute("points", points);
         this.previewPathElement.style.display = "block";
+    },
+
+    toggleOptions() {
+        const modal = document.getElementById('adventureOptionsModal');
+        if (modal.style.display === 'block') {
+            modal.style.display = 'none';
+        } else {
+            modal.style.display = 'block';
+        }
+    },
+
+    toggleMissionOption(type, enabled) {
+        if (this.options.hasOwnProperty(type)) {
+            this.options[type] = enabled;
+            this.showFeedback(`${type} missions ${enabled ? 'enabled' : 'disabled'}`);
+
+            // Live update for active adventure
+            if (this.active) {
+                const missionMap = {
+                    'Treasure': MissionTreasure,
+                    'Battle': MissionBattle,
+                    'Hunt': MissionHunt,
+                    'Diplomacy': MissionDiplomacy,
+                    'Siege': MissionSiege,
+                    'Explore': MissionExplore
+                };
+
+                const mission = missionMap[type];
+                if (mission) {
+                    if (enabled) {
+                        mission.init();
+                        mission.spawn(); // Try to spawn immediately
+                        mission.toggle(true);
+                    } else {
+                        mission.toggle(false); // Hide visuals
+                        // We might want to clear data too, but hiding is safer for now
+                    }
+                    this.render();
+                }
+            }
+        }
+    },
+
+    showLocationPing(x, y) {
+        const svg = document.getElementById('mapSvg');
+        if (!svg) return;
+
+        const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        circle.setAttribute("cx", x);
+        circle.setAttribute("cy", y);
+        circle.setAttribute("r", "120"); // Start Big
+        circle.setAttribute("fill", "none");
+        circle.setAttribute("stroke", "#e74c3c"); // Alizarin Red
+        circle.setAttribute("stroke-width", "1");
+        circle.style.pointerEvents = "none";
+        circle.style.opacity = "0"; // Start invisible
+        circle.style.transition = "all 2.0s ease-out"; // Slower (2.5s)
+        circle.style.zIndex = "200";
+
+        svg.appendChild(circle);
+
+        // Trigger animation in next frame
+        requestAnimationFrame(() => {
+            circle.setAttribute("r", "15"); // End Small (Pinpoint)
+            circle.style.opacity = "1";   // Fade In
+            circle.style.strokeWidth = "5"; // Thicker stroke
+        });
+
+        // Cleanup after animation + delay
+        setTimeout(() => {
+            circle.style.transition = "opacity 0.5s ease-out";
+            circle.style.opacity = "0";
+
+            setTimeout(() => {
+                if (circle.parentNode) {
+                    circle.parentNode.removeChild(circle);
+                }
+            }, 500);
+
+        }, 2000); // Wait for main animation (2.5s)
+    },
+
+    showFloatingText(text, x, y, color = "#fff") {
+        const svg = document.getElementById('mapSvg');
+        if (!svg) return;
+
+        const textEl = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        textEl.setAttribute("x", x);
+        textEl.setAttribute("y", y);
+        textEl.setAttribute("text-anchor", "middle"); // Center
+        textEl.setAttribute("fill", color);
+        textEl.setAttribute("font-size", "14px");
+        textEl.setAttribute("font-weight", "bold");
+        textEl.setAttribute("stroke", "#000");
+        textEl.setAttribute("stroke-width", "0.5px"); // Outline for readability
+        textEl.style.pointerEvents = "none";
+        textEl.style.zIndex = "300"; // Topmost
+        textEl.textContent = text;
+
+        // Inline styles for animation
+        textEl.style.opacity = "1";
+        textEl.style.transition = "transform 2.5s ease-out, opacity 2.5s ease-out";
+
+        svg.appendChild(textEl);
+
+        // Animate
+        requestAnimationFrame(() => {
+            textEl.style.transform = `translateY(-30px)`; // Float up
+            textEl.style.opacity = "0"; // Fade out
+        });
+
+        // Cleanup
+        setTimeout(() => {
+            if (textEl.parentNode) {
+                textEl.parentNode.removeChild(textEl);
+            }
+        }, 2500);
     }
 };
 

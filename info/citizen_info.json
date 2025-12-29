@@ -11,9 +11,9 @@
       "Port": -10,
       "Shanty Town": 10
     },
-    "Consumption_Food": -1,
+    "Consumption_Food": -10,
     "Consumption_Gold": 0,
-    "Production_Food": 1.5,
+    "Production_Food": 15,
     "Production_Gold": 0
   },
   {
@@ -28,9 +28,9 @@
       "Naval": 15,
       "Port": 15
     },
-    "Consumption_Food": -1,
+    "Consumption_Food": -10,
     "Consumption_Gold": 0,
-    "Production_Food": 2,
+    "Production_Food": 20,
     "Production_Gold": 0
   },
   {
@@ -41,9 +41,9 @@
       "Hunting": 10
     },
     "Burg_Features_Frequency_Modifiers": {},
-    "Consumption_Food": -1,
+    "Consumption_Food": -10,
     "Consumption_Gold": 0,
-    "Production_Food": 1.5,
+    "Production_Food": 15,
     "Production_Gold": 0
   },
   {
@@ -58,10 +58,10 @@
       "Market": 5,
       "Church": 5
     },
-    "Consumption_Food": -1,
+    "Consumption_Food": -10,
     "Consumption_Gold": 0,
     "Production_Food": 0,
-    "Production_Gold": 0.5
+    "Production_Gold": 5
   },
   {
     "Citizen": "Tradesman",
@@ -72,10 +72,10 @@
       "Port": 10,
       "Market": 10
     },
-    "Consumption_Food": -1,
+    "Consumption_Food": -10,
     "Consumption_Gold": 0,
     "Production_Food": 0,
-    "Production_Gold": 1
+    "Production_Gold": 10
   },
   {
     "Citizen": "Churchman",
@@ -84,8 +84,8 @@
     "Burg_Features_Frequency_Modifiers": {
       "Church": 10
     },
-    "Consumption_Food": -1,
-    "Consumption_Gold": -1,
+    "Consumption_Food": -10,
+    "Consumption_Gold": -10,
     "Production_Food": 0,
     "Production_Gold": 0
   },
@@ -96,8 +96,8 @@
     "Burg_Features_Frequency_Modifiers": {
       "Capital": 10
     },
-    "Consumption_Food": -1,
-    "Consumption_Gold": -1,
+    "Consumption_Food": -10,
+    "Consumption_Gold": -10,
     "Production_Food": 0,
     "Production_Gold": 0
   },
@@ -108,8 +108,8 @@
     "Burg_Features_Frequency_Modifiers": {
       "Citadel": 10
     },
-    "Consumption_Food": -1,
-    "Consumption_Gold": -1,
+    "Consumption_Food": -10,
+    "Consumption_Gold": -10,
     "Production_Food": 0,
     "Production_Gold": 0
   }
