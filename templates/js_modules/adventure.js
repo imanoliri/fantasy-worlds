@@ -182,6 +182,8 @@ const AdventureManager = {
                 this.render();
             }
         } else {
+            this.movementId++; // Cancel any ongoing movement
+            this.isMoving = false;
             btn.classList.remove('active');
             const sidebar = document.getElementById('adventureSidebar');
             if (sidebar) {
@@ -196,6 +198,9 @@ const AdventureManager = {
             MissionHunt.toggle(false);
             MissionTreasure.toggle(false);
             MissionExplore.toggle(false);
+
+            if (this.pathElement) this.pathElement.style.display = 'none';
+            if (this.previewPathElement) this.previewPathElement.style.display = 'none';
         }
     },
 
