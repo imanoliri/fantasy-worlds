@@ -280,6 +280,11 @@ def generate_map(burgs, output_file, trades_data=None, map_name="Interactive Map
             'is_capital': is_capital
         })
 
+    # Sort burgs by radius descending (Largest first)
+    # This ensures that when iterating (drawing), large burgs are drawn first (background)
+    # and small burgs are drawn last (foreground/on top), preventing overlaps from blocking clicks.
+    burgs_draw_order = sorted(burgs_data, key=lambda x: x['r'], reverse=True)
+
     # 4. States Data for Table
     states_data = []
     culture_name_lookup = {}
@@ -331,6 +336,7 @@ def generate_map(burgs, output_file, trades_data=None, map_name="Interactive Map
         'background_paths': background_paths,
         'trade_routes': trade_routes,
         'burgs_data': burgs_data,
+        'burgs_draw_order': burgs_draw_order,
         'states_data': states_data,
         'burg_types': sorted_burg_types,
         'food_rows': food_rows,
