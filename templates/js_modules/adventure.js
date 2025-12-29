@@ -278,6 +278,7 @@ const AdventureManager = {
 
     handleRightClick(target) {
         if (!this.active) return;
+        if (this.isMoving) return;
 
         const cellId = this.getTargetCellId(target);
         if (cellId !== null) {
@@ -419,6 +420,9 @@ const AdventureManager = {
     // Generic Helper for Missions
     handleMissionClick(mission, index = null) {
         if (!this.active) return;
+
+        this.drawPreviewPath([]);
+        this.movementId++;
 
         let targetCell = null;
         if (index !== null) {

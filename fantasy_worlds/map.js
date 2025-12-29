@@ -1317,7 +1317,7 @@ const MissionDiplomacy = {
         this.targets = capitals.slice(0, 3).map(b => b.id);
         this.solvedCount = 0;
         const targetNames = capitals.slice(0, 3).map(b => b.name).join(", ");
-        AdventureManager.showFeedback(`Diplomatic Tour Started! Visit 3 Capitals (Blue Rings): ${targetNames}.`);
+        AdventureManager.showFeedback(`Diplomatic Tour Started! Visit 3 Capitals with Blue Rings: ${targetNames}.`);
         this.updateVisuals();
     },
 
@@ -1792,6 +1792,7 @@ const AdventureManager = {
 
     handleRightClick(target) {
         if (!this.active) return;
+        if (this.isMoving) return;
 
         const cellId = this.getTargetCellId(target);
         if (cellId !== null) {
@@ -1933,6 +1934,9 @@ const AdventureManager = {
     // Generic Helper for Missions
     handleMissionClick(mission, index = null) {
         if (!this.active) return;
+
+        this.drawPreviewPath([]);
+        this.movementId++;
 
         let targetCell = null;
         if (index !== null) {
