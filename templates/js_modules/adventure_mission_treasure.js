@@ -152,6 +152,13 @@ const MissionTreasure = {
             AdventureManager.party.gold += this.data.amount;
             AdventureManager.showFeedback(`Mined ${this.data.amount} Gold! Used ${cost} Tools.`);
 
+            // Floating Text
+            const cell = graphData[AdventureManager.party.cell];
+            if (cell) {
+                AdventureManager.showFloatingText(`-${cost} 🛠️`, cell.p[0], cell.p[1] - 20, "#e74c3c");
+                AdventureManager.showFloatingText(`+${this.data.amount} 💰`, cell.p[0], cell.p[1] - 40, "#f1c40f");
+            }
+
             AdventureManager.closePopup();
             this.spawn(); // Respawn
             AdventureManager.updateStats();

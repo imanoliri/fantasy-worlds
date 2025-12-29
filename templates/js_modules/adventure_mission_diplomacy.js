@@ -80,16 +80,33 @@ const MissionDiplomacy = {
             this.updateVisuals(); // Update rings
             AdventureManager.closePopup();
 
+            // Floating Text (Cost & Success)
+            const cell = graphData[AdventureManager.party.cell];
+            if (cell) {
+                AdventureManager.showFloatingText(`MISSION SUCCESS!`, cell.p[0], cell.p[1] - 40, "#2ecc71");
+                AdventureManager.showFloatingText(`-5 💰`, cell.p[0], cell.p[1] - 20, "#e74c3c");
+            }
+
             if (this.solvedCount >= 3) {
                 AdventureManager.party.gold += 35;
                 AdventureManager.showFeedback("Diplomatic Tour Complete! +35 Gold. Starting new tour...");
                 AdventureManager.updateStats();
+
+                if (cell) {
+                    AdventureManager.showFloatingText(`TOUR COMPLETE!`, cell.p[0], cell.p[1] - 60, "#2ecc71");
+                    AdventureManager.showFloatingText(`+35 💰`, cell.p[0], cell.p[1] - 40, "#f1c40f");
+                }
+
                 setTimeout(() => this.startTour(), 2000);
             } else {
                 AdventureManager.showFeedback(`Diplomatic Mission Successful! (${this.solvedCount}/3)`);
             }
         } else {
             AdventureManager.showFeedback("Not enough gold (Need 5 💰)!");
+            const cell = graphData[AdventureManager.party.cell];
+            if (cell) {
+                AdventureManager.showFloatingText(`NEED 5 💰`, cell.p[0], cell.p[1] - 20, "#e74c3c");
+            }
         }
     }
 };

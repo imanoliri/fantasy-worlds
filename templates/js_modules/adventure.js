@@ -495,6 +495,9 @@ const AdventureManager = {
                     }
                 }
                 this.party.food--;
+                // Floating text for food consumption
+                const cellData = graphData[this.party.cell];
+                this.showFloatingText("-1 🍎", cellData.p[0], cellData.p[1], "#e74c3c"); // Red for loss
             }
 
             this.party.cell = nextCell;
@@ -584,8 +587,15 @@ const AdventureManager = {
         if (netFood > 0) {
             const surplusCap = Math.floor(netFood);
             if (this.party.food < surplusCap) {
+                const gained = surplusCap - this.party.food;
                 this.party.food = surplusCap;
                 notificationHtml = `<div class="notification">Abundant food! Supplies reset to ${surplusCap}.</div>`;
+
+                const burgCell = graphData[burg.cell_id]; // Need coordinates
+                if (burgCell) {
+                    this.showFloatingText(`+${gained} 🍎`, burgCell.p[0], burgCell.p[1], "#2ecc71"); // Green for gain
+                }
+
                 this.updateStats();
             }
         }
@@ -654,6 +664,13 @@ const AdventureManager = {
             this.party.onShip = true;
             this.updateStats();
             this.showFeedback("Ship rented! Water travel enabled ⛵");
+
+            const cell = graphData[this.party.cell];
+            if (cell) {
+                this.showFloatingText(`-${cost} 💰`, cell.p[0], cell.p[1], "#e74c3c");
+                this.showFloatingText(`+Ship ⛵`, cell.p[0], cell.p[1] - 20, "#3498db");
+            }
+
             this.closePopup();
             this.render();
         } else {
@@ -673,6 +690,12 @@ const AdventureManager = {
             this.party.gold -= cost;
             this.party.food += amount;
             this.updateStats();
+
+            const cell = graphData[this.party.cell];
+            if (cell) {
+                this.showFloatingText(`-${cost} 💰`, cell.p[0], cell.p[1], "#e74c3c");
+                this.showFloatingText(`+${amount} 🍎`, cell.p[0], cell.p[1] - 20, "#2ecc71");
+            }
         } else {
             this.showFeedback("Not enough gold!");
         }
@@ -683,6 +706,12 @@ const AdventureManager = {
             this.party.gold -= cost;
             this.party.tools += amount;
             this.updateStats();
+
+            const cell = graphData[this.party.cell];
+            if (cell) {
+                this.showFloatingText(`-${cost} 💰`, cell.p[0], cell.p[1], "#e74c3c");
+                this.showFloatingText(`+${amount} 🛠️`, cell.p[0], cell.p[1] - 20, "#f1c40f");
+            }
         } else {
             this.showFeedback("Not enough gold!");
         }
@@ -710,6 +739,13 @@ const AdventureManager = {
             this.party.soldiers += amount;
 
             this.updateStats();
+
+            const cell = graphData[this.party.cell];
+            if (cell) {
+                this.showFloatingText(`-${cost} 💰`, cell.p[0], cell.p[1], "#e74c3c");
+                this.showFloatingText(`-${toolsCost} 🛠️`, cell.p[0], cell.p[1] - 20, "#e74c3c");
+                this.showFloatingText(`+${amount} ⚔️`, cell.p[0], cell.p[1] - 40, "#9b59b6");
+            }
         } else {
             if (this.party.gold < cost) {
                 this.showFeedback("Not enough gold!");
@@ -873,6 +909,43 @@ const AdventureManager = {
             }, 500);
 
         }, 2000); // Wait for main animation (2.5s)
+    },
+
+    showFloatingText(text, x, y, color = "#fff") {
+        const svg = document.getElementById('mapSvg');
+        if (!svg) return;
+
+        const textEl = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        textEl.setAttribute("x", x);
+        textEl.setAttribute("y", y);
+        textEl.setAttribute("text-anchor", "middle"); // Center
+        textEl.setAttribute("fill", color);
+        textEl.setAttribute("font-size", "14px");
+        textEl.setAttribute("font-weight", "bold");
+        textEl.setAttribute("stroke", "#000");
+        textEl.setAttribute("stroke-width", "0.5px"); // Outline for readability
+        textEl.style.pointerEvents = "none";
+        textEl.style.zIndex = "300"; // Topmost
+        textEl.textContent = text;
+
+        // Inline styles for animation
+        textEl.style.opacity = "1";
+        textEl.style.transition = "transform 2.5s ease-out, opacity 2.5s ease-out";
+
+        svg.appendChild(textEl);
+
+        // Animate
+        requestAnimationFrame(() => {
+            textEl.style.transform = `translateY(-30px)`; // Float up
+            textEl.style.opacity = "0"; // Fade out
+        });
+
+        // Cleanup
+        setTimeout(() => {
+            if (textEl.parentNode) {
+                textEl.parentNode.removeChild(textEl);
+            }
+        }, 2500);
     }
 };
 

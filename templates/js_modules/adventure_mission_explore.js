@@ -117,6 +117,14 @@ const MissionExplore = {
         // Found a location!
         AdventureManager.party.gold += 5;
         AdventureManager.showFeedback("Location Discovered! +5 Gold 🔍");
+
+        // Floating Text
+        const cell = graphData[AdventureManager.party.cell];
+        if (cell) {
+            AdventureManager.showFloatingText(`FOUND!`, cell.p[0], cell.p[1] - 40, "#9b59b6");
+            AdventureManager.showFloatingText(`+5 💰`, cell.p[0], cell.p[1] - 20, "#f1c40f");
+        }
+
         this.spawnLocation(index); // Respawn immediately
         AdventureManager.updateStats();
         this.updateVisuals(); // Update to remove old, show new
