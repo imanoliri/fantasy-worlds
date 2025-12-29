@@ -2110,6 +2110,7 @@ const AdventureManager = {
                     if (this.party.soldiers === 0) {
                         this.showFeedback("Game Over! All soldiers died.");
                         this.isMoving = false;
+                        this.updateStats();
                         return;
                     }
                 }
@@ -2395,6 +2396,36 @@ const AdventureManager = {
         if (document.getElementById('advFood')) document.getElementById('advFood').textContent = this.party.food;
         if (document.getElementById('advGold')) document.getElementById('advGold').textContent = this.party.gold;
         if (document.getElementById('advTools')) document.getElementById('advTools').textContent = this.party.tools;
+
+        // Game Over Check
+        if (this.party.soldiers <= 0 && this.active) {
+            this.showFeedback("GAME OVER! All soldiers are dead.");
+            // Prevent further updates/clicks
+            const modal = document.getElementById('gameOverModal');
+            if (modal) {
+                modal.style.display = 'flex';
+                this.isGameOver = true; // Flag to prevent movement
+            }
+        }
+    },
+
+    closeGameOver() {
+        const modal = document.getElementById('gameOverModal');
+        if (modal) modal.style.display = 'none';
+        this.toggle(); // Close adventure mode (this sets active = false)
+        this.isGameOver = false;
+        this.party.cell = 0;
+    },
+
+    restartGame() {
+        const modal = document.getElementById('gameOverModal');
+        if (modal) modal.style.display = 'none';
+        this.isGameOver = false;
+
+        // Reset and Start New
+        if (this.active) this.toggle(); // Turn off first if on
+        this.toggle(); // Turn on
+        this.start(); // Start new
     },
 
     showFeedback(msg) {

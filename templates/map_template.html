@@ -305,6 +305,22 @@
             </div>
         </div>
 
+        <!-- Game Over Modal -->
+        <div id="gameOverModal" class="adventure-modal"
+            style="display:none; justify-content:center; align-items:center;">
+            <div class="modal-content" style="max-width: 400px; text-align: center; border: 3px solid #e74c3c;">
+                <h2 style="color: #c0392b; font-family: 'Cinzel', serif; font-size: 2em; margin-bottom: 20px;">GAME OVER
+                </h2>
+                <p style="font-size: 1.2em; margin-bottom: 30px;">Your party has fallen. All soldiers are lost.</p>
+                <div class="actions" style="display: flex; gap: 10px; justify-content: center;">
+                    <button class="btn-leave" onclick="AdventureManager.closeGameOver()"
+                        style="background: #95a5a6;">Close & Look</button>
+                    <button class="btn-enter" onclick="AdventureManager.restartGame()"
+                        style="background: #27ae60;">Start New Adventure</button>
+                </div>
+            </div>
+        </div>
+
         <script>
             /* Injected Data */
             var diplomacyMatrix = {{ diplomacy_matrix }};
