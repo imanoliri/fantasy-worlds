@@ -813,9 +813,8 @@ const AdventureManager = {
     closeGameOver() {
         const modal = document.getElementById('gameOverModal');
         if (modal) modal.style.display = 'none';
-        this.toggle(); // Close adventure mode (this sets active = false)
-        this.isGameOver = false;
-        this.party.cell = 0;
+        // User wants to look around, so we don't toggle() or reset.
+        // isGameOver remains true, blocking movement.
     },
 
     restartGame() {
