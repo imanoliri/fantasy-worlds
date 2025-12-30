@@ -1285,7 +1285,7 @@ const MissionSiege = {
 
         if (Math.random() < winProb) {
             // WIN
-            const goldReward = 50; // High reward
+            const goldReward = 35; // High reward
             const soldierReward = 10; // Freed prisoners?
 
             AdventureManager.party.gold += goldReward;
