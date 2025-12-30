@@ -62520,6 +62520,22 @@
             </div>
         </div>
 
+        <!-- Game Won Modal -->
+        <div id="gameWonModal" class="adventure-modal"
+            style="display:none; justify-content:center; align-items:center;">
+            <div class="modal-content" style="max-width: 400px; text-align: center; border: 3px solid #f1c40f;">
+                <h2 style="color: #f39c12; font-family: 'Cinzel', serif; font-size: 2em; margin-bottom: 20px;">VICTORY!
+                </h2>
+                <p style="font-size: 1.2em; margin-bottom: 30px;">You have amassed 300 of every resource!</p>
+                <div class="actions" style="display: flex; gap: 10px; justify-content: center;">
+                    <button class="btn-leave" onclick="AdventureManager.closeWinModal()"
+                        style="background: #95a5a6;">Keep Playing</button>
+                    <button class="btn-enter" onclick="AdventureManager.exitAdventureMode()"
+                        style="background: #27ae60;">Exit Adventure Mode</button>
+                </div>
+            </div>
+        </div>
+
         <script>
             /* Injected Data */
             var diplomacyMatrix = [[["Oberischia-Lolian War", "Oberischia declared a war on its rival Lolia", "Lolia's vassal Vinivia joined the war on defenders side", "Frightened by Oberischia, Kakuhia severed the defense pact with Lolia", "Oberischia's ally Boskirkia joined the war on attackers side"]], ["x", "x", "Suspicion", "Enemy", "Suspicion", "Suspicion", "Suzerain", "Enemy", "Friendly", "Rival", "Suspicion"], ["x", "Suspicion", "x", "Friendly", "Friendly", "Suspicion", "Suspicion", "Friendly", "Ally", "Neutral", "Suzerain"], ["x", "Enemy", "Friendly", "x", "Suspicion", "Suspicion", "Enemy", "Ally", "Neutral", "Neutral", "Friendly"], ["x", "Suspicion", "Friendly", "Suspicion", "x", "Friendly", "Ally", "Neutral", "Rival", "Ally", "Friendly"], ["x", "Suspicion", "Suspicion", "Suspicion", "Friendly", "x", "Suspicion", "Friendly", "Neutral", "Ally", "Suspicion"], ["x", "Vassal", "Suspicion", "Enemy", "Ally", "Suspicion", "x", "Enemy", "Friendly", "Rival", "Suspicion"], ["x", "Enemy", "Friendly", "Ally", "Neutral", "Friendly", "Enemy", "x", "Neutral", "Friendly", "Friendly"], ["x", "Friendly", "Ally", "Neutral", "Rival", "Neutral", "Friendly", "Neutral", "x", "Rival", "Ally"], ["x", "Rival", "Neutral", "Neutral", "Ally", "Ally", "Rival", "Friendly", "Rival", "x", "Neutral"], ["x", "Suspicion", "Vassal", "Friendly", "Friendly", "Suspicion", "Suspicion", "Friendly", "Ally", "Neutral", "x"]];
