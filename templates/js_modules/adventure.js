@@ -175,7 +175,7 @@ const AdventureManager = {
         const sidebar = document.getElementById('adventureSidebar');
 
         if (this.active) {
-            btn.classList.add('active');
+            if (btn) btn.classList.add('active');
             if (sidebar) {
                 sidebar.classList.remove('hidden');
             }
@@ -198,7 +198,7 @@ const AdventureManager = {
         } else {
             this.movementId++; // Cancel any ongoing movement
             this.isMoving = false;
-            btn.classList.remove('active');
+            if (btn) btn.classList.remove('active');
             const sidebar = document.getElementById('adventureSidebar');
             if (sidebar) {
                 sidebar.classList.add('hidden');

@@ -1774,7 +1774,7 @@ const AdventureManager = {
         const sidebar = document.getElementById('adventureSidebar');
 
         if (this.active) {
-            btn.classList.add('active');
+            if (btn) btn.classList.add('active');
             if (sidebar) {
                 sidebar.classList.remove('hidden');
             }
@@ -1797,7 +1797,7 @@ const AdventureManager = {
         } else {
             this.movementId++; // Cancel any ongoing movement
             this.isMoving = false;
-            btn.classList.remove('active');
+            if (btn) btn.classList.remove('active');
             const sidebar = document.getElementById('adventureSidebar');
             if (sidebar) {
                 sidebar.classList.add('hidden');
@@ -2414,7 +2414,7 @@ const AdventureManager = {
 
         // Win Condition Check
         if (this.active && !this.hasWon && !this.isGameOver) {
-            if (this.party.soldiers >= 100 &&
+            if (this.party.soldiers >= 300 &&
                 this.party.food >= 300 &&
                 this.party.gold >= 300 &&
                 this.party.tools >= 300) {

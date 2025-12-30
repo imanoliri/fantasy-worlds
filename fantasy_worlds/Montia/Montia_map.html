@@ -140,8 +140,16 @@
                 Table</button>
             <button class="toggle-btn active" id="toggleMap" onclick="toggleMap()">Show Map</button>
             <button class="toggle-btn" id="toggleMapMode" onclick="toggleMapMode()">Mode: Biome</button>
-            <button class="toggle-btn special" id="toggleAdventure" onclick="toggleAdventureMode()">⚔️
-                Adventure</button>
+
+            <div class="dropdown">
+                <button class="toggle-btn special dropbtn" id="gameModeBtn"
+                    onclick="toggleDropdown('gameModeDropdown')">Free Mode ▼</button>
+                <div class="dropdown-content" id="gameModeDropdown">
+                    <a href="#" onclick="selectGameMode('none')">Free Mode</a>
+                    <a href="#" onclick="selectGameMode('adventure')">⚔️ Adventure</a>
+                    <a href="#" onclick="selectGameMode('campaign')">📜 Campaign</a>
+                </div>
+            </div>
             <span>| Total Burgs: 384</span>
 
         </div>
@@ -47601,6 +47609,37 @@
             var marineBiomeId = 0;
         </script>
         <script src="../map.js"></script>
+        <script>
+            function selectGameMode(mode) {
+                const btn = document.getElementById('gameModeBtn');
+                const dropdown = document.getElementById('gameModeDropdown');
+
+                if (mode === 'adventure') {
+                    btn.innerHTML = "Adventure ▼";
+                    // Only toggle if not already active
+                    if (!window.AdventureManager || !window.AdventureManager.active) {
+                        toggleAdventureMode();
+                    }
+                } else if (mode === 'campaign') {
+                    btn.innerHTML = "Campaign ▼";
+                    // Stop Adventure if active
+                    if (window.AdventureManager && window.AdventureManager.active) {
+                        toggleAdventureMode();
+                    }
+                    console.log("Campaign Mode selected");
+                    // Placeholder for Campaign Start
+                } else {
+                    btn.innerHTML = "Free Mode ▼";
+                    // Stop Adventure if active
+                    if (window.AdventureManager && window.AdventureManager.active) {
+                        toggleAdventureMode();
+                    }
+                }
+
+                // Close dropdown
+                dropdown.classList.remove('show');
+            }
+        </script>
 </body>
 
 </html>
