@@ -1285,7 +1285,7 @@ const MissionSiege = {
 
         if (Math.random() < winProb) {
             // WIN
-            const goldReward = 50; // High reward
+            const goldReward = 35; // High reward
             const soldierReward = 10; // Freed prisoners?
 
             AdventureManager.party.gold += goldReward;
@@ -2411,6 +2411,41 @@ const AdventureManager = {
                 this.isGameOver = true; // Flag to prevent movement
             }
         }
+
+        // Win Condition Check
+        if (this.active && !this.hasWon && !this.isGameOver) {
+            if (this.party.soldiers >= 100 &&
+                this.party.food >= 300 &&
+                this.party.gold >= 300 &&
+                this.party.tools >= 300) {
+
+                this.hasWon = true;
+                this.showWinModal();
+            }
+        }
+    },
+
+    showWinModal() {
+        const modal = document.getElementById('gameWonModal');
+        if (modal) {
+            modal.style.display = 'flex';
+            this.isGameOver = true; // Pause movement/interaction while modal is open
+        }
+    },
+
+    closeWinModal() {
+        const modal = document.getElementById('gameWonModal');
+        if (modal) modal.style.display = 'none';
+        this.isGameOver = false; // Resume play
+        // hasWon remains true, so it won't trigger again
+        this.showFeedback("You continue your adventure as a legend!");
+    },
+
+    exitAdventureMode() {
+        const modal = document.getElementById('gameWonModal');
+        if (modal) modal.style.display = 'none';
+        this.isGameOver = false;
+        this.toggle(); // Turn off adventure mode
     },
 
     closeGameOver() {
