@@ -800,6 +800,11 @@ const AdventureManager = {
         if (document.getElementById('advSoldiers')) document.getElementById('advSoldiers').textContent = this.party.soldiers;
         if (document.getElementById('advFood')) document.getElementById('advFood').textContent = this.party.food;
         if (document.getElementById('advGold')) document.getElementById('advGold').textContent = this.party.gold;
+
+        // Hook for Campaign
+        if (window.CampaignManager && window.CampaignManager.active) {
+            window.CampaignManager.checkObjectives();
+        }
         if (document.getElementById('advTools')) document.getElementById('advTools').textContent = this.party.tools;
 
         // Game Over Check

@@ -213,6 +213,11 @@ const MissionSiege = {
 
             AdventureManager.showFeedback(`SIEGE BROKEN! Hero of the city! +${goldReward} Gold.`);
 
+            // Hook for Campaign
+            if (window.CampaignManager && window.CampaignManager.active) {
+                window.CampaignManager.siegeDefeated();
+            }
+
             // Floating Text (Win)
             const cell = graphData[AdventureManager.party.cell];
             if (cell) {
@@ -250,6 +255,11 @@ const MissionSiege = {
 
             if (this.data.soldiers === 0) {
                 AdventureManager.showFeedback(`DEFEAT! But siege is broken at high cost!`);
+
+                // Hook for Campaign (Victory via Sacrifice)
+                if (window.CampaignManager && window.CampaignManager.active) {
+                    window.CampaignManager.siegeDefeated();
+                }
                 this.data = null;
                 this.updateVisuals();
                 setTimeout(() => this.spawn(), 3000);

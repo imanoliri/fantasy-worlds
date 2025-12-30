@@ -59,7 +59,12 @@ const MissionHunt = {
 
         if (validCells.length > 0) {
             const randomCell = validCells[Math.floor(Math.random() * validCells.length)];
-            const strength = Math.floor(Math.random() * (30 - 5 + 1)) + 5; // 5 to 30
+            let strength = Math.floor(Math.random() * (30 - 5 + 1)) + 5; // 5 to 30
+
+            // Campaign Hook for Strength
+            if (window.MissionHunt.baseStrength) {
+                strength = window.MissionHunt.baseStrength;
+            }
             this.data = { cell: randomCell.i, strength: strength };
             this.updateVisuals();
         }

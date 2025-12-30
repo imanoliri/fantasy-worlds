@@ -1,0 +1,195 @@
+/* Campaign Mode Logic */
+
+const CampaignManager = {
+    active: false,
+    currentCampaign: null,
+    campaigns: [
+        {
+            id: "siege_defense_v1",
+            name: "The Siege Defense",
+            description: "A dark army surrounds the capital. You must gather resources, build an army, and break the siege before the city falls.",
+            startConfig: {
+                resources: { soldiers: 20, tools: 20, food: 15, gold: 0 }
+            },
+            modifiers: {
+                beastStrength: 25,
+                preExistingSiege: { strength: 150 }
+            },
+            objectives: [
+                { id: "obj1", text: "Gather 30 Soldiers", type: "resources", conditions: { soldiers: 30 }, completed: false },
+                { id: "obj2", text: "Gather 30 Tools", type: "resources", conditions: { tools: 30 }, completed: false },
+                { id: "obj3", text: "Defeat the Siege", type: "defeat_siege", completed: false }
+            ]
+        }
+    ],
+
+    // Called when Campaign Mode is selected
+    init() {
+        this.populateSidebar();
+    },
+
+    populateSidebar() {
+        const dropdown = document.getElementById('campaignDropdown');
+        if (!dropdown) return;
+
+        // Clear existing (except default)
+        dropdown.innerHTML = '<option value="" disabled selected>Select a Campaign...</option>';
+
+        this.campaigns.forEach((camp, index) => {
+            const opt = document.createElement('option');
+            opt.value = index; // Use index for easy retrieval
+            opt.textContent = camp.name;
+            opt.title = camp.description; // Description as tooltip
+            dropdown.appendChild(opt);
+        });
+
+        // Hide objectives initially
+        document.getElementById('campaignObjectives').classList.add('hidden');
+        document.getElementById('campaignStartBtn').classList.add('hidden');
+    },
+
+    selectCampaign(index) {
+        if (index === "") return;
+        const campaign = this.campaigns[index];
+        this.currentCampaign = JSON.parse(JSON.stringify(campaign)); // Deep clone to reset state
+
+        // Update UI
+        // Description is tooltip now
+        document.getElementById('campaignStartBtn').classList.remove('hidden');
+
+        // Show objectives preview (optional, or wait for start)
+        this.renderObjectives();
+        document.getElementById('campaignObjectives').classList.remove('hidden');
+    },
+
+    startCampaign() {
+        if (!this.currentCampaign) return;
+
+        console.log("Starting Campaign:", this.currentCampaign.name);
+        this.active = true;
+
+        // Reset Adventure Logic
+        if (window.AdventureManager) {
+            // Ensure AdventureManager is initialized and active
+            AdventureManager.init(); // Creates SVG elements if missing
+            AdventureManager.active = true; // Enable interactions
+
+            // Force start a new adventure to generate party/place
+            AdventureManager.start();
+
+            // Set Resources override
+            if (this.currentCampaign.startConfig && this.currentCampaign.startConfig.resources) {
+                AdventureManager.party = { ...AdventureManager.party, ...this.currentCampaign.startConfig.resources };
+            }
+
+            // Update UI with new stats
+            AdventureManager.updateStats();
+            AdventureManager.render(); // Re-render to show correct position/party
+
+            AdventureManager.showFeedback(`Campaign Started: ${this.currentCampaign.name}`);
+        }
+
+        // Hide Start Button (game is running)
+        document.getElementById('campaignStartBtn').classList.add('hidden');
+        document.getElementById('campaignDropdown').disabled = true;
+    },
+
+    renderObjectives() {
+        const list = document.getElementById('objectivesList');
+        if (!list || !this.currentCampaign) return;
+
+        list.innerHTML = "";
+        this.currentCampaign.objectives.forEach(obj => {
+            const li = document.createElement('li');
+            li.textContent = obj.text;
+            if (obj.completed) li.classList.add('completed');
+            list.appendChild(li);
+        });
+    },
+
+    // Called by hooks in AdventureManager
+    checkObjectives() {
+        if (!this.active || !this.currentCampaign) return;
+
+        let changed = false;
+        const party = window.AdventureManager ? AdventureManager.party : null;
+
+        this.currentCampaign.objectives.forEach(obj => {
+            if (obj.completed) return;
+
+            if (obj.type === "resources" && party) {
+                let met = true;
+                if (obj.conditions.soldiers && party.soldiers < obj.conditions.soldiers) met = false;
+                if (obj.conditions.tools && party.tools < obj.conditions.tools) met = false;
+                if (obj.conditions.food && party.food < obj.conditions.food) met = false;
+                if (obj.conditions.gold && party.gold < obj.conditions.gold) met = false;
+
+                if (met) {
+                    obj.completed = true;
+                    changed = true;
+                    AdventureManager.showFeedback(`Objective Complete: ${obj.text}`);
+                }
+            }
+        });
+
+        if (changed) {
+            this.renderObjectives();
+            this.checkVictory();
+        }
+    },
+
+    checkVictory() {
+        const allComplete = this.currentCampaign.objectives.every(o => o.completed);
+        if (allComplete) {
+            this.active = false;
+            this.showCampaignWinModal();
+        }
+    },
+
+    showCampaignWinModal() {
+        const modal = document.getElementById('campaignVictoryModal');
+        if (modal) {
+            modal.style.display = 'flex'; // adventure-modal class needs flex centering
+            if (window.AdventureManager) AdventureManager.isGameOver = true; // Pause
+        }
+    },
+
+    endCampaign() {
+        const modal = document.getElementById('campaignVictoryModal');
+        if (modal) modal.style.display = 'none';
+
+        // Reset UI Components
+        document.getElementById('campaignDropdown').disabled = false;
+        document.getElementById('campaignDropdown').value = "";
+        document.getElementById('campaignStartBtn').classList.add('hidden');
+        document.getElementById('campaignObjectives').classList.add('hidden');
+
+        // Use Global Helper to Switch Mode properly
+        // This handles stopping adventure and resetting top-level UI
+        if (typeof selectGameMode === 'function') {
+            selectGameMode('free');
+        } else {
+            // Fallback
+            if (window.AdventureManager) {
+                AdventureManager.isGameOver = false;
+                AdventureManager.toggle();
+            }
+        }
+
+        // Reset valid descriptions
+        document.getElementById('campaignDescription').textContent = "";
+    },
+
+    siegeDefeated() {
+        if (!this.active || !this.currentCampaign) return;
+        const obj = this.currentCampaign.objectives.find(o => o.type === "defeat_siege");
+        if (obj && !obj.completed) {
+            obj.completed = true;
+            this.renderObjectives();
+            AdventureManager.showFeedback("Objective Complete: Defeat the Siege");
+            this.checkVictory();
+        }
+    }
+};
+
+window.CampaignManager = CampaignManager;
