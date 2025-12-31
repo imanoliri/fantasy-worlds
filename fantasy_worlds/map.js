@@ -2868,7 +2868,10 @@ class BaseCampaign {
     onAdventureStart() { }
     onMissionStart(data) { }
     onMissionComplete(data) { }
-    onUpdateStats(party) { this.checkObjectives(party); }
+    onUpdateStats(party) {
+        if (!this.active) return;
+        this.checkObjectives(party);
+    }
 
     // Internal Logic
     addObjective(id, text, type, checkFn) {
@@ -2978,15 +2981,22 @@ class SiegeDefenseCampaign extends BaseCampaign {
     constructor() {
         super("siege_defense_v1", "The Siege Defense", "A dark army surrounds the capital. You must gather resources, build an army, and break the siege before the city falls.");
 
-        // Define Objectives
-        // Note: We use lambda functions for checks to encapsulate the logic
-        this.addObjective("obj1", "Gather 30 Tools", "resources", (p) => p.tools >= 30);
-        this.addObjective("obj2", "Gather 70 Soldiers", "resources", (p) => p.soldiers >= 70);
-        this.addObjective("obj3", "Gather 150 Food", "resources", (p) => p.food >= 150);
-
-        // Custom logic for Siege Objective
+        // Internal State
         this.siegeDefeated = false;
-        this.addObjective("obj4", "Defeat the Siege", "defeat_siege", (p) => this.siegeDefeated);
+        this.siegedBurgId = -1;
+        this.siegedBurgCell = -1;
+        this.siegedBurgName = "the Capital";
+
+        // Define Objectives
+        // Order: Gather Basics -> Soldiers -> Defeat Siege -> Deliver Food
+        this.addObjective("obj1", "Gather 30 Food", "resources", (p) => p.food >= 30);
+        this.addObjective("obj2", "Gather 30 Tools", "resources", (p) => p.tools >= 30);
+        this.addObjective("obj3", "Gather 70 Soldiers", "resources", (p) => p.soldiers >= 70);
+        this.addObjective("obj5", "Defeat the Siege", "defeat_siege", (p) => this.siegeDefeated);
+        this.addObjective("obj4", "Bring 150 Food to the Capital", "delivery", (p) => {
+            // Check if we are AT the sieged city AND have the food
+            return p.food >= 150 && this.siegedBurgCell !== -1 && p.cell === this.siegedBurgCell;
+        });
 
         this.startConfig = {
             resources: { soldiers: 20, tools: 20, food: 15, gold: 0 }
@@ -3037,6 +3047,23 @@ class SiegeDefenseCampaign extends BaseCampaign {
                 console.log(`SiegeDefenseCampaign: Enforced Siege Strength to ${FORCED_STRENGTH}`);
             }
             console.log(`SiegeDefenseCampaign: Tracking Siege on Burg ID ${data.burgId}`);
+
+            // Update Objective Target Info
+            if (window.burgsData && this.siegedBurgId === -1) {
+                const burg = burgsData.find(b => b.id === data.burgId);
+                if (burg) {
+                    this.siegedBurgId = burg.id;
+                    this.siegedBurgCell = burg.cell_id;
+                    this.siegedBurgName = burg.name;
+
+                    // Update Objective Text
+                    const deliveryObj = this.objectives.find(o => o.id === "obj4");
+                    if (deliveryObj) {
+                        deliveryObj.text = `Bring 150 Food to ${this.siegedBurgName}`;
+                        this.renderObjectives();
+                    }
+                }
+            }
         }
 
         if (data.type === 'hunt') {
