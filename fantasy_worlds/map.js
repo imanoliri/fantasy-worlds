@@ -1890,14 +1890,14 @@ const AdventureManager = {
             this.updateStats();
             this.render();
 
-            // Trigger Start Ping
-            const startNode = graphData[startCell];
+            // Emit Event (Campaigns may override start location here)
+            if (this.events) this.events.emit('start', this.party);
+
+            // Trigger Start Ping (Use actual party cell in case it was moved)
+            const startNode = graphData[this.party.cell];
             if (startNode) {
                 this.showLocationPing(startNode.p[0], startNode.p[1]);
             }
-
-            // Emit Event
-            if (this.events) this.events.emit('start', this.party);
 
             // Initial message
             this.showFeedback("Adventure started! Click to move.");
@@ -3004,8 +3004,19 @@ class SiegeDefenseCampaign extends BaseCampaign {
 
     onAdventureStart() {
         // Enforce Start Location
-        if (this.startConfig.cell) {
-            AdventureManager.party.cell = this.startConfig.cell;
+        let startCell = this.startConfig.cell;
+
+        // PRIORITIZE: Start at the location of the Siege
+        if (window.MissionSiege && MissionSiege.data && window.burgsData) {
+            const siegedBurg = burgsData.find(b => b.id === MissionSiege.data.burgId);
+            if (siegedBurg) {
+                startCell = siegedBurg.cell_id;
+                console.log(`SiegeDefenseCampaign: Starting at sieged burg ${siegedBurg.name} (Cell ${startCell})`);
+            }
+        }
+
+        if (startCell) {
+            AdventureManager.party.cell = startCell;
             setTimeout(() => AdventureManager.render(), 100);
         }
         AdventureManager.updateStats();

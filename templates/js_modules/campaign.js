@@ -161,8 +161,19 @@ class SiegeDefenseCampaign extends BaseCampaign {
 
     onAdventureStart() {
         // Enforce Start Location
-        if (this.startConfig.cell) {
-            AdventureManager.party.cell = this.startConfig.cell;
+        let startCell = this.startConfig.cell;
+
+        // PRIORITIZE: Start at the location of the Siege
+        if (window.MissionSiege && MissionSiege.data && window.burgsData) {
+            const siegedBurg = burgsData.find(b => b.id === MissionSiege.data.burgId);
+            if (siegedBurg) {
+                startCell = siegedBurg.cell_id;
+                console.log(`SiegeDefenseCampaign: Starting at sieged burg ${siegedBurg.name} (Cell ${startCell})`);
+            }
+        }
+
+        if (startCell) {
+            AdventureManager.party.cell = startCell;
             setTimeout(() => AdventureManager.render(), 100);
         }
         AdventureManager.updateStats();

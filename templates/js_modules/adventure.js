@@ -272,14 +272,14 @@ const AdventureManager = {
             this.updateStats();
             this.render();
 
-            // Trigger Start Ping
-            const startNode = graphData[startCell];
+            // Emit Event (Campaigns may override start location here)
+            if (this.events) this.events.emit('start', this.party);
+
+            // Trigger Start Ping (Use actual party cell in case it was moved)
+            const startNode = graphData[this.party.cell];
             if (startNode) {
                 this.showLocationPing(startNode.p[0], startNode.p[1]);
             }
-
-            // Emit Event
-            if (this.events) this.events.emit('start', this.party);
 
             // Initial message
             this.showFeedback("Adventure started! Click to move.");
