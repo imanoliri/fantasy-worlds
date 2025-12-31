@@ -1087,6 +1087,7 @@ window.MissionHunt = MissionHunt;
 
 const MissionSiege = {
     data: null, // { burgId: int, armyCell: int, soldiers: int }
+    lastSiegedBurgId: -1, // Track the last sieged burg to prevent immediate repeats
     element: null, // Group for Bomb icon
     countElement: null,
     ringGroup: null, // Group for siege ring
@@ -1160,9 +1161,24 @@ const MissionSiege = {
         const capitals = burgsData.filter(b => b.is_capital);
         if (capitals.length === 0) return;
 
+        // Filter out the last sieged burg to avoid repetition
+        let candidateCapitals = capitals;
+        if (this.lastSiegedBurgId !== -1) {
+            candidateCapitals = capitals.filter(b => b.id !== this.lastSiegedBurgId);
+            // If only 1 capital exists and it was just sieged, we might have to re-siege it 
+            // or return. Given the user request "ensure it's not the original city again",
+            // we will default to original list only if NO candidates remain.
+            if (candidateCapitals.length === 0) {
+                candidateCapitals = capitals;
+            }
+        }
+
         // Pick random capital
-        const capital = capitals[Math.floor(Math.random() * capitals.length)];
+        const capital = candidateCapitals[Math.floor(Math.random() * candidateCapitals.length)];
         const capitalCell = capital.cell_id;
+
+        // Save for next time
+        this.lastSiegedBurgId = capital.id;
 
         // Find neighbor land cell for army
         const neighbors = graphData[capitalCell].c;
