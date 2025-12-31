@@ -3065,6 +3065,11 @@ const CampaignManager = {
         const modal = document.getElementById('campaignVictoryModal');
         if (modal) modal.style.display = 'none';
 
+        // Close any adventure popups (burg info, etc)
+        if (window.AdventureManager && typeof AdventureManager.closePopup === 'function') {
+            AdventureManager.closePopup();
+        }
+
         // Reset UI Components
         document.getElementById('campaignDropdown').disabled = false;
         document.getElementById('campaignDropdown').value = "";
