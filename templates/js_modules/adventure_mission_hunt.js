@@ -59,14 +59,11 @@ const MissionHunt = {
 
         if (validCells.length > 0) {
             const randomCell = validCells[Math.floor(Math.random() * validCells.length)];
-            let strength = Math.floor(Math.random() * (30 - 5 + 1)) + 5; // 5 to 30
-
-            // Campaign Hook for Strength
-            if (window.MissionHunt.baseStrength) {
-                strength = window.MissionHunt.baseStrength;
-            }
+            const strength = Math.floor(Math.random() * (30 - 5 + 1)) + 5; // 5 to 30
             this.data = { cell: randomCell.i, strength: strength };
             this.updateVisuals();
+            // Emit Start Event
+            if (AdventureManager.events) AdventureManager.events.emit('missionStart', { type: 'hunt', ...this.data });
         }
     },
 
@@ -162,6 +159,9 @@ const MissionHunt = {
             AdventureManager.party.food += foodReward;
 
             AdventureManager.showFeedback(`SLAIN! Gained ${goldReward} Gold & ${foodReward} Food.`);
+
+            // Emit Complete Event
+            if (AdventureManager.events) AdventureManager.events.emit('missionComplete', { type: 'hunt', result: 'win', ...this.data });
 
             // Floating Text (Win)
             const cell = graphData[AdventureManager.party.cell];

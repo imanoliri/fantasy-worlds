@@ -92,6 +92,9 @@ const MissionSiege = {
             this.data = { burgId: capital.id, armyCell: armyCell, soldiers: strength };
             this.updateVisuals();
             AdventureManager.showFeedback(`Siege started at ${capital.name}!`);
+
+            // Emit Start Event
+            if (AdventureManager.events) AdventureManager.events.emit('missionStart', { type: 'siege', ...this.data });
         }
     },
 
@@ -213,10 +216,8 @@ const MissionSiege = {
 
             AdventureManager.showFeedback(`SIEGE BROKEN! Hero of the city! +${goldReward} Gold.`);
 
-            // Hook for Campaign
-            if (window.CampaignManager && window.CampaignManager.active) {
-                window.CampaignManager.siegeDefeated();
-            }
+            // Emit Complete Event (Win)
+            if (AdventureManager.events) AdventureManager.events.emit('missionComplete', { type: 'siege', result: 'win', ...this.data });
 
             // Floating Text (Win)
             const cell = graphData[AdventureManager.party.cell];
@@ -256,10 +257,9 @@ const MissionSiege = {
             if (this.data.soldiers === 0) {
                 AdventureManager.showFeedback(`DEFEAT! But siege is broken at high cost!`);
 
-                // Hook for Campaign (Victory via Sacrifice)
-                if (window.CampaignManager && window.CampaignManager.active) {
-                    window.CampaignManager.siegeDefeated();
-                }
+                // Emit Complete Event (Sacrifice)
+                if (AdventureManager.events) AdventureManager.events.emit('missionComplete', { type: 'siege', result: 'sacrifice', ...this.data });
+
                 this.data = null;
                 this.updateVisuals();
                 setTimeout(() => this.spawn(), 3000);

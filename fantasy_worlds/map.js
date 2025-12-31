@@ -930,14 +930,11 @@ const MissionHunt = {
 
         if (validCells.length > 0) {
             const randomCell = validCells[Math.floor(Math.random() * validCells.length)];
-            let strength = Math.floor(Math.random() * (30 - 5 + 1)) + 5; // 5 to 30
-
-            // Campaign Hook for Strength
-            if (window.MissionHunt.baseStrength) {
-                strength = window.MissionHunt.baseStrength;
-            }
+            const strength = Math.floor(Math.random() * (30 - 5 + 1)) + 5; // 5 to 30
             this.data = { cell: randomCell.i, strength: strength };
             this.updateVisuals();
+            // Emit Start Event
+            if (AdventureManager.events) AdventureManager.events.emit('missionStart', { type: 'hunt', ...this.data });
         }
     },
 
@@ -1033,6 +1030,9 @@ const MissionHunt = {
             AdventureManager.party.food += foodReward;
 
             AdventureManager.showFeedback(`SLAIN! Gained ${goldReward} Gold & ${foodReward} Food.`);
+
+            // Emit Complete Event
+            if (AdventureManager.events) AdventureManager.events.emit('missionComplete', { type: 'hunt', result: 'win', ...this.data });
 
             // Floating Text (Win)
             const cell = graphData[AdventureManager.party.cell];
@@ -1177,6 +1177,9 @@ const MissionSiege = {
             this.data = { burgId: capital.id, armyCell: armyCell, soldiers: strength };
             this.updateVisuals();
             AdventureManager.showFeedback(`Siege started at ${capital.name}!`);
+
+            // Emit Start Event
+            if (AdventureManager.events) AdventureManager.events.emit('missionStart', { type: 'siege', ...this.data });
         }
     },
 
@@ -1298,10 +1301,8 @@ const MissionSiege = {
 
             AdventureManager.showFeedback(`SIEGE BROKEN! Hero of the city! +${goldReward} Gold.`);
 
-            // Hook for Campaign
-            if (window.CampaignManager && window.CampaignManager.active) {
-                window.CampaignManager.siegeDefeated();
-            }
+            // Emit Complete Event (Win)
+            if (AdventureManager.events) AdventureManager.events.emit('missionComplete', { type: 'siege', result: 'win', ...this.data });
 
             // Floating Text (Win)
             const cell = graphData[AdventureManager.party.cell];
@@ -1341,10 +1342,9 @@ const MissionSiege = {
             if (this.data.soldiers === 0) {
                 AdventureManager.showFeedback(`DEFEAT! But siege is broken at high cost!`);
 
-                // Hook for Campaign (Victory via Sacrifice)
-                if (window.CampaignManager && window.CampaignManager.active) {
-                    window.CampaignManager.siegeDefeated();
-                }
+                // Emit Complete Event (Sacrifice)
+                if (AdventureManager.events) AdventureManager.events.emit('missionComplete', { type: 'siege', result: 'sacrifice', ...this.data });
+
                 this.data = null;
                 this.updateVisuals();
                 setTimeout(() => this.spawn(), 3000);
@@ -1647,6 +1647,20 @@ const AdventureManager = {
     init() {
         if (this.partyElement) return;
 
+        // Initialize Event System
+        this.events = {
+            listeners: {},
+            on(event, callback) {
+                if (!this.listeners[event]) this.listeners[event] = [];
+                this.listeners[event].push(callback);
+            },
+            emit(event, data) {
+                if (this.listeners[event]) {
+                    this.listeners[event].forEach(cb => cb(data));
+                }
+            }
+        };
+
         // Identify Accessible Land (Islands with at least one port)
         this.identifyAccessibleLand();
         // Calculate static docking points for ports
@@ -1877,6 +1891,9 @@ const AdventureManager = {
             if (startNode) {
                 this.showLocationPing(startNode.p[0], startNode.p[1]);
             }
+
+            // Emit Event
+            if (this.events) this.events.emit('start', this.party);
 
             // Initial message
             this.showFeedback("Adventure started! Click to move.");
@@ -2408,6 +2425,8 @@ const AdventureManager = {
         if (this.options.Siege) MissionSiege.updateVisuals();
         if (this.options.Diplomacy) MissionDiplomacy.updateVisuals();
         if (this.options.Explore) MissionExplore.updateVisuals();
+
+        if (this.events) this.events.emit('render', null);
     },
 
     updateStats() {
@@ -2415,10 +2434,8 @@ const AdventureManager = {
         if (document.getElementById('advFood')) document.getElementById('advFood').textContent = this.party.food;
         if (document.getElementById('advGold')) document.getElementById('advGold').textContent = this.party.gold;
 
-        // Hook for Campaign
-        if (window.CampaignManager && window.CampaignManager.active) {
-            window.CampaignManager.checkObjectives();
-        }
+        if (this.events) this.events.emit('updateStats', this.party);
+
         if (document.getElementById('advTools')) document.getElementById('advTools').textContent = this.party.tools;
 
         // Game Over Check
@@ -2890,30 +2907,63 @@ const CampaignManager = {
         console.log("Starting Campaign:", this.currentCampaign.name);
         this.active = true;
 
-        // Reset Adventure Logic
         if (window.AdventureManager) {
-            // Ensure AdventureManager is initialized and active
-            AdventureManager.init(); // Creates SVG elements if missing
-            AdventureManager.active = true; // Enable interactions
+            AdventureManager.init();
+            AdventureManager.active = true;
 
-            // Force start a new adventure to generate party/place
-            AdventureManager.start();
+            // Subscribe to Adventure Events
+            if (AdventureManager.events) {
 
-            // Set Resources override
-            if (this.currentCampaign.startConfig && this.currentCampaign.startConfig.resources) {
-                AdventureManager.party = { ...AdventureManager.party, ...this.currentCampaign.startConfig.resources };
+                AdventureManager.events.on('start', () => this.onAdventureStart());
+                AdventureManager.events.on('start', () => this.onAdventureStart());
+                AdventureManager.events.on('updateStats', () => this.checkObjectives());
+                AdventureManager.events.on('missionStart', (data) => this.onMissionStart(data));
+                AdventureManager.events.on('missionComplete', (data) => this.onMissionComplete(data));
             }
 
-            // Update UI with new stats
-            AdventureManager.updateStats();
-            AdventureManager.render(); // Re-render to show correct position/party
-
+            AdventureManager.start();
             AdventureManager.showFeedback(`Campaign Started: ${this.currentCampaign.name}`);
         }
 
-        // Hide Start Button (game is running)
         document.getElementById('campaignStartBtn').classList.add('hidden');
         document.getElementById('campaignDropdown').disabled = true;
+    },
+
+    onAdventureStart() {
+        if (!this.active || !this.currentCampaign) return;
+
+        // Initial Capture (if already spawned)
+        if (window.MissionSiege && MissionSiege.data) {
+            this.onMissionStart({ type: 'siege', ...MissionSiege.data });
+        }
+
+        // Enforce Starting Resources
+        if (this.currentCampaign.startConfig && this.currentCampaign.startConfig.resources) {
+            AdventureManager.party = { ...AdventureManager.party, ...this.currentCampaign.startConfig.resources };
+            AdventureManager.updateStats(); // Force UI update
+        }
+    },
+
+    onMissionStart(data) {
+        if (!this.active) return;
+        if (data.type === 'siege') {
+            console.log(`Campaign: Tracking Siege on Burg ID ${data.burgId}`);
+        }
+    },
+
+    onMissionComplete(data) {
+        if (!this.active || !this.currentCampaign) return;
+
+        if (data.type === 'siege') {
+            const obj = this.currentCampaign.objectives.find(o => o.type === "defeat_siege");
+
+            if (obj && !obj.completed) {
+                obj.completed = true;
+                this.renderObjectives();
+                AdventureManager.showFeedback(`Objective Complete: Defeat the Siege`);
+                this.checkVictory();
+            }
+        }
     },
 
     renderObjectives() {
@@ -2935,6 +2985,8 @@ const CampaignManager = {
 
         let changed = false;
         const party = window.AdventureManager ? AdventureManager.party : null;
+
+        // Note: Siege logic moved to onMissionComplete
 
         this.currentCampaign.objectives.forEach(obj => {
             if (obj.completed) return;
@@ -3002,16 +3054,6 @@ const CampaignManager = {
         document.getElementById('campaignDescription').textContent = "";
     },
 
-    siegeDefeated() {
-        if (!this.active || !this.currentCampaign) return;
-        const obj = this.currentCampaign.objectives.find(o => o.type === "defeat_siege");
-        if (obj && !obj.completed) {
-            obj.completed = true;
-            this.renderObjectives();
-            AdventureManager.showFeedback("Objective Complete: Defeat the Siege");
-            this.checkVictory();
-        }
-    }
 };
 
 window.CampaignManager = CampaignManager;

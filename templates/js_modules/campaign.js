@@ -68,30 +68,63 @@ const CampaignManager = {
         console.log("Starting Campaign:", this.currentCampaign.name);
         this.active = true;
 
-        // Reset Adventure Logic
         if (window.AdventureManager) {
-            // Ensure AdventureManager is initialized and active
-            AdventureManager.init(); // Creates SVG elements if missing
-            AdventureManager.active = true; // Enable interactions
+            AdventureManager.init();
+            AdventureManager.active = true;
 
-            // Force start a new adventure to generate party/place
-            AdventureManager.start();
+            // Subscribe to Adventure Events
+            if (AdventureManager.events) {
 
-            // Set Resources override
-            if (this.currentCampaign.startConfig && this.currentCampaign.startConfig.resources) {
-                AdventureManager.party = { ...AdventureManager.party, ...this.currentCampaign.startConfig.resources };
+                AdventureManager.events.on('start', () => this.onAdventureStart());
+                AdventureManager.events.on('start', () => this.onAdventureStart());
+                AdventureManager.events.on('updateStats', () => this.checkObjectives());
+                AdventureManager.events.on('missionStart', (data) => this.onMissionStart(data));
+                AdventureManager.events.on('missionComplete', (data) => this.onMissionComplete(data));
             }
 
-            // Update UI with new stats
-            AdventureManager.updateStats();
-            AdventureManager.render(); // Re-render to show correct position/party
-
+            AdventureManager.start();
             AdventureManager.showFeedback(`Campaign Started: ${this.currentCampaign.name}`);
         }
 
-        // Hide Start Button (game is running)
         document.getElementById('campaignStartBtn').classList.add('hidden');
         document.getElementById('campaignDropdown').disabled = true;
+    },
+
+    onAdventureStart() {
+        if (!this.active || !this.currentCampaign) return;
+
+        // Initial Capture (if already spawned)
+        if (window.MissionSiege && MissionSiege.data) {
+            this.onMissionStart({ type: 'siege', ...MissionSiege.data });
+        }
+
+        // Enforce Starting Resources
+        if (this.currentCampaign.startConfig && this.currentCampaign.startConfig.resources) {
+            AdventureManager.party = { ...AdventureManager.party, ...this.currentCampaign.startConfig.resources };
+            AdventureManager.updateStats(); // Force UI update
+        }
+    },
+
+    onMissionStart(data) {
+        if (!this.active) return;
+        if (data.type === 'siege') {
+            console.log(`Campaign: Tracking Siege on Burg ID ${data.burgId}`);
+        }
+    },
+
+    onMissionComplete(data) {
+        if (!this.active || !this.currentCampaign) return;
+
+        if (data.type === 'siege') {
+            const obj = this.currentCampaign.objectives.find(o => o.type === "defeat_siege");
+
+            if (obj && !obj.completed) {
+                obj.completed = true;
+                this.renderObjectives();
+                AdventureManager.showFeedback(`Objective Complete: Defeat the Siege`);
+                this.checkVictory();
+            }
+        }
     },
 
     renderObjectives() {
@@ -113,6 +146,8 @@ const CampaignManager = {
 
         let changed = false;
         const party = window.AdventureManager ? AdventureManager.party : null;
+
+        // Note: Siege logic moved to onMissionComplete
 
         this.currentCampaign.objectives.forEach(obj => {
             if (obj.completed) return;
@@ -180,16 +215,6 @@ const CampaignManager = {
         document.getElementById('campaignDescription').textContent = "";
     },
 
-    siegeDefeated() {
-        if (!this.active || !this.currentCampaign) return;
-        const obj = this.currentCampaign.objectives.find(o => o.type === "defeat_siege");
-        if (obj && !obj.completed) {
-            obj.completed = true;
-            this.renderObjectives();
-            AdventureManager.showFeedback("Objective Complete: Defeat the Siege");
-            this.checkVictory();
-        }
-    }
 };
 
 window.CampaignManager = CampaignManager;
