@@ -2851,13 +2851,14 @@ const CampaignManager = {
                 resources: { soldiers: 20, tools: 20, food: 15, gold: 0 }
             },
             modifiers: {
-                beastStrength: 25,
-                preExistingSiege: { strength: 150 }
+                huntStrength: 25,
+                siegeStrength: 60
             },
             objectives: [
-                { id: "obj1", text: "Gather 30 Soldiers", type: "resources", conditions: { soldiers: 30 }, completed: false },
                 { id: "obj2", text: "Gather 30 Tools", type: "resources", conditions: { tools: 30 }, completed: false },
-                { id: "obj3", text: "Defeat the Siege", type: "defeat_siege", completed: false }
+                { id: "obj1", text: "Gather 70 Soldiers", type: "resources", conditions: { soldiers: 70 }, completed: false },
+                { id: "obj3", text: "Gather 150 Food", type: "resources", conditions: { food: 150 }, completed: false },
+                { id: "obj4", text: "Defeat the Siege", type: "defeat_siege", completed: false }
             ]
         }
     ],
@@ -2937,15 +2938,47 @@ const CampaignManager = {
             this.onMissionStart({ type: 'siege', ...MissionSiege.data });
         }
 
-        // Enforce Starting Resources
-        if (this.currentCampaign.startConfig && this.currentCampaign.startConfig.resources) {
-            AdventureManager.party = { ...AdventureManager.party, ...this.currentCampaign.startConfig.resources };
+        // Enforce Starting Resources & Location
+        if (this.currentCampaign.startConfig) {
+            if (this.currentCampaign.startConfig.resources) {
+                AdventureManager.party = { ...AdventureManager.party, ...this.currentCampaign.startConfig.resources };
+            }
+            if (this.currentCampaign.startConfig.cell) {
+                AdventureManager.party.cell = this.currentCampaign.startConfig.cell;
+                // We need to re-render to move the marker
+                // But updateStats calls render? No, usually separate.
+                setTimeout(() => AdventureManager.render(), 100); // Small delay to ensure graphData is ready/map rendered
+            }
             AdventureManager.updateStats(); // Force UI update
         }
     },
 
     onMissionStart(data) {
         if (!this.active) return;
+
+        // Apply Modifiers (Live correction of random spawns)
+        if (this.currentCampaign.modifiers) {
+            const mods = this.currentCampaign.modifiers;
+
+            // Siege Strength Override
+            if (data.type === 'siege' && mods.siegeStrength && window.MissionSiege) {
+                if (MissionSiege.data) {
+                    MissionSiege.data.soldiers = mods.siegeStrength;
+                    MissionSiege.updateVisuals(); // Refresh UI
+                    console.log(`Campaign: Enforced Siege Strength to ${mods.siegeStrength}`);
+                }
+            }
+
+            // Hunt Strength Override
+            if (data.type === 'hunt' && mods.huntStrength && window.MissionHunt) {
+                if (MissionHunt.data) {
+                    MissionHunt.data.strength = mods.huntStrength;
+                    MissionHunt.updateVisuals(); // Refresh UI
+                    console.log(`Campaign: Enforced Hunt Strength to ${mods.huntStrength}`);
+                }
+            }
+        }
+
         if (data.type === 'siege') {
             console.log(`Campaign: Tracking Siege on Burg ID ${data.burgId}`);
         }
