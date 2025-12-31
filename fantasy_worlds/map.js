@@ -1165,9 +1165,7 @@ const MissionSiege = {
         let candidateCapitals = capitals;
         if (this.lastSiegedBurgId !== -1) {
             candidateCapitals = capitals.filter(b => b.id !== this.lastSiegedBurgId);
-            // If only 1 capital exists and it was just sieged, we might have to re-siege it 
-            // or return. Given the user request "ensure it's not the original city again",
-            // we will default to original list only if NO candidates remain.
+            // If only 1 capital exists, use the original list
             if (candidateCapitals.length === 0) {
                 candidateCapitals = capitals;
             }

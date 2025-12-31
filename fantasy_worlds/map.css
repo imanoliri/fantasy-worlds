@@ -336,6 +336,20 @@ caption {
     display: block;
 }
 
+/* Fix for Filter Dropdown Text Visibility */
+.checkbox-list label {
+    display: block;
+    padding: 5px 15px;
+    color: #2c3e50;
+    /* Dark text to contrast white background */
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.checkbox-list label:hover {
+    background-color: #f1f1f1;
+}
+
 /* Toggle Buttons */
 .toggle-btn {
     background-color: #f0f0f0;
