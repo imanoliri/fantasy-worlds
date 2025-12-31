@@ -3205,6 +3205,7 @@ const CampaignManager = {
         // UI Reset
         document.getElementById('campaignObjectives').classList.add('hidden');
         document.getElementById('campaignStartBtn').classList.add('hidden');
+        document.getElementById('campaignCancelBtn').classList.add('hidden');
     },
 
     selectCampaign(index) {
@@ -3213,6 +3214,7 @@ const CampaignManager = {
         this.currentCampaignInstance = new CampClass();
 
         document.getElementById('campaignStartBtn').classList.remove('hidden');
+        document.getElementById('campaignCancelBtn').classList.add('hidden'); // Ensure cancel is hidden
         this.currentCampaignInstance.renderObjectives();
         document.getElementById('campaignObjectives').classList.remove('hidden');
     },
@@ -3239,6 +3241,7 @@ const CampaignManager = {
         }
 
         document.getElementById('campaignStartBtn').classList.add('hidden');
+        document.getElementById('campaignCancelBtn').classList.remove('hidden'); // Show Cancel
         document.getElementById('campaignDropdown').disabled = true;
     },
 
@@ -3248,6 +3251,34 @@ const CampaignManager = {
             modal.style.display = 'flex';
             if (window.AdventureManager) AdventureManager.isGameOver = true;
         }
+    },
+
+    cancelCampaign() {
+        // 1. Cleanup current campaign
+        if (this.currentCampaignInstance) {
+            this.currentCampaignInstance.onEnd();
+            this.currentCampaignInstance = null;
+        }
+        this.active = false;
+
+        // 2. Stop Adventure Manager (cleans up game state, stops loop)
+        if (window.AdventureManager && AdventureManager.active) {
+            AdventureManager.toggle();
+        }
+
+        // 3. Force Sidebar back open (restore Campaign Menu state)
+        const sidebar = document.getElementById('adventureSidebar');
+        if (sidebar) sidebar.classList.remove('hidden');
+
+        // 4. Reset UI Elements to Selection State
+        document.querySelector('.sidebar-controls').classList.add('hidden');
+        document.getElementById('campaignSelectContainer').classList.remove('hidden');
+
+        // Reset Dropdown & Buttons
+        this.populateSidebar();
+        document.getElementById('campaignDropdown').disabled = false;
+
+        AdventureManager.showFeedback("Campaign Cancelled.");
     },
 
     endCampaign() {
@@ -3269,6 +3300,7 @@ const CampaignManager = {
         document.getElementById('campaignDropdown').disabled = false;
         document.getElementById('campaignDropdown').value = "";
         document.getElementById('campaignStartBtn').classList.add('hidden');
+        document.getElementById('campaignCancelBtn').classList.add('hidden');
         document.getElementById('campaignObjectives').classList.add('hidden');
 
         if (typeof selectGameMode === 'function') {
