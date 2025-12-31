@@ -238,7 +238,18 @@ class SiegeDefenseCampaign extends BaseCampaign {
             // In this specific campaign, completing ANY siege counts as victory
             this.siegeDefeated = true;
             this.checkObjectives(AdventureManager.party);
+
+            // Highlight the city to bring the food to
+            if (this.siegedBurgCell !== -1) {
+                this.highlightCell(this.siegedBurgCell, "#00FF00");
+                AdventureManager.showFeedback(`Siege Lifted! Bring Food to ${this.siegedBurgName}!`);
+            }
         }
+    }
+
+    onEnd() {
+        super.onEnd();
+        this.clearHighlights();
     }
 }
 
