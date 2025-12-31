@@ -70,6 +70,62 @@ class BaseCampaign {
     onVictory() {
         CampaignManager.showCampaignWinModal();
     }
+
+    // Visual Helpers
+    highlightCell(cellId, color = "#00ffff") {
+        if (!window.graphData || !graphData[cellId]) return;
+
+        let x, y;
+
+        // Try to find exact Burg coordinates first for better centering
+        if (window.burgsData) {
+            const burg = burgsData.find(b => b.cell_id === cellId);
+            if (burg) {
+                x = burg.x;
+                y = burg.y;
+            }
+        }
+
+        // Fallback to cell center
+        if (x === undefined || y === undefined) {
+            const cell = graphData[cellId];
+            x = cell.p[0];
+            y = cell.p[1];
+        }
+
+        // Ensure container exists
+        let container = document.getElementById('campaignHighlights');
+        if (!container) {
+            container = document.createElementNS("http://www.w3.org/2000/svg", "g");
+            container.setAttribute("id", "campaignHighlights");
+            const svg = document.getElementById('mapSvg');
+            if (svg) svg.appendChild(container);
+        }
+
+        const ring = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        ring.setAttribute("cx", x);
+        ring.setAttribute("cy", y);
+        ring.setAttribute("r", "15");
+        ring.setAttribute("fill", "none");
+        ring.setAttribute("stroke", color);
+        ring.setAttribute("stroke-width", "3");
+        ring.setAttribute("stroke-dasharray", "4,4");
+
+        // Animation
+        const anim = document.createElementNS("http://www.w3.org/2000/svg", "animate");
+        anim.setAttribute("attributeName", "r");
+        anim.setAttribute("values", "15;35;15");
+        anim.setAttribute("dur", "3s");
+        anim.setAttribute("repeatCount", "indefinite");
+        ring.appendChild(anim);
+
+        container.appendChild(ring);
+    }
+
+    clearHighlights() {
+        const container = document.getElementById('campaignHighlights');
+        if (container) container.innerHTML = "";
+    }
 }
 
 // ---------------------------------------------------------
@@ -195,7 +251,13 @@ class ExplorerCampaign extends BaseCampaign {
         if (obj && this.targetCityName) {
             obj.text = `Reach ${this.targetCityName}`;
             this.renderObjectives();
+            this.highlightCell(this.targetCityId, "#00ffff"); // Cyan highlight
         }
+    }
+
+    onEnd() {
+        super.onEnd();
+        this.clearHighlights();
     }
 
     onMissionComplete(data) {
