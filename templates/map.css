@@ -153,7 +153,7 @@ body.show-gold-trades .burg-ring-gold {
     top: 0;
     bottom: 0;
     display: flex;
-    z-index: 20;
+    z-index: 1001;
     pointer-events: none;
     flex-direction: row-reverse;
 }
