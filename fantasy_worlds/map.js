@@ -3370,174 +3370,162 @@ const CampaignManager = {
 window.CampaignManager = CampaignManager;
 
 
-function selectBurg(id) {
-    // Remove previous selection
-    if (selectedId) {
-        const prevRow = document.querySelector(`tr[data-id="${selectedId}"]`);
-        const prevDot = document.querySelector(`.burg-dot[data-id="${selectedId}"]`);
-        if (prevRow) prevRow.classList.remove('selected');
-        if (prevDot) prevDot.classList.remove('selected');
-    }
+// Global Sets for Multi-Selection
+window.selectedBurgIds = new Set();
+window.selectedStateNames = new Set();
+window.selectedTradeRoutes = new Set(); // Stores strings "fromId-toId"
 
-    // Clear any trade route highlights
-    clearHighlights();
-
-    // Clear previous table highlights (State and Trade)
-    document.querySelectorAll('.related-highlight').forEach(el => el.classList.remove('selected'));
-
-    selectedId = id;
-
-    if (id) {
-        const row = document.querySelector(`tr[data-id="${id}"]`);
-        const dot = document.querySelector(`.burg-dot[data-id="${id}"]`);
-
-        if (row) {
-            row.classList.add('selected');
-            row.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-
-        if (dot) {
-            dot.classList.add('selected');
-
-            // Highlight Related State
-            const stateName = dot.getAttribute('data-state');
-            if (stateName) {
-                // Update Diplomacy Map if active
-                const btn = document.getElementById('toggleMapMode');
-                if (btn && btn.getAttribute('data-mode') === 'state') {
-                    updateDiplomacyColors(stateName);
-                }
-
-                const stateTable = document.getElementById('stateTable');
-                const stateRows = stateTable.getElementsByTagName('tr');
-                for (let i = 1; i < stateRows.length; i++) {
-                    const sRow = stateRows[i];
-                    const nameCell = sRow.getElementsByTagName('td')[1]; // Name is 2nd column
-                    if (nameCell && (nameCell.textContent || nameCell.innerText).trim() === stateName) {
-                        sRow.classList.add('related-highlight');
-                        sRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        break;
-                    }
-                }
-            }
-
-            // Highlight Related Trade Routes
-            const burgName = dot.getAttribute('data-name');
-            if (burgName) {
-                ['foodTradeTable', 'goldTradeTable'].forEach(tableId => {
-                    let scrolled = false;
-                    const tTable = document.getElementById(tableId);
-                    if (tTable) {
-                        const tRows = tTable.getElementsByTagName('tr');
-                        for (let i = 1; i < tRows.length; i++) {
-                            const tRow = tRows[i];
-                            const fromCell = tRow.getElementsByTagName('td')[0];
-                            const toCell = tRow.getElementsByTagName('td')[1];
-
-                            const fromName = (fromCell.textContent || fromCell.innerText).trim();
-                            const toName = (toCell.textContent || toCell.innerText).trim();
-
-                            if (fromName === burgName || toName === burgName) {
-                                tRow.classList.add('related-highlight');
-                                if (!scrolled) {
-                                    tRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                                    scrolled = true;
-                                }
-                            }
-                        }
-                    }
-                });
-            }
-        }
-    }
-}
-
-function highlightBurg(id) {
-    selectBurg(id);
-}
-
-function clearHighlights() {
-    // Clear Burg Dots
+function updateVisuals() {
+    // 1. Clear ALL previous highlights
     document.querySelectorAll('.burg-dot').forEach(el => {
         el.classList.remove('selected', 'highlighted');
         el.style.fill = '';
         el.style.stroke = '';
     });
-
-    // Clear Table Rows (Burgs, States, Trades)
     document.querySelectorAll('tr').forEach(el => {
         el.classList.remove('selected', 'related-highlight');
     });
 
-    highlightedIds = [];
-    selectedId = null;
+    // 2. Highlight Selected Burgs and their Relations
+    window.selectedBurgIds.forEach(id => {
+        const row = document.querySelector(`tr[data-id="${id}"]`);
+        const dot = document.querySelector(`.burg-dot[data-id="${id}"]`);
+
+        if (row) row.classList.add('selected');
+        if (dot) {
+            dot.classList.add('selected');
+
+            // Related State
+            const stateName = dot.getAttribute('data-state');
+            if (stateName) {
+                // Determine State Color if possible? For now just highlight row
+                highlightRowByName('stateTable', stateName, 'related-highlight');
+            }
+
+            // Related Trade Routes
+            const burgName = dot.getAttribute('data-name');
+            if (burgName) {
+                highlightTradeRowsByBurgName(burgName, 'related-highlight');
+            }
+        }
+    });
+
+    // 3. Highlight Selected States and their Relations
+    window.selectedStateNames.forEach(stateName => {
+        // Highlight State Row
+        const stateRow = highlightRowByName('stateTable', stateName, 'selected');
+
+        let color = '#ccc';
+        if (stateRow) {
+            const colorBox = stateRow.querySelector('.color-box');
+            if (colorBox) color = colorBox.style.backgroundColor;
+        }
+
+        // Highlight Burgs in State
+        const dots = document.querySelectorAll(`.burg-dot[data-state="${stateName}"]`);
+        dots.forEach(dot => {
+            dot.classList.add('highlighted');
+            // Only override fill if not selected (selected takes precedence)
+            if (!dot.classList.contains('selected')) {
+                dot.style.fill = color;
+                dot.style.stroke = '#000';
+            }
+
+            const id = dot.getAttribute('data-id');
+            const burgName = dot.getAttribute('data-name');
+            if (id) {
+                const bRow = document.querySelector(`tr[data-id="${id}"]`);
+                if (bRow) bRow.classList.add('related-highlight');
+            }
+            // Highlight Trade Routes belonging to these burgs
+            if (burgName) {
+                highlightTradeRowsByBurgName(burgName, 'related-highlight');
+            }
+        });
+    });
+
+    // 4. Highlight Selected Trade Routes
+    window.selectedTradeRoutes.forEach(key => {
+        const [fromId, toId] = key.split('-');
+
+        // Find Trade Row(s) - tricky because we don't have unique IDs on TR rows usually?
+        // We need to match based on from/to cells content or we can assume unique lookup.
+        // Actually, the previous code passed the element 'el'. But for general update, we search.
+        // Let's assume we can find it.
+
+        // Highlight Key Trade Rows
+        highlightTradeRowsByIds(fromId, toId, 'selected');
+
+        // Highlight Endpoints
+        [fromId, toId].forEach(id => {
+            const dot = document.querySelector(`.burg-dot[data-id="${id}"]`);
+            if (dot) dot.classList.add('selected');
+            const row = document.querySelector(`tr[data-id="${id}"]`);
+            if (row) row.classList.add('selected');
+        });
+    });
 }
 
-function highlightState(stateName, color) {
-    clearHighlights();
-
-    // Find and highlight state row
-    const stateTable = document.getElementById('stateTable');
-    if (stateTable) {
-        const stateRows = stateTable.getElementsByTagName('tr');
-        for (let i = 1; i < stateRows.length; i++) {
-            const sRow = stateRows[i];
-            const nameCell = sRow.getElementsByTagName('td')[1];
-            if (nameCell && (nameCell.textContent || nameCell.innerText).trim() === stateName) {
-                sRow.classList.add('selected');
-                break;
+// Helper: Find row in table by "Name" (assumed col 1, index 1)
+function highlightRowByName(tableId, name, className) {
+    const table = document.getElementById(tableId);
+    if (!table) return null;
+    const rows = table.getElementsByTagName('tr');
+    for (let i = 1; i < rows.length; i++) {
+        const row = rows[i];
+        const cells = row.getElementsByTagName('td');
+        if (cells.length > 1) {
+            // State table: Name is col 1. Burg table: Name is col 0. checking.
+            // State Table: Color(0), Name(1)
+            const cell = cells[tableId === 'stateTable' ? 1 : 0];
+            if (cell && (cell.textContent || cell.innerText).trim() === name) {
+                row.classList.add(className);
+                return row;
             }
         }
     }
+    return null;
+}
 
-    const burgsInState = [];
-    let firstBurgScrolled = false;
-
-    // Highlight Burg Dots and accumulate names
-    const dots = document.querySelectorAll(`.burg-dot[data-state="${stateName}"]`);
-    dots.forEach(dot => {
-        dot.classList.add('highlighted');
-        dot.style.fill = color;
-        dot.style.stroke = '#000';
-
-        const id = dot.getAttribute('data-id');
-        const name = dot.getAttribute('data-name');
-        if (id) {
-            highlightedIds.push(id);
-            // Highlight Burg Row
-            const row = document.querySelector(`tr[data-id="${id}"]`);
-            if (row) {
-                row.classList.add('related-highlight');
-                if (!firstBurgScrolled) {
-                    row.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    firstBurgScrolled = true;
+// Helper: Highlight trade rows containing a burg name
+function highlightTradeRowsByBurgName(burgName, className) {
+    ['foodTradeTable', 'goldTradeTable'].forEach(tableId => {
+        const table = document.getElementById(tableId);
+        if (table) {
+            const rows = table.getElementsByTagName('tr');
+            for (let i = 1; i < rows.length; i++) {
+                const r = rows[i];
+                const from = r.cells[0].textContent.trim();
+                const to = r.cells[1].textContent.trim();
+                if (from === burgName || to === burgName) {
+                    r.classList.add(className);
                 }
             }
         }
-        if (name) burgsInState.push(name);
     });
+}
 
-    // Highlight Trade Routes
-    if (burgsInState.length > 0) {
+// Helper: Highlight specific trade row by IDs (Need to match Names actually, as table has names)
+// We need to lookup Names from IDs if possible. 
+// OR, we can pass the logic differently.
+// Let's assume we can map ID -> Name using the dot.
+function highlightTradeRowsByIds(fromId, toId, className) {
+    const d1 = document.querySelector(`.burg-dot[data-id="${fromId}"]`);
+    const d2 = document.querySelector(`.burg-dot[data-id="${toId}"]`);
+    if (d1 && d2) {
+        const n1 = d1.getAttribute('data-name');
+        const n2 = d2.getAttribute('data-name');
+
         ['foodTradeTable', 'goldTradeTable'].forEach(tableId => {
-            let firstTradeScrolled = false;
-            const tTable = document.getElementById(tableId);
-            if (tTable) {
-                const tRows = tTable.getElementsByTagName('tr');
-                for (let i = 1; i < tRows.length; i++) {
-                    const tRow = tRows[i];
-                    const fromCell = tRow.getElementsByTagName('td')[0];
-                    const toCell = tRow.getElementsByTagName('td')[1];
-
-                    const fromName = (fromCell.textContent || fromCell.innerText).trim();
-                    const toName = (toCell.textContent || toCell.innerText).trim();
-
-                    if (burgsInState.includes(fromName) || burgsInState.includes(toName)) {
-                        tRow.classList.add('related-highlight');
-                        if (!firstTradeScrolled) {
-                            tRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                            firstTradeScrolled = true;
-                        }
+            const table = document.getElementById(tableId);
+            if (table) {
+                const rows = table.getElementsByTagName('tr');
+                for (let i = 1; i < rows.length; i++) {
+                    const r = rows[i];
+                    const c1 = r.cells[0].textContent.trim();
+                    const c2 = r.cells[1].textContent.trim();
+                    if ((c1 === n1 && c2 === n2) || (c1 === n2 && c2 === n1)) {
+                        r.classList.add(className);
                     }
                 }
             }
@@ -3545,63 +3533,64 @@ function highlightState(stateName, color) {
     }
 }
 
-function highlightTradeRoute(el, fromId, toId) {
-    clearHighlights();
-    if (selectedId) selectBurg(null); // Reset single burg selection mode
 
-    // 1. Highlight the Trade Route Row(s)
-    if (el) el.classList.add('selected');
+function selectBurg(id) {
+    if (!id) return; // Ignore clear calls if any
 
-    // 2. Identify and Highlight Burgs (Dots and Rows)
-    const burgIds = [fromId, toId];
-    const stateNames = new Set();
-
-    burgIds.forEach(id => {
-        // Highlight Dot
-        const dot = document.querySelector(`.burg-dot[data-id="${id}"]`);
-        if (dot) {
-            dot.classList.add('selected');
-            highlightedIds.push(id);
-
-            const sName = dot.getAttribute('data-state');
-            if (sName) stateNames.add(sName);
-        }
-
-        // Highlight Row
+    if (window.selectedBurgIds.has(id)) {
+        window.selectedBurgIds.delete(id);
+    } else {
+        window.selectedBurgIds.add(id);
+        // Scroll to it only on Add
         const row = document.querySelector(`tr[data-id="${id}"]`);
-        if (row) {
-            row.classList.add('selected');
-            row.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-    });
-
-    // 3. Highlight States
-    const stateTable = document.getElementById('stateTable');
-    if (stateTable && stateNames.size > 0) {
-        const stateRows = stateTable.getElementsByTagName('tr');
-        let firstStateScrolled = false;
-        for (let i = 1; i < stateRows.length; i++) {
-            const sRow = stateRows[i];
-            const nameCell = sRow.getElementsByTagName('td')[1];
-            const rowStateName = (nameCell.textContent || nameCell.innerText).trim();
-
-            if (nameCell && stateNames.has(rowStateName)) {
-                sRow.classList.add('related-highlight');
-                if (!firstStateScrolled) {
-                    sRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    firstStateScrolled = true;
-                }
-            }
-        }
+        if (row) row.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
+    updateVisuals();
+}
+
+function highlightBurg(id) {
+    selectBurg(id);
+}
+
+function highlightState(stateName, color) {
+    if (window.selectedStateNames.has(stateName)) {
+        window.selectedStateNames.delete(stateName);
+    } else {
+        window.selectedStateNames.add(stateName);
+        // Scroll
+        const row = highlightRowByName('stateTable', stateName, 'selected'); // Dry run to find row
+        if (row) row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    updateVisuals();
+}
+
+function highlightTradeRoute(el, fromId, toId) {
+    const key = `${fromId}-${toId}`;
+    if (window.selectedTradeRoutes.has(key)) {
+        window.selectedTradeRoutes.delete(key);
+    } else {
+        window.selectedTradeRoutes.add(key);
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    updateVisuals();
+}
+
+function clearHighlights() {
+    window.selectedBurgIds.clear();
+    window.selectedStateNames.clear();
+    window.selectedTradeRoutes.clear();
+    updateVisuals();
 }
 
 function selectState(stateId) {
+    // Legacy support for diplomacy click actions, can keep as is or integrate.
+    // The original code toggled colors on click.
     const btn = document.getElementById('toggleMapMode');
-    const currentMode = btn.getAttribute('data-mode');
-
-    if (currentMode === 'state') {
-        updateDiplomacyColors(stateId);
+    if (btn) {
+        const currentMode = btn.getAttribute('data-mode');
+        if (currentMode === 'state') {
+            updateDiplomacyColors(stateId);
+        }
     }
 }
 
