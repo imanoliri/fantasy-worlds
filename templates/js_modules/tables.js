@@ -127,8 +127,15 @@ function toggleAllTypes(source) {
 
 function sortTable(n, header, tableId) {
     const table = document.getElementById(tableId);
-    let dir = "asc";
+    let dir = "asc"; // Default to ascending if starting fresh
     const tbody = table.querySelector('tbody') || table;
+
+    // Detect current state and cycle: No Arrow/Asc -> Desc -> Original
+    if (header.innerHTML.includes('▲')) {
+        dir = "desc";
+    } else if (header.innerHTML.includes('▼')) {
+        dir = "original";
+    }
 
     // Reset other headers
     const headers = table.querySelectorAll('th');
@@ -138,45 +145,53 @@ function sortTable(n, header, tableId) {
         }
     });
 
-    if (header.innerHTML.includes('▲')) {
-        dir = "desc";
-    }
-
     const rows = Array.from(table.rows).slice(1);
 
-    rows.sort((rowA, rowB) => {
-        const cellA = rowA.getElementsByTagName("TD")[n];
-        const cellB = rowB.getElementsByTagName("TD")[n];
+    if (dir === "original") {
+        // Reset to original order using data-original-index
+        rows.sort((a, b) => {
+            const idxA = parseInt(a.getAttribute('data-original-index') || 0);
+            const idxB = parseInt(b.getAttribute('data-original-index') || 0);
+            return idxA - idxB;
+        });
 
-        let aVal = cellA ? (cellA.textContent || cellA.innerText).toLowerCase() : "";
-        let bVal = cellB ? (cellB.textContent || cellB.innerText).toLowerCase() : "";
+        // Clear arrow
+        header.innerHTML = header.innerHTML.replace(' ▲', '').replace(' ▼', '');
+    } else {
+        // Normal Sort
+        rows.sort((rowA, rowB) => {
+            const cellA = rowA.getElementsByTagName("TD")[n];
+            const cellB = rowB.getElementsByTagName("TD")[n];
 
-        // Remove commas for number parsing
-        const aNum = parseFloat(aVal.replace(/,/g, ''));
-        const bNum = parseFloat(bVal.replace(/,/g, ''));
+            let aVal = cellA ? (cellA.textContent || cellA.innerText).toLowerCase() : "";
+            let bVal = cellB ? (cellB.textContent || cellB.innerText).toLowerCase() : "";
 
-        if (!isNaN(aNum) && !isNaN(bNum)) {
-            return dir === "asc" ? aNum - bNum : bNum - aNum;
+            // Remove commas for number parsing
+            const aNum = parseFloat(aVal.replace(/,/g, ''));
+            const bNum = parseFloat(bVal.replace(/,/g, ''));
+
+            if (!isNaN(aNum) && !isNaN(bNum)) {
+                return dir === "asc" ? aNum - bNum : bNum - aNum;
+            } else {
+                if (aVal < bVal) return dir === "asc" ? -1 : 1;
+                if (aVal > bVal) return dir === "asc" ? 1 : -1;
+                return 0;
+            }
+        });
+
+        // Update arrow
+        if (dir === "asc") {
+            header.innerHTML = header.innerHTML.replace(' ▼', '').replace(' ▲', '') + ' ▲';
         } else {
-            if (aVal < bVal) return dir === "asc" ? -1 : 1;
-            if (aVal > bVal) return dir === "asc" ? 1 : -1;
-            return 0;
+            header.innerHTML = header.innerHTML.replace(' ▲', '').replace(' ▼', '') + ' ▼';
         }
-    });
+    }
 
     // Re-append rows in sorted order
-    // Using DocumentFragment for better performance
     const fragment = document.createDocumentFragment();
     rows.forEach(row => fragment.appendChild(row));
 
-    // Append fragment to cached tbody
     if (tbody) {
         tbody.appendChild(fragment);
-    }
-
-    if (dir === "asc") {
-        header.innerHTML = header.innerHTML.replace(' ▼', '') + ' ▲';
-    } else {
-        header.innerHTML = header.innerHTML.replace(' ▲', '') + ' ▼';
     }
 }
