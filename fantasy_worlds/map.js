@@ -322,6 +322,7 @@ function filterTable() {
 
     // Filter Table
     // Start from 1 to skip header
+    const visibleBurgIds = new Set(); // Track visible burgs for trade route filtering
     for (let i = 1; i < rows.length; i++) {
         const row = rows[i];
         const nameCell = row.getElementsByTagName('td')[0];
@@ -334,6 +335,7 @@ function filterTable() {
             const typeText = typeCell.textContent || typeCell.innerText;
             const stateText = stateCell.textContent || stateCell.innerText;
             const isCapitalRow = row.classList.contains('capital-row');
+
 
             const matchesName = nameText.toLowerCase().indexOf(filterText) > -1;
 
@@ -354,23 +356,47 @@ function filterTable() {
 
             const isVisible = matchesName && matchesType && matchesState;
 
+
+            // --- UPDATED VISIBILITY LOGIC ---
+            // 1. Toggle Row Visibility
+            row.style.display = isVisible ? "" : "none";
+
+            // 2. Track Visible Burgs for Trade Routes
             if (isVisible) {
-                row.style.display = "";
-            } else {
-                row.style.display = "none";
+                visibleBurgIds.add(burgId);
             }
 
-            // Filter Map Dot corresponding to this row
-            const dot = document.querySelector(`.burg-dot[data-id="${burgId}"]`);
-            if (dot) {
-                if (isVisible) {
-                    dot.classList.remove('hidden');
-                } else {
-                    dot.classList.add('hidden');
+            // 3. Toggle Dependent Elements (Dot, Rings)
+            const elementsToToggle = [
+                `.burg-dot[data-id="${burgId}"]`,
+                `.burg-ring-selection[data-id="${burgId}"]`,
+                `.burg-ring-gold[data-id="${burgId}"]`,
+                // Add other rings if needed, e.g. .burg-ring-food if class exists
+            ];
+
+            elementsToToggle.forEach(selector => {
+                const el = document.querySelector(selector);
+                if (el) {
+                    if (isVisible) el.classList.remove('hidden');
+                    else el.classList.add('hidden');
                 }
-            }
+            });
         }
     }
+
+    // 4. Toggle Trade Routes (After collecting all visible burgs)
+    const tradeRoutes = document.querySelectorAll('.trade-route');
+    tradeRoutes.forEach(route => {
+        const startId = route.getAttribute('data-start');
+        const endId = route.getAttribute('data-end');
+
+        // Visible only if BOTH endpoints are visible
+        if (visibleBurgIds.has(startId) && visibleBurgIds.has(endId)) {
+            route.classList.remove('hidden');
+        } else {
+            route.classList.add('hidden');
+        }
+    });
 
     // Filter State Table
     const stateTable = document.getElementById('stateTable');

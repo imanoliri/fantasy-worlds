@@ -87,7 +87,8 @@
                 <!-- Trade Routes -->
                 {% for t in trade_routes %}
                 <line x1="{{ t.x1 }}" y1="{{ t.y1 }}" x2="{{ t.x2 }}" y2="{{ t.y2 }}" stroke="{{ t.stroke_color }}"
-                    stroke-width="1" stroke-opacity="0.6" class="trade-route {{ t.route_class }}" />
+                    stroke-width="1" stroke-opacity="0.6" class="trade-route {{ t.route_class }}"
+                    data-start="{{ t.from_id }}" data-end="{{ t.to_id }}" />
                 {% endfor %}
 
                 <!-- Burgs -->
