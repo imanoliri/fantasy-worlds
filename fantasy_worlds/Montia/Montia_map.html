@@ -49211,6 +49211,11 @@
                     document.getElementById('gameModeBtn').classList.add('active');
                 } else {
                     btn.innerHTML = "Free Mode ▼";
+
+                    // Explicitly hide sidebar (fixes bug where it stays open if Adventure wasn't active)
+                    const sidebar = document.getElementById('adventureSidebar');
+                    if (sidebar) sidebar.classList.add('hidden');
+
                     // Stop Adventure if active
                     if (window.AdventureManager && window.AdventureManager.active) {
                         toggleAdventureMode();
