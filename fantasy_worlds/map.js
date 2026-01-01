@@ -3637,6 +3637,7 @@ function clearHighlights() {
     window.selectedBurgIds.clear();
     window.selectedStateNames.clear();
     window.selectedTradeRoutes.clear();
+    updateDiplomacyColors(null);
     updateVisuals();
 }
 
