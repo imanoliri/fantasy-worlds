@@ -115,26 +115,23 @@ body.show-gold-trades .trade-route-gold {
 
 /* Burg Rings Toggles (Updated for Production) */
 
-body.show-food-trades .burg-dot.food-producer {
+.burg-dot.food-producer {
     stroke: #27ae60 !important;
     /* Green */
 }
 
-body.show-gold-trades .burg-dot.gold-producer {
+.burg-dot.gold-producer {
     stroke: #e74c3c !important;
     /* Red/Maroon */
 }
 
 .burg-ring-gold {
-    display: none;
+    display: block;
     transition: transform 0.2s, stroke 0.2s;
     transform-origin: center;
     transform-box: fill-box;
 }
 
-body.show-gold-trades .burg-ring-gold {
-    display: block;
-}
 
 @keyframes pulse {
     0% {
