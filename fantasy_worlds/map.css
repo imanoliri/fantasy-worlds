@@ -192,7 +192,7 @@ body.show-gold-trades .burg-ring-gold {
 .table-container,
 .state-table-container,
 .trade-table-container {
-    width: 60rem;
+    width: 50rem;
     overflow-y: auto;
     background: rgba(255, 255, 255, 0.95);
     padding: 0;
@@ -207,11 +207,11 @@ body.show-gold-trades .burg-ring-gold {
 }
 
 .table-container {
-    width: 60rem;
+    width: 45rem;
 }
 
 .trade-table-container {
-    width: 25rem;
+    width: 18rem;
 }
 
 /* Stacking Order: States > Burgs > Food > Gold (Left to Right) */
@@ -226,7 +226,7 @@ body.show-gold-trades .burg-ring-gold {
 table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 0.9rem;
+    font-size: 0.8rem;
 }
 
 th,
