@@ -106,10 +106,31 @@
                     data-id="{{ b.id }}" data-name="{{ b.name }}" data-pop="{{ b.population }}" data-type="{{ b.type }}"
                     data-state="{{ b.state_name }}" data-gold="{{ b.net_gold }}" data-food="{{ b.net_food }}"
                     data-quartiers="{{ b.quartier_details }}" data-cell-id="{{ b.cell_id }}">
+                    onclick="selectBurg({{ b.id }})" data-id="{{ b.id }}"
+                    onmouseover="showTooltip(event, '{{ b.name }}', '{{ b.population_fmt }}', '{{ b.type }}')"
+                    onmouseout="hideTooltip()" />
                 </circle>
                 {% if b.is_capital %}
                 <text x="{{ b.x }}" y="{{ b.y }}" dy="0.35em" text-anchor="middle" font-size="{{ b.r + 2 }}px"
                     pointer-events="none" class="capital-crown" style="text-shadow: 0px 0px 2px white;">👑</text>
+                {% endif %}
+                {% endfor %}
+
+                <!-- Info Badges (Rendered last to stay on top) -->
+                {% for b in burgs_draw_order %}
+                {% if b.soldier_quartiers >= 3 or b.craftsman_quartiers >= 3 %}
+                <g class="burg-info-badge" data-id="{{ b.id }}" transform="translate({{ b.x }}, {{ b.y + b.r + 8 }})"
+                    pointer-events="none">
+                    <rect
+                        x="{% if b.soldier_quartiers >= 1 and b.craftsman_quartiers >= 1 %}-18{% else %}-10{% endif %}"
+                        y="-6"
+                        width="{% if b.soldier_quartiers >= 1 and b.craftsman_quartiers >= 1 %}36{% else %}20{% endif %}"
+                        height="12" rx="3" fill="rgba(0,0,0,0.7)" />
+                    <text x="0" y="3" text-anchor="middle" font-size="8px" fill="white" font-family="Arial, sans-serif">
+                        {% if b.soldier_quartiers >= 1 %}⚔️{{ b.soldier_quartiers }}{% endif %}
+                        {% if b.craftsman_quartiers >= 1 %}🛠️{{ b.craftsman_quartiers }}{% endif %}
+                    </text>
+                </g>
                 {% endif %}
                 {% endfor %}
             </svg>

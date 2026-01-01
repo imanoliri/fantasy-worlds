@@ -130,6 +130,16 @@ body.show-gold-trades .trade-route-gold {
     transition: transform 0.2s, stroke 0.2s;
     transform-origin: center;
     transform-box: fill-box;
+    transform-origin: center;
+    transform-box: fill-box;
+}
+
+.burg-info-badge {
+    transition: opacity 0.2s;
+}
+
+.burg-info-badge.hidden {
+    display: none;
 }
 
 
@@ -1055,4 +1065,12 @@ caption {
     backdrop-filter: blur(8px);
     background: rgba(255, 255, 255, 0.4);
     transition: opacity 0.5s ease;
+}
+
+.burg-info-badge {
+    transition: opacity 0.2s;
+}
+
+.burg-info-badge.hidden {
+    display: none;
 }

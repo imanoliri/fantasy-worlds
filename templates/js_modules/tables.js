@@ -85,6 +85,7 @@ function filterTable() {
                 `.burg-dot[data-id="${burgId}"]`,
                 `.burg-ring-selection[data-id="${burgId}"]`,
                 `.burg-ring-gold[data-id="${burgId}"]`,
+                `.burg-info-badge[data-id="${burgId}"]`,
                 // Add other rings if needed, e.g. .burg-ring-food if class exists
             ];
 
