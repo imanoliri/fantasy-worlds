@@ -798,6 +798,12 @@ caption {
     animation: pulseTreasure 1.5s infinite ease-in-out;
 }
 
+/* Soldiers and Craftsmen Toggles */
+/* Info Banners Toggle */
+body:not(.show-info-banners) .burg-info-badge {
+    display: none;
+}
+
 @keyframes pulseTreasure {
     0% {
         transform: scale(1);

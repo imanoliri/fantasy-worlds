@@ -30,33 +30,12 @@ function hideTooltip() {
     tooltip.style.display = 'none';
 }
 
-function toggleFoodTrades() {
-    const btn = document.getElementById('toggleFoodTrades');
-    btn.classList.toggle('active');
-    if (btn.classList.contains('active')) {
-        document.body.classList.add('show-food-trades');
+function toggleLayer(layerClass) {
+    const body = document.body;
+    if (body.classList.contains(layerClass)) {
+        body.classList.remove(layerClass);
     } else {
-        document.body.classList.remove('show-food-trades');
-    }
-}
-
-function toggleGoldTrades() {
-    const btn = document.getElementById('toggleGoldTrades');
-    btn.classList.toggle('active');
-    if (btn.classList.contains('active')) {
-        document.body.classList.add('show-gold-trades');
-    } else {
-        document.body.classList.remove('show-gold-trades');
-    }
-}
-
-function toggleCapitals() {
-    const btn = document.getElementById('toggleCapitals');
-    btn.classList.toggle('active');
-    if (btn.classList.contains('active')) {
-        document.body.classList.add('show-capitals');
-    } else {
-        document.body.classList.remove('show-capitals');
+        body.classList.add(layerClass);
     }
 }
 

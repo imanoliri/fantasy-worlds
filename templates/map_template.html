@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="../map.css">
 </head>
 
-<body class="show-capitals show-food-trades show-gold-trades">
+<body class="show-capitals show-food-trades show-gold-trades show-info-banners">
     <header>
         <h1>World: {{ map_name }}</h1>
         <div class="controls">
@@ -43,9 +43,21 @@
                 </div>
             </div>
 
-            <button class="toggle-btn active" id="toggleFoodTrades" onclick="toggleFoodTrades()">Food Trade</button>
-            <button class="toggle-btn active" id="toggleGoldTrades" onclick="toggleGoldTrades()">Gold Trade</button>
-            <button class="toggle-btn active" id="toggleCapitals" onclick="toggleCapitals()">Show Capitals</button>
+            <div class="dropdown">
+                <button class="dropbtn" onclick="toggleDropdown('layerDropdown')">Map Layers ▼</button>
+                <div class="dropdown-content" id="layerDropdown">
+                    <div class="checkbox-list">
+                        <label><input type="checkbox" id="layerFood" checked onchange="toggleLayer('show-food-trades')">
+                            Food Trade</label>
+                        <label><input type="checkbox" id="layerGold" checked onchange="toggleLayer('show-gold-trades')">
+                            Gold Trade</label>
+                        <label><input type="checkbox" id="layerCapitals" checked
+                                onchange="toggleLayer('show-capitals')"> Capitals</label>
+                        <label><input type="checkbox" id="layerInfoBanners" checked
+                                onchange="toggleLayer('show-info-banners')"> Info Banners</label>
+                    </div>
+                </div>
+            </div>
             <button class="toggle-btn" id="toggleStateTable" onclick="toggleStateTable()">States Table</button>
             <button class="toggle-btn" id="toggleTable" onclick="toggleTable()">Burgs Table</button>
             <button class="toggle-btn" id="toggleFoodTradeTable" onclick="toggleFoodTradeTable()">Food Trade
@@ -127,8 +139,10 @@
                         width="{% if b.soldier_quartiers >= 1 and b.craftsman_quartiers >= 1 %}36{% else %}20{% endif %}"
                         height="12" rx="3" fill="rgba(0,0,0,0.7)" />
                     <text x="0" y="3" text-anchor="middle" font-size="8px" fill="white" font-family="Arial, sans-serif">
-                        {% if b.soldier_quartiers >= 1 %}⚔️{{ b.soldier_quartiers }}{% endif %}
-                        {% if b.craftsman_quartiers >= 1 %}🛠️{{ b.craftsman_quartiers }}{% endif %}
+                        {% if b.soldier_quartiers >= 1 %}<tspan class="badge-soldiers">⚔️{{ b.soldier_quartiers }}
+                        </tspan>{% endif %}
+                        {% if b.craftsman_quartiers >= 1 %}<tspan class="badge-craftsmen">🛠️{{ b.craftsman_quartiers }}
+                        </tspan>{% endif %}
                     </text>
                 </g>
                 {% endif %}
