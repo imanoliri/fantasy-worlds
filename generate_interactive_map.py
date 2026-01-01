@@ -159,7 +159,9 @@ def generate_map(burgs, output_file, trades_data=None, map_name="Interactive Map
                 trade_routes.append({
                     'x1': x1, 'y1': y1, 'x2': x2, 'y2': y2,
                     'stroke_color': stroke_color,
-                    'route_class': route_class
+                    'route_class': route_class,
+                    'from_id': from_id,
+                    'to_id': to_id
                 })
                 
                 # Table Rows

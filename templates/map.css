@@ -59,8 +59,10 @@ svg:active {
 }
 
 .burg-dot {
-    transition: r 0.2s, stroke-width 0.2s, opacity 0.3s;
+    transition: r 0.2s, stroke-width 0.2s, opacity 0.3s, transform 0.2s;
     cursor: pointer;
+    transform-origin: center;
+    transform-box: fill-box;
 }
 
 .burg-dot:hover {
@@ -69,17 +71,16 @@ svg:active {
 }
 
 .burg-dot.selected {
-    stroke: #000;
-    stroke-width: 4px;
-    r: 15px;
-    animation: pulse 1s infinite;
+    /* stroke: #000; Removed to keep green stroke visible */
+    stroke-width: 3px;
+    transform: scale(1.3);
 }
 
 .burg-dot.highlighted {
     stroke: #000;
     stroke-width: 4px;
     r: 15px;
-    animation: pulse 1s infinite;
+    /* No animation */
 }
 
 .burg-dot.hidden {
@@ -114,23 +115,33 @@ body.show-gold-trades .trade-route-gold {
 
 /* Burg Rings Toggles (Updated for Production) */
 
-body.show-food-trades .burg-dot.food-producer {
+.burg-dot.food-producer {
     stroke: #27ae60 !important;
     /* Green */
 }
 
-body.show-gold-trades .burg-dot.gold-producer {
+.burg-dot.gold-producer {
     stroke: #e74c3c !important;
     /* Red/Maroon */
 }
 
 .burg-ring-gold {
+    display: block;
+    transition: transform 0.2s, stroke 0.2s;
+    transform-origin: center;
+    transform-box: fill-box;
+    transform-origin: center;
+    transform-box: fill-box;
+}
+
+.burg-info-badge {
+    transition: opacity 0.2s;
+}
+
+.burg-info-badge.hidden {
     display: none;
 }
 
-body.show-gold-trades .burg-ring-gold {
-    display: block;
-}
 
 @keyframes pulse {
     0% {
@@ -146,6 +157,29 @@ body.show-gold-trades .burg-ring-gold {
     }
 }
 
+/* New Selection Ring Styles */
+.burg-ring-selection {
+    display: none;
+    stroke: #000;
+    stroke-width: 3px;
+    opacity: 0.8;
+    transition: transform 0.2s;
+    transform-origin: center;
+    transform-box: fill-box;
+}
+
+.burg-ring-selection.selected {
+    display: block !important;
+    transform: scale(1.3);
+}
+
+.burg-ring-gold.selected {
+    display: block !important;
+    opacity: 1;
+    transform: scale(1.3);
+    stroke-width: 3px;
+}
+
 /* Table Section */
 .tables-wrapper {
     position: absolute;
@@ -153,15 +187,19 @@ body.show-gold-trades .burg-ring-gold {
     top: 0;
     bottom: 0;
     display: flex;
-    z-index: 20;
-    pointer-events: none;
-    flex-direction: row-reverse;
+    z-index: 1001;
+    pointer-events: auto;
+    /* Allow interaction with scrollbar */
+    direction: rtl;
+    /* Stack tables from left to right: states, burgs, trade food, trade gold*/
+    max-width: 100vw;
+    overflow-x: auto;
 }
 
 .table-container,
 .state-table-container,
 .trade-table-container {
-    width: 800px;
+    width: 50rem;
     overflow-y: auto;
     background: rgba(255, 255, 255, 0.95);
     padding: 0;
@@ -169,10 +207,18 @@ body.show-gold-trades .burg-ring-gold {
     border-left: 1px solid #ddd;
     pointer-events: auto;
     transition: transform 0.3s ease-in-out;
+    flex-shrink: 0;
+    /* Prevent shrinking when screen is small */
+    direction: ltr;
+    /* Stack columns from left to right */
+}
+
+.table-container {
+    width: 45rem;
 }
 
 .trade-table-container {
-    width: 400px;
+    width: 18rem;
 }
 
 /* Stacking Order: States > Burgs > Food > Gold (Left to Right) */
@@ -187,12 +233,12 @@ body.show-gold-trades .burg-ring-gold {
 table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 0.9rem;
+    font-size: 0.8rem;
 }
 
 th,
 td {
-    padding: 10px;
+    padding: 0.8rem;
     text-align: left;
     border-bottom: 1px solid #eee;
 }
@@ -1019,4 +1065,12 @@ caption {
     backdrop-filter: blur(8px);
     background: rgba(255, 255, 255, 0.4);
     transition: opacity 0.5s ease;
+}
+
+.burg-info-badge {
+    transition: opacity 0.2s;
+}
+
+.burg-info-badge.hidden {
+    display: none;
 }
