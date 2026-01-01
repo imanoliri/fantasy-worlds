@@ -1080,3 +1080,107 @@ body:not(.show-info-banners) .burg-info-badge {
 .burg-info-badge.hidden {
     display: none;
 }
+
+/* Responsive Adventure Panel (Vertical Layout) */
+/* Responsive Adventure Panel (Vertical Layout) */
+@media (orientation: portrait) {
+    .container {
+        flex-direction: column;
+    }
+
+    /* Map takes remaining vertical space */
+    .map-container {
+        flex: 1;
+        width: 100%;
+        height: auto;
+    }
+
+    /* Sidebar moves to bottom, fixed height, Grid layout */
+    .adventure-sidebar {
+        width: 100%;
+        height: 200px;
+        border-left: none;
+        border-top: 3px solid #34495e;
+        overflow-y: hidden;
+        overflow-x: auto;
+
+        display: grid;
+        /* First col: Header+Options, Second: Stats, Third: Log */
+        grid-template-columns: 160px 180px 1fr;
+        grid-template-rows: 1fr auto;
+        /* Header takes available, Options at bottom */
+        grid-template-areas:
+            "header stats log"
+            "options stats log";
+    }
+
+    /* Column 1 Top: Header/Controls */
+    .sidebar-header {
+        grid-area: header;
+        width: 100%;
+        min-width: 0;
+        /* reset */
+        height: 100%;
+        border-bottom: none;
+        border-right: 2px solid #2c3e50;
+        box-sizing: border-box;
+
+        display: flex;
+        flex-direction: column;
+        /* Stack contents vertically */
+        justify-content: flex-start;
+        /* Align to top */
+        padding: 10px;
+    }
+
+    /* Stack buttons inside header vertically */
+    .sidebar-controls {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    /* Column 1 Bottom: Options Button */
+    .sidebar-options-btn-container {
+        grid-area: options;
+        width: 100%;
+        min-width: 0;
+        height: auto;
+        /* Take content height */
+        border-top: none;
+        border-left: none;
+        /* No border left */
+        border-right: 2px solid #2c3e50;
+        /* Continue header border */
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 10px !important;
+        box-sizing: border-box;
+        background: #34495e;
+        /* Match header bg */
+    }
+
+    /* Column 2: Stats (Span both rows) */
+    .stats-panel {
+        grid-area: stats;
+        width: 100%;
+        min-width: 0;
+        height: 100%;
+        border-right: 2px solid #2c3e50;
+        box-sizing: border-box;
+        overflow-y: auto;
+    }
+
+    /* Column 3: Log (Span both rows) */
+    .log-panel {
+        grid-area: log;
+        width: 100%;
+        /* Fill 1fr */
+        min-width: 150px;
+        /* Min width for readability */
+        height: 100%;
+        border-top: none;
+        box-sizing: border-box;
+    }
+}
