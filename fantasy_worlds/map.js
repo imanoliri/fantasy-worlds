@@ -3432,9 +3432,9 @@ function updateVisuals() {
         // Highlight Burgs in State
         const dots = document.querySelectorAll(`.burg-dot[data-state="${stateName}"]`);
         dots.forEach(dot => {
-            dot.classList.add('highlighted');
-            // Only override fill if not selected (selected takes precedence)
+            // Only apply state highlight if not individually selected
             if (!dot.classList.contains('selected')) {
+                dot.classList.add('highlighted');
                 dot.style.fill = color;
                 dot.style.stroke = '#000';
             }
