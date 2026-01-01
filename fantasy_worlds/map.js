@@ -2702,9 +2702,6 @@ svg.addEventListener('click', (e) => {
     if (e.target.classList.contains('burg-dot')) {
         const id = e.target.getAttribute('data-id');
         selectBurg(id);
-    } else {
-        // Deselect if clicking empty space
-        // selectBurg(null);
     }
 });
 
@@ -3548,12 +3545,15 @@ function highlightTradeRowsByIds(fromId, toId, className) {
 function selectBurg(id) {
     if (!id) return; // Ignore clear calls if any
 
-    if (window.selectedBurgIds.has(id)) {
-        window.selectedBurgIds.delete(id);
+    // Force String ID for consistency between Map (string) and Table (number)
+    const strId = id.toString();
+
+    if (window.selectedBurgIds.has(strId)) {
+        window.selectedBurgIds.delete(strId);
     } else {
-        window.selectedBurgIds.add(id);
+        window.selectedBurgIds.add(strId);
         // Scroll to it only on Add
-        const row = document.querySelector(`tr[data-id="${id}"]`);
+        const row = document.querySelector(`tr[data-id="${strId}"]`);
         if (row) row.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
     updateVisuals();

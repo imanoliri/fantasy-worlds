@@ -8,9 +8,6 @@ svg.addEventListener('click', (e) => {
     if (e.target.classList.contains('burg-dot')) {
         const id = e.target.getAttribute('data-id');
         selectBurg(id);
-    } else {
-        // Deselect if clicking empty space
-        // selectBurg(null);
     }
 });
 
