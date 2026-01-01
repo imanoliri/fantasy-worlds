@@ -3377,37 +3377,48 @@ window.selectedTradeRoutes = new Set(); // Stores strings "fromId-toId"
 
 function updateVisuals() {
     // 1. Clear ALL previous highlights
-    document.querySelectorAll('.burg-dot').forEach(el => {
+    // 1. Clear ALL previous highlights
+    document.querySelectorAll('.burg-dot, .burg-ring-selection, .burg-ring-gold').forEach(el => {
         el.classList.remove('selected', 'highlighted');
-        el.style.fill = '';
-        el.style.stroke = '';
+        if (el.classList.contains('burg-dot')) {
+            el.style.fill = '';
+            el.style.stroke = '';
+        }
     });
     document.querySelectorAll('tr').forEach(el => {
         el.classList.remove('selected', 'related-highlight');
     });
 
     // 2. Highlight Selected Burgs and their Relations
+    // 2. Highlight Selected Burgs and their Relations
     window.selectedBurgIds.forEach(id => {
         const row = document.querySelector(`tr[data-id="${id}"]`);
-        const dot = document.querySelector(`.burg-dot[data-id="${id}"]`);
 
-        if (row) row.classList.add('selected');
-        if (dot) {
+        // Select all circles (dot, ring, selection ring) to apply selection style
+        const matches = document.querySelectorAll(`circle[data-id="${id}"]`);
+
+        matches.forEach(dot => {
             dot.classList.add('selected');
+        });
 
+        // Use main dot for data retrieval
+        const mainDot = document.querySelector(`.burg-dot[data-id="${id}"]`);
+
+        if (mainDot) {
             // Related State
-            const stateName = dot.getAttribute('data-state');
+            const stateName = mainDot.getAttribute('data-state');
             if (stateName) {
-                // Determine State Color if possible? For now just highlight row
                 highlightRowByName('stateTable', stateName, 'related-highlight');
             }
 
             // Related Trade Routes
-            const burgName = dot.getAttribute('data-name');
+            const burgName = mainDot.getAttribute('data-name');
             if (burgName) {
                 highlightTradeRowsByBurgName(burgName, 'related-highlight');
             }
         }
+
+        if (row) row.classList.add('selected');
     });
 
     // 3. Highlight Selected States and their Relations

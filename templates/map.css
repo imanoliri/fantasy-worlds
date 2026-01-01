@@ -59,8 +59,10 @@ svg:active {
 }
 
 .burg-dot {
-    transition: r 0.2s, stroke-width 0.2s, opacity 0.3s;
+    transition: r 0.2s, stroke-width 0.2s, opacity 0.3s, transform 0.2s;
     cursor: pointer;
+    transform-origin: center;
+    transform-box: fill-box;
 }
 
 .burg-dot:hover {
@@ -69,17 +71,16 @@ svg:active {
 }
 
 .burg-dot.selected {
-    stroke: #000;
-    stroke-width: 4px;
-    r: 15px;
-    animation: pulse 1s infinite;
+    /* stroke: #000; Removed to keep green stroke visible */
+    stroke-width: 3px;
+    transform: scale(1.3);
 }
 
 .burg-dot.highlighted {
     stroke: #000;
     stroke-width: 4px;
     r: 15px;
-    animation: pulse 1s infinite;
+    /* No animation */
 }
 
 .burg-dot.hidden {
@@ -126,6 +127,9 @@ body.show-gold-trades .burg-dot.gold-producer {
 
 .burg-ring-gold {
     display: none;
+    transition: transform 0.2s, stroke 0.2s;
+    transform-origin: center;
+    transform-box: fill-box;
 }
 
 body.show-gold-trades .burg-ring-gold {
@@ -144,6 +148,29 @@ body.show-gold-trades .burg-ring-gold {
     100% {
         stroke-opacity: 1;
     }
+}
+
+/* New Selection Ring Styles */
+.burg-ring-selection {
+    display: none;
+    stroke: #000;
+    stroke-width: 3px;
+    opacity: 0.8;
+    transition: transform 0.2s;
+    transform-origin: center;
+    transform-box: fill-box;
+}
+
+.burg-ring-selection.selected {
+    display: block !important;
+    transform: scale(1.3);
+}
+
+.burg-ring-gold.selected {
+    display: block !important;
+    opacity: 1;
+    transform: scale(1.3);
+    stroke-width: 3px;
 }
 
 /* Table Section */
