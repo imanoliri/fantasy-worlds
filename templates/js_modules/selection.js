@@ -67,7 +67,7 @@ function updateVisuals() {
             if (!dot.classList.contains('selected')) {
                 dot.classList.add('highlighted');
                 dot.style.fill = color;
-                dot.style.stroke = '#000';
+                dot.style.setProperty('stroke', '#000', 'important'); // Force override of producer colors
             }
 
             const id = dot.getAttribute('data-id');
