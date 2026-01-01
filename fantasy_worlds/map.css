@@ -183,9 +183,8 @@ body.show-gold-trades .burg-ring-gold {
     z-index: 1001;
     pointer-events: auto;
     /* Allow interaction with scrollbar */
-    /* Using RTL so that "start" is on the right, and overflow goes to the left (which becomes scrollable) */
     direction: rtl;
-    flex-direction: row;
+    /* Stack tables from left to right: states, burgs, trade food, trade gold*/
     max-width: 100vw;
     overflow-x: auto;
 }
@@ -203,6 +202,8 @@ body.show-gold-trades .burg-ring-gold {
     transition: transform 0.3s ease-in-out;
     flex-shrink: 0;
     /* Prevent shrinking when screen is small */
+    direction: ltr;
+    /* Stack columns from left to right */
 }
 
 .table-container {
