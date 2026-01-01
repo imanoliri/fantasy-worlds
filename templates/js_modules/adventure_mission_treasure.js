@@ -162,6 +162,8 @@ const MissionTreasure = {
             AdventureManager.closePopup();
             this.spawn(); // Respawn
             AdventureManager.updateStats();
+
+            AdventureManager.events.emit('missionComplete', { type: 'treasure', amount: this.data.amount });
         } else {
             AdventureManager.showFeedback("Not enough tools!");
         }

@@ -33,6 +33,20 @@ const AdventureManager = {
     init() {
         if (this.partyElement) return;
 
+        // Initialize Event System
+        this.events = {
+            listeners: {},
+            on(event, callback) {
+                if (!this.listeners[event]) this.listeners[event] = [];
+                this.listeners[event].push(callback);
+            },
+            emit(event, data) {
+                if (this.listeners[event]) {
+                    this.listeners[event].forEach(cb => cb(data));
+                }
+            }
+        };
+
         // Identify Accessible Land (Islands with at least one port)
         this.identifyAccessibleLand();
         // Calculate static docking points for ports
@@ -175,7 +189,7 @@ const AdventureManager = {
         const sidebar = document.getElementById('adventureSidebar');
 
         if (this.active) {
-            btn.classList.add('active');
+            if (btn) btn.classList.add('active');
             if (sidebar) {
                 sidebar.classList.remove('hidden');
             }
@@ -198,7 +212,7 @@ const AdventureManager = {
         } else {
             this.movementId++; // Cancel any ongoing movement
             this.isMoving = false;
-            btn.classList.remove('active');
+            if (btn) btn.classList.remove('active');
             const sidebar = document.getElementById('adventureSidebar');
             if (sidebar) {
                 sidebar.classList.add('hidden');
@@ -258,8 +272,11 @@ const AdventureManager = {
             this.updateStats();
             this.render();
 
-            // Trigger Start Ping
-            const startNode = graphData[startCell];
+            // Emit Event (Campaigns may override start location here)
+            if (this.events) this.events.emit('start', this.party);
+
+            // Trigger Start Ping (Use actual party cell in case it was moved)
+            const startNode = graphData[this.party.cell];
             if (startNode) {
                 this.showLocationPing(startNode.p[0], startNode.p[1]);
             }
@@ -794,12 +811,17 @@ const AdventureManager = {
         if (this.options.Siege) MissionSiege.updateVisuals();
         if (this.options.Diplomacy) MissionDiplomacy.updateVisuals();
         if (this.options.Explore) MissionExplore.updateVisuals();
+
+        if (this.events) this.events.emit('render', null);
     },
 
     updateStats() {
         if (document.getElementById('advSoldiers')) document.getElementById('advSoldiers').textContent = this.party.soldiers;
         if (document.getElementById('advFood')) document.getElementById('advFood').textContent = this.party.food;
         if (document.getElementById('advGold')) document.getElementById('advGold').textContent = this.party.gold;
+
+        if (this.events) this.events.emit('updateStats', this.party);
+
         if (document.getElementById('advTools')) document.getElementById('advTools').textContent = this.party.tools;
 
         // Game Over Check

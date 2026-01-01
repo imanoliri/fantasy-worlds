@@ -1,5 +1,6 @@
 const MissionSiege = {
     data: null, // { burgId: int, armyCell: int, soldiers: int }
+    lastSiegedBurgId: -1, // Track the last sieged burg to prevent immediate repeats
     element: null, // Group for Bomb icon
     countElement: null,
     ringGroup: null, // Group for siege ring
@@ -73,9 +74,22 @@ const MissionSiege = {
         const capitals = burgsData.filter(b => b.is_capital);
         if (capitals.length === 0) return;
 
+        // Filter out the last sieged burg to avoid repetition
+        let candidateCapitals = capitals;
+        if (this.lastSiegedBurgId !== -1) {
+            candidateCapitals = capitals.filter(b => b.id !== this.lastSiegedBurgId);
+            // If only 1 capital exists, use the original list
+            if (candidateCapitals.length === 0) {
+                candidateCapitals = capitals;
+            }
+        }
+
         // Pick random capital
-        const capital = capitals[Math.floor(Math.random() * capitals.length)];
+        const capital = candidateCapitals[Math.floor(Math.random() * candidateCapitals.length)];
         const capitalCell = capital.cell_id;
+
+        // Save for next time
+        this.lastSiegedBurgId = capital.id;
 
         // Find neighbor land cell for army
         const neighbors = graphData[capitalCell].c;
@@ -92,6 +106,9 @@ const MissionSiege = {
             this.data = { burgId: capital.id, armyCell: armyCell, soldiers: strength };
             this.updateVisuals();
             AdventureManager.showFeedback(`Siege started at ${capital.name}!`);
+
+            // Emit Start Event
+            if (AdventureManager.events) AdventureManager.events.emit('missionStart', { type: 'siege', ...this.data });
         }
     },
 
@@ -213,6 +230,9 @@ const MissionSiege = {
 
             AdventureManager.showFeedback(`SIEGE BROKEN! Hero of the city! +${goldReward} Gold.`);
 
+            // Emit Complete Event (Win)
+            if (AdventureManager.events) AdventureManager.events.emit('missionComplete', { type: 'siege', result: 'win', ...this.data });
+
             // Floating Text (Win)
             const cell = graphData[AdventureManager.party.cell];
             if (cell) {
@@ -250,6 +270,10 @@ const MissionSiege = {
 
             if (this.data.soldiers === 0) {
                 AdventureManager.showFeedback(`DEFEAT! But siege is broken at high cost!`);
+
+                // Emit Complete Event (Sacrifice)
+                if (AdventureManager.events) AdventureManager.events.emit('missionComplete', { type: 'siege', result: 'sacrifice', ...this.data });
+
                 this.data = null;
                 this.updateVisuals();
                 setTimeout(() => this.spawn(), 3000);

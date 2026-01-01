@@ -125,9 +125,11 @@ const MissionExplore = {
             AdventureManager.showFloatingText(`+5 💰`, cell.p[0], cell.p[1] - 20, "#f1c40f");
         }
 
-        this.spawnLocation(index); // Respawn immediately
         AdventureManager.updateStats();
+        this.spawnLocation(index); // Respawn immediately
         this.updateVisuals(); // Update to remove old, show new
+
+        AdventureManager.events.emit('missionComplete', { type: 'explore' });
     }
 };
 

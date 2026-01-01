@@ -11,5 +11,6 @@
     "adventure_mission_explore.js",
     "adventure.js",
     "interactions.js",
+    "campaign.js",
     "selection.js"
 ]

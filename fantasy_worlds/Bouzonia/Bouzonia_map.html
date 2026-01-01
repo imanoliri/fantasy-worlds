@@ -134,8 +134,16 @@
                 Table</button>
             <button class="toggle-btn active" id="toggleMap" onclick="toggleMap()">Show Map</button>
             <button class="toggle-btn" id="toggleMapMode" onclick="toggleMapMode()">Mode: Biome</button>
-            <button class="toggle-btn special" id="toggleAdventure" onclick="toggleAdventureMode()">⚔️
-                Adventure</button>
+
+            <div class="dropdown">
+                <button class="toggle-btn special dropbtn" id="gameModeBtn"
+                    onclick="toggleDropdown('gameModeDropdown')">Free Mode ▼</button>
+                <div class="dropdown-content" id="gameModeDropdown">
+                    <a href="#" onclick="selectGameMode('none')">Free Mode</a>
+                    <a href="#" onclick="selectGameMode('adventure')">⚔️ Adventure</a>
+                    <a href="#" onclick="selectGameMode('campaign')">📜 Campaign</a>
+                </div>
+            </div>
             <span>| Total Burgs: 355</span>
 
         </div>
@@ -38112,6 +38120,23 @@
                     <button class="adventure-btn start-btn" onclick="AdventureManager.start()">Start New</button>
                     <button class="adventure-btn pause-btn" onclick="toggleAdventureMode()">Pause</button>
                 </div>
+
+                <!-- Campaign Controls -->
+                <div id="campaignSelectContainer" class="campaign-panel hidden">
+                    <select id="campaignDropdown" class="campaign-dropdown"
+                        onchange="CampaignManager.selectCampaign(this.value)">
+                        <option value="" disabled selected>Select a Campaign...</option>
+                    </select>
+                    <!-- Description removed, now tooltip -->
+                    <div id="campaignObjectives" class="campaign-objectives hidden">
+                        <h3>Objectives</h3>
+                        <ul id="objectivesList" class="objective-list"></ul>
+                    </div>
+                    <button id="campaignStartBtn" class="adventure-btn start-btn hidden"
+                        onclick="CampaignManager.startCampaign()">Start Campaign</button>
+                    <button id="campaignCancelBtn" class="adventure-btn pause-btn hidden"
+                        onclick="CampaignManager.cancelCampaign()" style="margin-top: 5px;">Cancel Campaign</button>
+                </div>
             </div>
 
             <div class="stats-panel">
@@ -43265,6 +43290,21 @@
         </div>
         <div id="tooltip" class="tooltip"></div>
 
+        <!-- Campaign Victory Modal -->
+        <div id="campaignVictoryModal" class="adventure-modal"
+            style="display:none; justify-content:center; align-items:center;">
+            <div class="modal-content" style="max-width: 400px; text-align: center; border: 3px solid #f1c40f;">
+                <h2 style="color: #f39c12; font-family: 'Cinzel', serif; font-size: 2em; margin-bottom: 20px;">CAMPAIGN
+                    VICTORY!</h2>
+                <p style="font-size: 1.2em; margin-bottom: 20px;">You have successfully defended the realm and completed
+                    all objectives.</p>
+                <div class="actions" style="display: flex; gap: 10px; justify-content: center;">
+                    <button class="btn-enter" onclick="CampaignManager.endCampaign()"
+                        style="background: #27ae60;">Return to Free Mode</button>
+                </div>
+            </div>
+        </div>
+
         <!-- Adventure Options Modal -->
         <div id="adventureOptionsModal" class="modal-overlay">
             <div class="burg-popup options-popup">
@@ -43341,6 +43381,50 @@
             var marineBiomeId = 0;
         </script>
         <script src="../map.js"></script>
+        <script>
+            function selectGameMode(mode) {
+                const btn = document.getElementById('gameModeBtn');
+                const dropdown = document.getElementById('gameModeDropdown');
+
+                if (mode === 'adventure') {
+                    btn.innerHTML = "Adventure ▼";
+                    // Only toggle if not already active
+                    if (!window.AdventureManager || !window.AdventureManager.active) {
+                        toggleAdventureMode();
+                    }
+                } else if (mode === 'campaign') {
+                    btn.innerHTML = "Campaign ▼";
+                    // Stop Adventure if active
+                    if (window.AdventureManager && window.AdventureManager.active) {
+                        toggleAdventureMode();
+                    }
+                    console.log("Campaign Mode selected");
+
+                    // 1. Show Sidebar
+                    const sidebar = document.getElementById('adventureSidebar');
+                    if (sidebar) sidebar.classList.remove('hidden');
+
+                    // 2. Initialize Campaign Manager
+                    if (window.CampaignManager) {
+                        CampaignManager.init();
+                        // Hide standard controls
+                        document.querySelector('.sidebar-controls').classList.add('hidden');
+                        document.getElementById('campaignSelectContainer').classList.remove('hidden');
+                    }
+
+                    document.getElementById('gameModeBtn').classList.add('active');
+                } else {
+                    btn.innerHTML = "Free Mode ▼";
+                    // Stop Adventure if active
+                    if (window.AdventureManager && window.AdventureManager.active) {
+                        toggleAdventureMode();
+                    }
+                }
+
+                // Close dropdown
+                dropdown.classList.remove('show');
+            }
+        </script>
 </body>
 
 </html>
