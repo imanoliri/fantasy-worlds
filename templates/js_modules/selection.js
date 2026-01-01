@@ -96,9 +96,14 @@ function updateVisuals() {
         highlightTradeRowsByIds(fromId, toId, 'selected');
 
         // Highlight Endpoints
+        // Highlight Endpoints
         [fromId, toId].forEach(id => {
-            const dot = document.querySelector(`.burg-dot[data-id="${id}"]`);
-            if (dot) dot.classList.add('selected');
+            // Select all circles (dot, ring, selection ring) to apply selection style
+            const matches = document.querySelectorAll(`circle[data-id="${id}"]`);
+            matches.forEach(dot => {
+                dot.classList.add('selected');
+            });
+
             const row = document.querySelector(`tr[data-id="${id}"]`);
             if (row) row.classList.add('selected');
         });
