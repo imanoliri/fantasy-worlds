@@ -372,6 +372,21 @@ caption {
     border-left: 3px solid transparent;
 }
 
+/* Green Button Logic */
+.toggle-btn.green-btn,
+.dropbtn.green-btn {
+    background-color: #27ae60;
+    /* Green */
+    color: white;
+}
+
+.toggle-btn.green-btn:hover,
+.dropbtn.green-btn:hover {
+    background-color: #219150;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
 .dropdown-content a:hover {
     background-color: #f8f9fa;
     border-left: 3px solid #3498db;

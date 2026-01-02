@@ -10,12 +10,13 @@
 
 <body class="show-capitals show-food-trades show-gold-trades show-info-banners">
     <header>
-        <h1>World: Montreia</h1>
+        <h1 style="display: none;">World: Montreia</h1>
         <div class="controls">
-            <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="Search burgs...">
+            <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="Search burgs..."
+                style="display: none;">
 
             <div class="dropdown">
-                <button class="dropbtn" onclick="toggleDropdown('typeDropdown')">Filter Types ▼</button>
+                <button class="dropbtn" onclick="toggleDropdown('typeDropdown')">Types ▼</button>
                 <div class="dropdown-content" id="typeDropdown">
                     <div class="checkbox-list" id="typeCheckboxes">
                         <label><input type="checkbox" value="all" checked onchange="toggleAllTypes(this)"> All
@@ -39,7 +40,7 @@
             </div>
 
             <div class="dropdown">
-                <button class="dropbtn" onclick="toggleDropdown('stateDropdown')">Filter States ▼</button>
+                <button class="dropbtn" onclick="toggleDropdown('stateDropdown')">States ▼</button>
                 <div class="dropdown-content" id="stateDropdown">
                     <div class="checkbox-list" id="stateCheckboxes">
                         <label><input type="checkbox" value="all" checked onchange="toggleAllStates(this)"> All
@@ -160,14 +161,21 @@
                     </div>
                 </div>
             </div>
-            <button class="toggle-btn" id="toggleStateTable" onclick="toggleStateTable()">States Table</button>
-            <button class="toggle-btn" id="toggleTable" onclick="toggleTable()">Burgs Table</button>
-            <button class="toggle-btn" id="toggleFoodTradeTable" onclick="toggleFoodTradeTable()">Food Trade
-                Table</button>
-            <button class="toggle-btn" id="toggleGoldTradeTable" onclick="toggleGoldTradeTable()">Gold Trade
-                Table</button>
-            <button class="toggle-btn active" id="toggleMap" onclick="toggleMap()">Show Map</button>
-            <button class="toggle-btn" id="toggleMapMode" onclick="toggleMapMode()">Mode: Biome</button>
+            <button class="toggle-btn" id="toggleStateTable" onclick="toggleStateTable()">States</button>
+            <button class="toggle-btn" id="toggleTable" onclick="toggleTable()">Burgs</button>
+            <button class="toggle-btn" id="toggleFoodTradeTable" onclick="toggleFoodTradeTable()">Food Trade</button>
+            <button class="toggle-btn" id="toggleGoldTradeTable" onclick="toggleGoldTradeTable()">Gold Trade</button>
+            <div class="dropdown">
+                <button class="dropbtn green-btn" id="mapModeBtn" onclick="toggleDropdown('mapModeDropdown')">Map: Biome
+                    ▼</button>
+                <div class="dropdown-content" id="mapModeDropdown">
+                    <a href="#" onclick="setMapMode('biome')">Biome</a>
+                    <a href="#" onclick="setMapMode('state')">Political</a>
+                    <a href="#" onclick="setMapMode('heightmap')">Heightmap</a>
+                    <a href="#" onclick="setMapMode('temperature')">Temperature</a>
+                    <a href="#" onclick="setMapMode('none')">None</a>
+                </div>
+            </div>
 
             <div class="dropdown">
                 <button class="toggle-btn special dropbtn" id="gameModeBtn"
