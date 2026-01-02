@@ -3,22 +3,19 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>World: {{ map_name }}</title>
     <link rel="stylesheet" href="../map.css">
 </head>
 
-<body class="show-capitals show-food-trades show-gold-trades show-info-banners">
+<body class="show-capitals show-food-trades show-gold-trades">
     <header>
-        <div class="header-top">
-            <h1 class="world-title-bar">{{ map_name }}</h1>
-            <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="Search burgs...">
-            <button id="headerToggleBtn" onclick="toggleHeaderControls()" title="Toggle Controls">▼</button>
-        </div>
+        <h1>World: {{ map_name }}</h1>
         <div class="controls">
+            <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="Search burgs...">
 
             <div class="dropdown">
-                <button class="dropbtn" onclick="toggleDropdown('typeDropdown')">Types ▼</button>
+                <button class="dropbtn" onclick="toggleDropdown('typeDropdown')">Filter Types ▼</button>
                 <div class="dropdown-content" id="typeDropdown">
                     <div class="checkbox-list" id="typeCheckboxes">
                         <label><input type="checkbox" value="all" checked onchange="toggleAllTypes(this)"> All
@@ -32,7 +29,7 @@
             </div>
 
             <div class="dropdown">
-                <button class="dropbtn" onclick="toggleDropdown('stateDropdown')">States ▼</button>
+                <button class="dropbtn" onclick="toggleDropdown('stateDropdown')">Filter States ▼</button>
                 <div class="dropdown-content" id="stateDropdown">
                     <div class="checkbox-list" id="stateCheckboxes">
                         <label><input type="checkbox" value="all" checked onchange="toggleAllStates(this)"> All
@@ -46,26 +43,17 @@
                 </div>
             </div>
 
-            <div class="dropdown">
-                <button class="dropbtn" onclick="toggleDropdown('layerDropdown')">Map Layers ▼</button>
-                <div class="dropdown-content" id="layerDropdown">
-                    <div class="checkbox-list">
-                        <label><input type="checkbox" id="layerFood" checked onchange="toggleLayer('show-food-trades')">
-                            Food Trade</label>
-                        <label><input type="checkbox" id="layerGold" checked onchange="toggleLayer('show-gold-trades')">
-                            Gold Trade</label>
-                        <label><input type="checkbox" id="layerCapitals" checked
-                                onchange="toggleLayer('show-capitals')"> Capitals</label>
-                        <label><input type="checkbox" id="layerInfoBanners" checked
-                                onchange="toggleLayer('show-info-banners')"> Info Banners</label>
-                    </div>
-                </div>
-            </div>
-            <button class="toggle-btn" id="toggleStateTable" onclick="toggleStateTable()">States</button>
-            <button class="toggle-btn" id="toggleTable" onclick="toggleTable()">Burgs</button>
-            <button class="toggle-btn" id="toggleFoodTradeTable" onclick="toggleFoodTradeTable()">Food Trade</button>
-            <button class="toggle-btn" id="toggleGoldTradeTable" onclick="toggleGoldTradeTable()">Gold Trade</button>
-            <button class="toggle-btn green-btn" id="mapModeBtn" onclick="cycleMapMode()">Map: Biome</button>
+            <button class="toggle-btn active" id="toggleFoodTrades" onclick="toggleFoodTrades()">Food Trade</button>
+            <button class="toggle-btn active" id="toggleGoldTrades" onclick="toggleGoldTrades()">Gold Trade</button>
+            <button class="toggle-btn active" id="toggleCapitals" onclick="toggleCapitals()">Show Capitals</button>
+            <button class="toggle-btn" id="toggleStateTable" onclick="toggleStateTable()">States Table</button>
+            <button class="toggle-btn" id="toggleTable" onclick="toggleTable()">Burgs Table</button>
+            <button class="toggle-btn" id="toggleFoodTradeTable" onclick="toggleFoodTradeTable()">Food Trade
+                Table</button>
+            <button class="toggle-btn" id="toggleGoldTradeTable" onclick="toggleGoldTradeTable()">Gold Trade
+                Table</button>
+            <button class="toggle-btn active" id="toggleMap" onclick="toggleMap()">Show Map</button>
+            <button class="toggle-btn" id="toggleMapMode" onclick="toggleMapMode()">Mode: Biome</button>
 
             <div class="dropdown">
                 <button class="toggle-btn special dropbtn" id="gameModeBtn"
@@ -83,30 +71,6 @@
 
     <div class="container">
         <div class="map-container" id="mapContainer">
-            <!-- Adventure Stats Banner -->
-            <div id="adventureStatsBanner" class="adventure-banner hidden">
-                <div class="resource-item" title="Soldiers">
-                    <span class="icon">🛡️</span>
-                    <span id="advSoldiers" class="value">0</span>
-                </div>
-                <div class="resource-item" title="Tools">
-                    <span class="icon">🛠️</span>
-                    <span id="advTools" class="value">0</span>
-                </div>
-                <div class="resource-item" title="Food">
-                    <span class="icon">🍎</span>
-                    <span id="advFood" class="value">0</span>
-                </div>
-                <div class="resource-item" title="Gold">
-                    <span class="icon">💰</span>
-                    <span id="advGold" class="value">0</span>
-                </div>
-            </div>
-
-            <!-- Floating Options Button -->
-            <button id="adventureOptionsBtn" class="adventure-btn floating-options-btn hidden"
-                onclick="AdventureManager.toggleOptions()">⚙️</button>
-
             <svg id="mapSvg" viewBox="{{ min_x-50 }} {{ min_y-50 }} {{ width }} {{ height }}"
                 preserveAspectRatio="xMidYMid meet">
                 <!-- Background Polygons -->
@@ -141,8 +105,10 @@
                     stroke-width="{{ b.stroke_width }}" class="burg-dot{{ b.capital_class }} {{ b.dot_class_str }}"
                     data-id="{{ b.id }}" data-name="{{ b.name }}" data-pop="{{ b.population }}" data-type="{{ b.type }}"
                     data-state="{{ b.state_name }}" data-gold="{{ b.net_gold }}" data-food="{{ b.net_food }}"
-                    data-quartiers="{{ b.quartier_details }}" data-cell-id="{{ b.cell_id }}"
-                    onclick="selectBurg({{ b.id }})" />
+                    data-quartiers="{{ b.quartier_details }}" data-cell-id="{{ b.cell_id }}">
+                    onclick="selectBurg({{ b.id }})" data-id="{{ b.id }}"
+                    onmouseover="showTooltip(event, '{{ b.name }}', '{{ b.population_fmt }}', '{{ b.type }}')"
+                    onmouseout="hideTooltip()" />
                 </circle>
                 {% if b.is_capital %}
                 <text x="{{ b.x }}" y="{{ b.y }}" dy="0.35em" text-anchor="middle" font-size="{{ b.r + 2 }}px"
@@ -161,10 +127,8 @@
                         width="{% if b.soldier_quartiers >= 1 and b.craftsman_quartiers >= 1 %}36{% else %}20{% endif %}"
                         height="12" rx="3" fill="rgba(0,0,0,0.7)" />
                     <text x="0" y="3" text-anchor="middle" font-size="8px" fill="white" font-family="Arial, sans-serif">
-                        {% if b.soldier_quartiers >= 1 %}<tspan class="badge-soldiers">⚔️{{ b.soldier_quartiers }}
-                        </tspan>{% endif %}
-                        {% if b.craftsman_quartiers >= 1 %}<tspan class="badge-craftsmen">🛠️{{ b.craftsman_quartiers }}
-                        </tspan>{% endif %}
+                        {% if b.soldier_quartiers >= 1 %}⚔️{{ b.soldier_quartiers }}{% endif %}
+                        {% if b.craftsman_quartiers >= 1 %}🛠️{{ b.craftsman_quartiers }}{% endif %}
                     </text>
                 </g>
                 {% endif %}
@@ -188,22 +152,50 @@
                     </select>
                     <!-- Description removed, now tooltip -->
                     <div id="campaignObjectives" class="campaign-objectives hidden">
+                        <h3>Objectives</h3>
                         <ul id="objectivesList" class="objective-list"></ul>
                     </div>
                     <button id="campaignStartBtn" class="adventure-btn start-btn hidden"
-                        onclick="CampaignManager.startCampaign()">Start</button>
+                        onclick="CampaignManager.startCampaign()">Start Campaign</button>
                     <button id="campaignCancelBtn" class="adventure-btn pause-btn hidden"
-                        onclick="CampaignManager.cancelCampaign()" style="margin-top: 5px;">Cancel</button>
+                        onclick="CampaignManager.cancelCampaign()" style="margin-top: 5px;">Cancel Campaign</button>
                 </div>
             </div>
 
-            <!-- Stats Panel Removed from here -->
+            <div class="stats-panel">
+                <h3>Party Stats</h3>
+                <div class="stat-row">
+                    <span class="icon">🛡️</span>
+                    <span class="label">Soldiers:</span>
+                    <span id="advSoldiers" class="value">0</span>
+                </div>
+                <div class="stat-row">
+                    <span class="icon">🛠️</span>
+                    <span class="label">Tools:</span>
+                    <span id="advTools" class="value">0</span>
+                </div>
+                <div class="stat-row">
+                    <span class="icon">🍎</span>
+                    <span class="label">Food:</span>
+                    <span id="advFood" class="value">0</span>
+                </div>
+                <div class="stat-row">
+                    <span class="icon">💰</span>
+                    <span class="label">Gold:</span>
+                    <span id="advGold" class="value">0</span>
+                </div>
+            </div>
 
             <div class="log-panel">
+                <h3>Adventure Log</h3>
                 <div id="adventureLog" class="adventure-log"></div>
             </div>
 
-
+            <div class="sidebar-options-btn-container"
+                style="padding: 10px; background: #34495e; text-align: center; border-top: 1px solid #2c3e50;">
+                <button class="adventure-btn options-btn" onclick="AdventureManager.toggleOptions()"
+                    style="background-color: #7f8c8d; width: 100%;">⚙️ Options</button>
+            </div>
         </div>
 
         <div class="tables-wrapper">
@@ -427,11 +419,6 @@
 
                 if (mode === 'adventure') {
                     btn.innerHTML = "Adventure ▼";
-
-                    // Cleanup Campaign UI if present
-                    document.getElementById('campaignSelectContainer').classList.add('hidden');
-                    document.querySelector('.sidebar-controls').classList.remove('hidden');
-
                     // Only toggle if not already active
                     if (!window.AdventureManager || !window.AdventureManager.active) {
                         toggleAdventureMode();
@@ -459,10 +446,6 @@
                     document.getElementById('gameModeBtn').classList.add('active');
                 } else {
                     btn.innerHTML = "Free Mode ▼";
-
-                    // Cleanup Campaign UI
-                    document.getElementById('campaignSelectContainer').classList.add('hidden');
-                    document.querySelector('.sidebar-controls').classList.remove('hidden');
 
                     // Explicitly hide sidebar (fixes bug where it stays open if Adventure wasn't active)
                     const sidebar = document.getElementById('adventureSidebar');

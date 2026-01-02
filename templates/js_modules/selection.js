@@ -226,12 +226,7 @@ function clearHighlights() {
     window.selectedBurgIds.clear();
     window.selectedStateNames.clear();
     window.selectedTradeRoutes.clear();
-
-    const btn = document.getElementById('toggleMapMode');
-    if (btn && btn.getAttribute('data-mode') === 'state') {
-        updateDiplomacyColors(null);
-    }
-
+    updateDiplomacyColors(null);
     updateVisuals();
 }
 
