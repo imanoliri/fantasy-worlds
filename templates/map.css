@@ -1436,3 +1436,10 @@ body:not(.show-capitals) .capital-crown {
         max-width: 400px;
     }
 }
+
+/* Disabled Buttons Styling */
+button:disabled {
+    opacity: 0.5 !important;
+    cursor: not-allowed !important;
+    pointer-events: none;
+}
