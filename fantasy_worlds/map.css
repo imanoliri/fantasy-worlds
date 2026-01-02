@@ -96,12 +96,16 @@ h1.world-title-bar {
     background: #ecf0f1;
     position: relative;
     overflow: hidden;
+    touch-action: none;
+    /* Prevent default browser zoom/scroll */
 }
 
 svg {
     width: 100%;
     height: 100%;
     cursor: grab;
+    touch-action: none;
+    /* Prevent default browser zoom/scroll */
 }
 
 svg:active {
@@ -1298,6 +1302,7 @@ body:not(.show-capitals) .capital-crown {
     /* Column 1 Top: Header/Controls */
     .sidebar-header {
         grid-area: header;
+        font-size: small;
         width: 100%;
         min-width: 0;
         /* reset */
@@ -1316,6 +1321,7 @@ body:not(.show-capitals) .capital-crown {
 
     /* Stack buttons inside header vertically */
     .sidebar-controls {
+        font-size: small;
         flex-direction: column;
         width: 100%;
     }
@@ -1328,6 +1334,7 @@ body:not(.show-capitals) .capital-crown {
     .log-panel {
         grid-area: log;
         width: 100%;
+        font-size: small;
         /* Fill 1fr */
         min-width: 150px;
         /* Min width for readability */
@@ -1339,6 +1346,7 @@ body:not(.show-capitals) .capital-crown {
     /* Fix Modal Centering on Mobile */
     .burg-popup {
         width: 90%;
+        font-size: small;
         max-width: 350px;
         left: 50%;
         top: 50%;
@@ -1347,6 +1355,7 @@ body:not(.show-capitals) .capital-crown {
 
     .adventure-modal .modal-content {
         width: 90%;
+        font-size: small;
         max-width: 400px;
     }
 }
