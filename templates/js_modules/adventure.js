@@ -970,12 +970,9 @@ const AdventureManager = {
                 const mission = missionMap[type];
                 if (mission) {
                     if (enabled) {
-                        mission.init();
-                        mission.spawn(); // Try to spawn immediately
                         mission.toggle(true);
                     } else {
                         mission.toggle(false); // Hide visuals
-                        // We might want to clear data too, but hiding is safer for now
                     }
                     this.render();
                 }
