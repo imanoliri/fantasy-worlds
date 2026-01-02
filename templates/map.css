@@ -61,16 +61,27 @@ h1.world-title-bar {
 }
 
 #headerToggleBtn {
-    background: transparent;
+    background: rgba(255, 255, 255, 0.1);
+    /* Circle background */
     border: none;
     color: #bdc3c7;
     cursor: pointer;
-    font-size: 0.9rem;
-    padding: 5px;
-    transition: color 0.2s;
+    font-size: 0.8rem;
+    /* Slightly smaller icon to fit nicely */
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    /* Make it circular */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.2s;
+    padding: 0;
+    /* Reset padding to allow centering */
 }
 
 #headerToggleBtn:hover {
+    background: rgba(255, 255, 255, 0.3);
     color: white;
 }
 
@@ -1291,7 +1302,7 @@ body:not(.show-capitals) .capital-crown {
     .adventure-sidebar {
         width: 100%;
         height: auto;
-        max-height: 250px;
+        max-height: 200px;
         /* Allow growth but cap it */
         font-size: small;
         border-left: none;
