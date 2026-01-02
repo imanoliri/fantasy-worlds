@@ -1257,4 +1257,18 @@ body:not(.show-info-banners) .burg-info-badge {
         border-top: none;
         box-sizing: border-box;
     }
+
+    /* Fix Modal Centering on Mobile */
+    .burg-popup {
+        width: 90%;
+        max-width: 350px;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+    .adventure-modal .modal-content {
+        width: 90%;
+        max-width: 400px;
+    }
 }
