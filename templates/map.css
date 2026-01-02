@@ -1281,6 +1281,7 @@ body:not(.show-capitals) .capital-crown {
     .adventure-sidebar {
         width: 100%;
         height: 200px;
+        font-size: small;
         border-left: none;
         border-top: 3px solid #34495e;
         overflow-y: hidden;
