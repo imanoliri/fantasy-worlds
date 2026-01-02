@@ -3774,9 +3774,10 @@ function clearHighlights() {
     window.selectedStateNames.clear();
     window.selectedTradeRoutes.clear();
 
-    const btn = document.getElementById('toggleMapMode');
-    if (btn && btn.getAttribute('data-mode') === 'state') {
+    const btn = document.getElementById('mapModeBtn');
+    if (btn && btn.getAttribute('data-current-mode') === 'state') {
         updateDiplomacyColors(null);
+        window.diplomacySelectedStateId = null;
     }
 
     updateVisuals();
@@ -3789,7 +3790,16 @@ function selectState(stateId) {
         // Only run diplomacy update if already in state mode (or switch to it?)
         // User said "when you are on the state map", so we assume mode is already 'state'.
         if (currentMode === 'state') {
-            updateDiplomacyColors(parseInt(stateId)); // Ensure ID is number for matrix lookup
+            const id = parseInt(stateId);
+            if (window.diplomacySelectedStateId === id) {
+                // Toggle Off
+                updateDiplomacyColors(null);
+                window.diplomacySelectedStateId = null;
+            } else {
+                // Toggle On
+                updateDiplomacyColors(id);
+                window.diplomacySelectedStateId = id;
+            }
         }
     }
 }
