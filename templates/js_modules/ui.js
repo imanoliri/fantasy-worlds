@@ -3,60 +3,13 @@ function toggleDropdown(id) {
     document.getElementById(id).classList.toggle("show");
 }
 
-function showStateTooltip(e, content) {
-    const tooltip = document.getElementById('tooltip');
-    tooltip.innerHTML = content;
-    tooltip.style.display = 'block';
 
-    // Position near the cursor
-    let left = e.clientX + 15;
-    let top = e.clientY + 15;
-
-    // Adjust if going off screen
-    if (left + 220 > window.innerWidth) {
-        left = e.clientX - 230;
-    }
-
-    if (top + 150 > window.innerHeight) {
-        top = e.clientY - 160;
-    }
-
-    tooltip.style.left = left + 'px';
-    tooltip.style.top = top + 'px';
-}
-
-function hideTooltip() {
-    const tooltip = document.getElementById('tooltip');
-    tooltip.style.display = 'none';
-}
-
-function toggleFoodTrades() {
-    const btn = document.getElementById('toggleFoodTrades');
-    btn.classList.toggle('active');
-    if (btn.classList.contains('active')) {
-        document.body.classList.add('show-food-trades');
+function toggleLayer(layerClass) {
+    const body = document.body;
+    if (body.classList.contains(layerClass)) {
+        body.classList.remove(layerClass);
     } else {
-        document.body.classList.remove('show-food-trades');
-    }
-}
-
-function toggleGoldTrades() {
-    const btn = document.getElementById('toggleGoldTrades');
-    btn.classList.toggle('active');
-    if (btn.classList.contains('active')) {
-        document.body.classList.add('show-gold-trades');
-    } else {
-        document.body.classList.remove('show-gold-trades');
-    }
-}
-
-function toggleCapitals() {
-    const btn = document.getElementById('toggleCapitals');
-    btn.classList.toggle('active');
-    if (btn.classList.contains('active')) {
-        document.body.classList.add('show-capitals');
-    } else {
-        document.body.classList.remove('show-capitals');
+        body.classList.add(layerClass);
     }
 }
 
@@ -116,5 +69,18 @@ function toggleMap() {
         mapGroup.style.display = 'block';
     } else {
         mapGroup.style.display = 'none';
+    }
+}
+
+function toggleHeaderControls() {
+    const controls = document.querySelector('.controls');
+    const btn = document.getElementById('headerToggleBtn');
+    controls.classList.toggle('hidden');
+
+    // Rotate triangle based on visibility
+    if (controls.classList.contains('hidden')) {
+        btn.innerHTML = '▲';
+    } else {
+        btn.innerHTML = '▼';
     }
 }

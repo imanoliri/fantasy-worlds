@@ -15,60 +15,13 @@ function toggleDropdown(id) {
     document.getElementById(id).classList.toggle("show");
 }
 
-function showStateTooltip(e, content) {
-    const tooltip = document.getElementById('tooltip');
-    tooltip.innerHTML = content;
-    tooltip.style.display = 'block';
 
-    // Position near the cursor
-    let left = e.clientX + 15;
-    let top = e.clientY + 15;
-
-    // Adjust if going off screen
-    if (left + 220 > window.innerWidth) {
-        left = e.clientX - 230;
-    }
-
-    if (top + 150 > window.innerHeight) {
-        top = e.clientY - 160;
-    }
-
-    tooltip.style.left = left + 'px';
-    tooltip.style.top = top + 'px';
-}
-
-function hideTooltip() {
-    const tooltip = document.getElementById('tooltip');
-    tooltip.style.display = 'none';
-}
-
-function toggleFoodTrades() {
-    const btn = document.getElementById('toggleFoodTrades');
-    btn.classList.toggle('active');
-    if (btn.classList.contains('active')) {
-        document.body.classList.add('show-food-trades');
+function toggleLayer(layerClass) {
+    const body = document.body;
+    if (body.classList.contains(layerClass)) {
+        body.classList.remove(layerClass);
     } else {
-        document.body.classList.remove('show-food-trades');
-    }
-}
-
-function toggleGoldTrades() {
-    const btn = document.getElementById('toggleGoldTrades');
-    btn.classList.toggle('active');
-    if (btn.classList.contains('active')) {
-        document.body.classList.add('show-gold-trades');
-    } else {
-        document.body.classList.remove('show-gold-trades');
-    }
-}
-
-function toggleCapitals() {
-    const btn = document.getElementById('toggleCapitals');
-    btn.classList.toggle('active');
-    if (btn.classList.contains('active')) {
-        document.body.classList.add('show-capitals');
-    } else {
-        document.body.classList.remove('show-capitals');
+        body.classList.add(layerClass);
     }
 }
 
@@ -131,6 +84,19 @@ function toggleMap() {
     }
 }
 
+function toggleHeaderControls() {
+    const controls = document.querySelector('.controls');
+    const btn = document.getElementById('headerToggleBtn');
+    controls.classList.toggle('hidden');
+
+    // Rotate triangle based on visibility
+    if (controls.classList.contains('hidden')) {
+        btn.innerHTML = '▲';
+    } else {
+        btn.innerHTML = '▼';
+    }
+}
+
 
 const relationColors = {
     "Ally": "#32CD32",      // Lime Green
@@ -145,27 +111,47 @@ const relationColors = {
     "x": "#800080"          // Selected State (Purple)
 };
 
-function toggleMapMode() {
-    const btn = document.getElementById('toggleMapMode');
+const mapModes = ['biome', 'state', 'heightmap', 'temperature', 'none'];
+
+function cycleMapMode() {
+    const btn = document.getElementById('mapModeBtn');
+    // Default to 'biome' if no attribute set
+    const currentMode = btn.getAttribute('data-current-mode') || 'biome';
+
+    const currentIndex = mapModes.indexOf(currentMode);
+    const nextIndex = (currentIndex + 1) % mapModes.length;
+    const nextMode = mapModes[nextIndex];
+
+    setMapMode(nextMode);
+}
+
+function setMapMode(mode) {
+    const mapGroup = document.getElementById('mapBackground');
     const paths = document.querySelectorAll('#mapBackground path');
+    const mapBtn = document.getElementById('mapModeBtn');
 
-    // Use data attribute for state tracking
-    const currentMode = btn.getAttribute('data-mode') || 'biome';
+    // Update button state tracking
+    if (mapBtn) {
+        mapBtn.setAttribute('data-current-mode', mode);
+    }
 
-    if (currentMode === 'biome') {
-        // Switch to State
-        btn.innerText = 'Mode: State';
-        btn.setAttribute('data-mode', 'state');
+    if (mode === 'none') {
+        mapGroup.style.display = 'none';
+        if (mapBtn) mapBtn.innerText = 'Map: None';
+        return;
+    }
+
+    // Ensure map is visible for other modes
+    mapGroup.style.display = 'block';
+
+    if (mode === 'state') {
+        if (mapBtn) mapBtn.innerText = 'Map: Political';
         paths.forEach(p => {
             p.setAttribute('fill', p.getAttribute('data-state-color'));
         });
-    } else if (currentMode === 'state') {
-        // Switch to Heightmap
-        btn.innerText = 'Mode: Heightmap';
-        btn.setAttribute('data-mode', 'heightmap');
-
+    } else if (mode === 'heightmap') {
+        if (mapBtn) mapBtn.innerText = 'Map: Heightmap';
         paths.forEach(p => {
-            // Heightmap logic: darken color based on height
             let h = parseInt(p.getAttribute('data-height'));
             let c = 255 - h * 2;
             if (c < 0) c = 0;
@@ -175,18 +161,15 @@ function toggleMapMode() {
                 p.setAttribute('fill', `rgb(${c}, ${c}, ${c})`);
             }
         });
-    } else if (currentMode === 'heightmap') {
-        // Switch to Temperature
-        btn.innerText = 'Mode: Temperature';
-        btn.setAttribute('data-mode', 'temperature');
+    } else if (mode === 'temperature') {
+        if (mapBtn) mapBtn.innerText = 'Map: Temperature';
         paths.forEach(p => {
             const t = parseInt(p.getAttribute('data-temp'));
             p.setAttribute('fill', getColorForTemp(t));
         });
     } else {
-        // Switch to Biome
-        btn.innerText = 'Mode: Biome';
-        btn.setAttribute('data-mode', 'biome');
+        // Biome (Default)
+        if (mapBtn) mapBtn.innerText = 'Map: Biome';
         paths.forEach(p => {
             p.setAttribute('fill', p.getAttribute('data-biome-color'));
         });
@@ -570,7 +553,7 @@ const MissionTreasure = {
         this.countElement = treasureCount;
 
         const svg = document.getElementById('mapSvg');
-        if (svg) svg.appendChild(this.element);
+        if (svg) svg.appendChild(treasureGroup);
     },
 
     spawn() {
@@ -744,7 +727,9 @@ const MissionBattle = {
         this.countElement = enemyCount;
 
         const svg = document.getElementById('mapSvg');
-        if (svg) svg.appendChild(this.element);
+        if (svg) svg.appendChild(enemyGroup);
+
+        // Mission: Battle
     },
 
     spawn() {
@@ -957,7 +942,9 @@ const MissionHunt = {
         this.countElement = beastCount;
 
         const svg = document.getElementById('mapSvg');
-        if (svg) svg.appendChild(this.element);
+        if (svg) svg.appendChild(beastGroup);
+
+        // Mission: Beast Hunt
     },
 
     spawn() {
@@ -1191,7 +1178,6 @@ const MissionSiege = {
         this.element = siegeGroup;
         this.countElement = siegeCount;
 
-        const svg = document.getElementById('mapSvg');
         if (svg) {
             svg.appendChild(siegeRingGroup);
             svg.appendChild(siegeGroup);
@@ -1573,8 +1559,14 @@ const MissionExplore = {
             this.elements.push(locGroup);
         }
 
+        // Mission: Exploration {
         const svg = document.getElementById('mapSvg');
         if (svg) svg.appendChild(locationsGroup);
+        this.locations = [null, null, null, null];
+        for (let i = 0; i < 4; i++) {
+            this.spawnLocation(i);
+        }
+        this.updateVisuals();
     },
 
     spawn() {
@@ -1861,12 +1853,15 @@ const AdventureManager = {
         this.active = !this.active;
         const btn = document.getElementById('toggleAdventure');
         const sidebar = document.getElementById('adventureSidebar');
+        const banner = document.getElementById('adventureStatsBanner');
+        const optionsBtn = document.getElementById('adventureOptionsBtn');
 
         if (this.active) {
             if (btn) btn.classList.add('active');
-            if (sidebar) {
-                sidebar.classList.remove('hidden');
-            }
+            if (sidebar) sidebar.classList.remove('hidden');
+            if (banner) banner.classList.remove('hidden');
+            if (optionsBtn) optionsBtn.classList.remove('hidden');
+
             this.init(); // Ensure element exists
             if (this.party.cell === 0) {
                 this.start();
@@ -1887,10 +1882,11 @@ const AdventureManager = {
             this.movementId++; // Cancel any ongoing movement
             this.isMoving = false;
             if (btn) btn.classList.remove('active');
-            const sidebar = document.getElementById('adventureSidebar');
-            if (sidebar) {
-                sidebar.classList.add('hidden');
-            }
+
+            if (sidebar) sidebar.classList.add('hidden');
+            if (banner) banner.classList.add('hidden');
+            if (optionsBtn) optionsBtn.classList.add('hidden');
+
             if (this.partyElement) this.partyElement.style.display = 'none';
 
             // Toggle Missions
@@ -2257,6 +2253,20 @@ const AdventureManager = {
         }
     },
 
+    // Helper to generate mini stats bar for modals (Small Top-Right)
+    getModalStatsBarHtml() {
+        if (!this.active) return '';
+        // Compact version: Icons + Numbers only. Matches Map Banner Order.
+        return `
+            <div class="modal-stats-bar">
+                <span title="Soldiers">🛡️ <span class="adv-stat-soldiers">${this.party.soldiers}</span></span>
+                <span title="Tools">🛠️ <span class="adv-stat-tools">${this.party.tools}</span></span>
+                <span title="Food">🍎 <span class="adv-stat-food">${this.party.food}</span></span>
+                <span title="Gold">💰 <span class="adv-stat-gold">${this.party.gold}</span></span>
+            </div>
+        `;
+    },
+
     // UI Helpers
     openPopup(htmlContent) {
         if (!this.popupElement) {
@@ -2274,7 +2284,18 @@ const AdventureManager = {
         }
         overlay.style.display = 'block';
 
-        this.popupElement.innerHTML = htmlContent;
+        // Intelligent Injection: Try to put it before "actions" div for better flow
+        let finalHtml = htmlContent;
+        const statsHtml = this.getModalStatsBarHtml();
+
+        if (finalHtml.includes('<div class="actions">')) {
+            finalHtml = finalHtml.replace('<div class="actions">', statsHtml + '<div class="actions">');
+        } else {
+            // Fallback: Prepend
+            finalHtml = statsHtml + finalHtml;
+        }
+
+        this.popupElement.innerHTML = finalHtml;
         this.popupElement.style.display = 'block';
     },
 
@@ -2338,13 +2359,20 @@ const AdventureManager = {
         let shipHtml = '';
         if (isPort && burg.type === "Naval") {
             if (onShip) {
-                shipHtml = `<button class="btn-recruit" style="background-color: #34495e;" onclick="AdventureManager.leaveShip()" title="Return to land travel">Leave Ship ⚓</button>`;
+                shipHtml = `<button class="btn-recruit" style="background-color: #34495e;" onclick="AdventureManager.leaveShip()" title="Return to land travel" ${siege ? 'disabled' : ''}>Leave Ship ⚓</button>`;
             } else {
-                shipHtml = `<button class="btn-buy" style="background-color: #2980b9;" onclick="AdventureManager.rentShip(5)" title="Rent a ship for water travel (5 💰)">Rent Ship (5 💰) ⛵</button>`;
+                shipHtml = `<button class="btn-buy" style="background-color: #2980b9;" onclick="AdventureManager.rentShip(5)" title="Rent a ship for water travel (5 💰)" ${siege ? 'disabled' : ''}>Rent Ship (5 💰) ⛵</button>`;
             }
         }
 
-        this.popupElement.innerHTML = `
+        if (burg.capital) {
+            this.popupElement.classList.add('capital-popup');
+        } else {
+            this.popupElement.classList.remove('capital-popup');
+        }
+
+        // Content Buffer to build HTML
+        let html = `
             <h2>${burg.name}</h2>
             <div class="content-wrapper">
                 <div class="info">
@@ -2356,17 +2384,19 @@ const AdventureManager = {
                 </div>
                 ${notificationHtml}
             </div>
+            ${this.getModalStatsBarHtml()}
             <div class="actions">
                 ${shipHtml}
-                <button class="btn-buy" onclick="AdventureManager.buyFood(10, 1)" title="1 Gold for 10 Food">Buy 10 Food (1 💰)</button>
-                ${diplomatic ? `<button class="btn-recruit" style="background-color: #4169E1;" onclick="MissionDiplomacy.resolve(${burg.id})" title="Solve diplomatic issue">Diplomatic Mission (5 💰)</button>` : ''}
-                ${siege ? `<button class="btn-recruit" style="background-color: #000;" onclick="MissionSiege.showPopup()" title="Fight Sieging Army">Fight Siege Army (💣)</button>` : ''}
-                ${canRecruit ? `<button class="btn-recruit" onclick="AdventureManager.recruitSoldiers(5, ${soldierCost}, ${burg.cell_id})" title="Recruit 5 soldiers for 5 Tools and 5 Gold. Each Soldier Quartier over 1 in the burg decreases the gold cost by one (down to a minimum of 1)">Recruit 5 Soldiers (${soldierCost} 💰, 5 🛠️)</button>` : ''}
-                ${canBuyTools ? `<button class="btn-buy" onclick="AdventureManager.buyTools(${toolsAmount}, 1)" title="1 Gold for an amount of Tools equal to Craftsmen Quartiers in the burg (max 5)">Buy ${toolsAmount} Tools (1 💰)</button>` : ''}
+                <button class="btn-buy" onclick="AdventureManager.buyFood(10, 1)" title="1 Gold for 10 Food" ${siege ? 'disabled' : ''}>Buy 10 Food (1 💰)</button>
+                ${diplomatic ? `<button class="btn-recruit" style="background-color: #4169E1;" onclick="MissionDiplomacy.resolve(${burg.id})" title="Solve diplomatic issue" ${siege ? 'disabled' : ''}>Diplomatic Mission (5 💰)</button>` : ''}
+                ${siege ? `<button class="btn-recruit" style="background-color: #000;" onclick="MissionSiege.showPopup()" title="Fight Sieging Army">Fight Sieging Army (💣)</button>` : ''}
+                ${canRecruit ? `<button class="btn-recruit" onclick="AdventureManager.recruitSoldiers(5, ${soldierCost}, ${burg.cell_id})" title="Recruit 5 soldiers for 5 Tools and 5 Gold." ${siege ? 'disabled' : ''}>Recruit 5 Soldiers (${soldierCost} 💰, 5 🛠️)</button>` : ''}
+                ${canBuyTools ? `<button class="btn-buy" onclick="AdventureManager.buyTools(${toolsAmount}, 1)" title="1 Gold for an amount of Tools equal to Craftsmen Quartiers" ${siege ? 'disabled' : ''}>Buy ${toolsAmount} Tools (1 💰)</button>` : ''}
                 <button class="btn-leave" onclick="AdventureManager.closePopup()">Leave</button>
             </div>
         `;
 
+        this.popupElement.innerHTML = html;
         this.popupElement.style.display = 'block';
     },
 
@@ -2490,13 +2520,19 @@ const AdventureManager = {
     },
 
     updateStats() {
+        // Update all elements with the specific stat class
+        document.querySelectorAll('.adv-stat-soldiers').forEach(el => el.textContent = this.party.soldiers);
+        document.querySelectorAll('.adv-stat-food').forEach(el => el.textContent = this.party.food);
+        document.querySelectorAll('.adv-stat-gold').forEach(el => el.textContent = this.party.gold);
+        document.querySelectorAll('.adv-stat-tools').forEach(el => el.textContent = this.party.tools);
+
+        // Also update legacy IDs if they exist (Header Banner)
         if (document.getElementById('advSoldiers')) document.getElementById('advSoldiers').textContent = this.party.soldiers;
         if (document.getElementById('advFood')) document.getElementById('advFood').textContent = this.party.food;
         if (document.getElementById('advGold')) document.getElementById('advGold').textContent = this.party.gold;
+        if (document.getElementById('advTools')) document.getElementById('advTools').textContent = this.party.tools;
 
         if (this.events) this.events.emit('updateStats', this.party);
-
-        if (document.getElementById('advTools')) document.getElementById('advTools').textContent = this.party.tools;
 
         // Game Over Check
         if (this.party.soldiers <= 0 && this.active) {
@@ -2640,12 +2676,9 @@ const AdventureManager = {
                 const mission = missionMap[type];
                 if (mission) {
                     if (enabled) {
-                        mission.init();
-                        mission.spawn(); // Try to spawn immediately
                         mission.toggle(true);
                     } else {
                         mission.toggle(false); // Hide visuals
-                        // We might want to clear data too, but hiding is safer for now
                     }
                     this.render();
                 }
@@ -2734,118 +2767,167 @@ window.toggleAdventureMode = () => AdventureManager.toggle();
 window.AdventureManager = AdventureManager;
 
 
-svg.addEventListener('click', (e) => {
-    // Adventure Mode
-    if (window.AdventureManager && window.AdventureManager.active) {
-        window.AdventureManager.handleClick(e.target);
-        return;
+const tablesWrapper = document.querySelector('.tables-wrapper');
+
+// --- Global Click Delegation ---
+document.body.addEventListener('click', (e) => {
+    const target = e.target;
+
+    // Adventure Mode Map Clicks
+    if (window.AdventureManager?.active && target.closest('#mapSvg')) {
+        return AdventureManager.handleClick(target);
     }
 
-    if (e.target.classList.contains('burg-dot')) {
-        const id = e.target.getAttribute('data-id');
-        selectBurg(id);
+    // Map Elements
+    if (target.classList.contains('burg-dot')) {
+        return selectBurg(target.getAttribute('data-id'));
+    }
+    if (target.hasAttribute('data-state-id')) {
+        return window.selectState && selectState(target.getAttribute('data-state-id'));
+    }
+
+    // Generic Action (data-click-action="Object.method" or "func")
+    const action = target.getAttribute('data-click-action');
+    if (action) {
+        const [obj, method] = action.split('.');
+        return method ? window[obj][method]() : window[action]();
+    }
+
+    // Specific UI Interactions
+    if (target.hasAttribute('data-dropdown-toggle')) {
+        return toggleDropdown(target.getAttribute('data-dropdown-toggle'));
+    }
+    if (target.hasAttribute('data-game-mode')) {
+        return selectGameMode(target.getAttribute('data-game-mode'));
+    }
+
+    // Table Interactions
+    const th = target.closest('th');
+    if (th?.hasAttribute('data-sort-col')) {
+        return sortTable(parseInt(th.getAttribute('data-sort-col')), th, th.getAttribute('data-sort-table'));
+    }
+
+    const tr = target.closest('tr');
+    if (tr) {
+        if (tr.hasAttribute('data-burg-id')) {
+            return highlightBurg(tr.getAttribute('data-burg-id'));
+        }
+        if (tr.hasAttribute('data-state-name')) {
+            return highlightState(tr.getAttribute('data-state-name'), tr.getAttribute('data-state-color'));
+        }
+        if (tr.hasAttribute('data-trade-from')) {
+            return highlightTradeRoute(tr, tr.getAttribute('data-trade-from'), tr.getAttribute('data-trade-to'));
+        }
     }
 });
 
+// --- Global Change Delegation ---
+document.body.addEventListener('change', ({ target }) => {
+    if (target.type === 'checkbox') {
+        const action = target.getAttribute('data-change-action');
+        if (action === 'toggleAllTypes') toggleAllTypes(target);
+        if (action === 'toggleAllStates') toggleAllStates(target);
+        if (action === 'toggleLayer') toggleLayer(target.getAttribute('data-layer-class'));
+        if (action === 'filterTable') filterTable();
+
+        if (target.hasAttribute('data-mission-toggle') && window.AdventureManager) {
+            AdventureManager.toggleMissionOption(target.getAttribute('data-mission-toggle'), target.checked);
+        }
+    } else if (target.tagName === 'SELECT') {
+        if (target.getAttribute('data-change-action') === 'CampaignManager.selectCampaign') {
+            CampaignManager.selectCampaign(target.value);
+        }
+    }
+});
+
+// --- Map Context Menu ---
 svg.addEventListener('contextmenu', (e) => {
-    if (window.AdventureManager && window.AdventureManager.active) {
-        e.preventDefault(); // Prevent default context menu
-        window.AdventureManager.handleRightClick(e.target);
+    if (window.AdventureManager?.active) {
+        e.preventDefault();
+        AdventureManager.handleRightClick(e.target);
     }
 });
 
-svg.addEventListener('mousemove', (e) => {
-    if (e.target.classList.contains('burg-dot')) {
-        const name = e.target.getAttribute('data-name');
-        const pop = parseInt(e.target.getAttribute('data-pop')).toLocaleString();
-        const type = e.target.getAttribute('data-type');
-        const state = e.target.getAttribute('data-state');
-        const gold = e.target.getAttribute('data-gold');
-        const food = e.target.getAttribute('data-food');
-        const quartiers = e.target.getAttribute('data-quartiers');
-        const isCapital = e.target.classList.contains('capital');
+// --- Tooltips ---
+const showTooltip = (content, x, y) => {
+    tooltip.innerHTML = content;
+    tooltip.style.display = 'block';
 
-        let displayName = isCapital ? `★ ${name}` : name;
+    let top = y + 10;
+    if (top + 100 > window.innerHeight) top = y - 100;
+    tooltip.style.left = (x + 10) + 'px';
+    tooltip.style.top = top + 'px';
+};
 
-        let tooltipContent = `<strong>${displayName}</strong><br>State: ${state}<br>Type: ${type}<br>Pop: ${pop}<br>Food: ${food}<br>Gold: ${gold}`;
-        if (quartiers) {
-            tooltipContent += `<hr style="margin: 5px 0; border: 0; border-top: 1px solid rgba(255,255,255,0.3);">${quartiers}`;
-        }
 
-        tooltip.innerHTML = tooltipContent;
-        tooltip.style.display = 'block';
 
-        // Smart positioning to keep within viewport
-        let top = e.clientY + 10;
-        let left = e.clientX + 10;
-
-        // Check if tooltip goes off bottom
-        if (top + 100 > window.innerHeight) {
-            top = e.clientY - 100; // Move above cursor
-        }
-
-        tooltip.style.left = left + 'px';
-        tooltip.style.top = top + 'px';
-    } else if (e.target.tagName === 'path') {
-        const btn = document.getElementById('toggleMapMode');
-        const mode = btn.getAttribute('data-mode') || 'biome';
-
-        let content = '';
-        if (mode === 'biome') {
-            const biome = e.target.getAttribute('data-biome');
-            if (biome) content = `<strong>Biome:</strong> ${biome}`;
-        } else if (mode === 'state') {
-            const state = e.target.getAttribute('data-state');
-            if (state) content = `<strong>State:</strong> ${state}`;
-        } else if (mode === 'heightmap') {
-            const h = e.target.getAttribute('data-height');
-            if (h) content = `<strong>Height:</strong> ${h}`;
-        } else if (mode === 'temperature') {
-            const t = e.target.getAttribute('data-temp');
-            if (t) content = `<strong>Temp:</strong> ${t}°C`;
-        }
-
-        if (content) {
-            tooltip.innerHTML = content;
-            tooltip.style.display = 'block';
-            tooltip.style.left = (e.clientX + 15) + 'px';
-            tooltip.style.top = (e.clientY + 15) + 'px';
-        } else {
-            tooltip.style.display = 'none';
-        }
-    } else {
-        tooltip.style.display = 'none';
-    }
-});
-
-// Table Tooltip Interactions
-table.addEventListener('mousemove', (e) => {
-    if (e.target.classList.contains('quartier-cell')) {
-        const details = e.target.getAttribute('data-details');
-        if (details) {
-            tooltip.innerHTML = details;
-            tooltip.style.display = 'block';
-            tooltip.style.left = (e.clientX + 10) + 'px';
-            tooltip.style.top = (e.clientY + 10) + 'px';
-        }
-    } else {
-        // Only hide if not over map dot (which is separate)
-        // But we are in table container, so map tooltip is not active
-        tooltip.style.display = 'none';
-    }
-});
-
-table.addEventListener('mouseleave', () => {
+function hideTooltip() {
+    const tooltip = document.getElementById('tooltip');
     tooltip.style.display = 'none';
-});
+}
 
-// Pan and Zoom (Basic)
+document.body.addEventListener('mousemove', (e) => {
+    const target = e.target;
+
+    // 1. Generic Data Tooltip (e.g., UI Labels)
+    const tooltipTarget = target.closest('[data-tooltip]');
+    if (tooltipTarget) {
+        return showTooltip(tooltipTarget.getAttribute('data-tooltip'), e.clientX, e.clientY);
+    }
+
+    // 2. Burg Tooltip
+    if (target.classList.contains('burg-dot')) {
+        const d = target.dataset;
+        const displayName = target.classList.contains('capital') ? `★ ${d.name}` : d.name;
+        let content = `<strong>${displayName}</strong><br>State: ${d.state}<br>Type: ${d.type}<br>Pop: ${parseInt(d.pop).toLocaleString()}<br>Food: ${d.food}<br>Gold: ${d.gold}`;
+        if (d.quartiers) content += `<hr style="margin:5px 0;border-top:1px solid rgba(255,255,255,0.3)">${d.quartiers}`;
+        return showTooltip(content, e.clientX, e.clientY);
+    }
+
+    // 3. Table Tooltip
+    if (target.classList.contains('quartier-cell')) {
+        const details = target.getAttribute('data-details');
+        if (details) return showTooltip(details, e.clientX, e.clientY);
+    }
+
+    // 4. Map Cell Tooltip (Cells)
+    if (target.tagName === 'path' && target.closest('#mapBackground')) {
+        const modeBtn = document.getElementById('mapModeBtn');
+        const mode = modeBtn ? (modeBtn.getAttribute('data-current-mode') || 'biome') : 'biome';
+
+        const d = target.dataset;
+        let content = '';
+
+        if (mode === 'biome') {
+            content = `<strong>Biome</strong><br>${d.biome}`;
+        } else if (mode === 'state') {
+            content = `<strong>State</strong><br>${d.state}`;
+        } else if (mode === 'heightmap') {
+            content = `<strong>Height</strong><br>${d.height}`;
+        } else if (mode === 'temperature') {
+            content = `<strong>Temperature</strong><br>${d.temp}°C`;
+        } else {
+            content = `<strong>${d.stateName}</strong><br>Biome: ${d.biome}`;
+        }
+
+        return showTooltip(content, e.clientX, e.clientY);
+    }
+
+    // 5. No match -> Hide Tooltip
+    hideTooltip();
+});
+// Ensure hide on leave
+if (mapContainer) mapContainer.addEventListener('mouseleave', hideTooltip);
+if (tablesWrapper) tablesWrapper.addEventListener('mouseleave', hideTooltip);
+
+// --- Pan and Zoom (Mouse & Touch) ---
 let isPanning = false;
 let startX, startY;
 let viewBox = svg.getAttribute('viewBox').split(' ').map(parseFloat);
+const updateViewBox = () => svg.setAttribute('viewBox', viewBox.join(' '));
 
 mapContainer.addEventListener('mousedown', (e) => {
-    if (e.target === svg || e.target.tagName === 'circle' || e.target.tagName === 'line' || e.target.tagName === 'path') {
+    if (['svg', 'circle', 'line', 'path'].includes(e.target.tagName) || e.target === svg) {
         isPanning = true;
         startX = e.clientX;
         startY = e.clientY;
@@ -2856,41 +2938,83 @@ mapContainer.addEventListener('mousedown', (e) => {
 mapContainer.addEventListener('mousemove', (e) => {
     if (!isPanning) return;
     e.preventDefault();
-    const dx = (e.clientX - startX) * (viewBox[2] / mapContainer.clientWidth);
-    const dy = (e.clientY - startY) * (viewBox[3] / mapContainer.clientHeight);
-
-    viewBox[0] -= dx;
-    viewBox[1] -= dy;
-    svg.setAttribute('viewBox', viewBox.join(' '));
-
+    const w = mapContainer.clientWidth;
+    const h = mapContainer.clientHeight;
+    viewBox[0] -= (e.clientX - startX) * (viewBox[2] / w);
+    viewBox[1] -= (e.clientY - startY) * (viewBox[3] / h);
+    updateViewBox();
     startX = e.clientX;
     startY = e.clientY;
 });
 
-mapContainer.addEventListener('mouseup', () => {
+const stopPan = () => {
     isPanning = false;
     mapContainer.style.cursor = 'default';
-});
-
-mapContainer.addEventListener('mouseleave', () => {
-    isPanning = false;
-    mapContainer.style.cursor = 'default';
-});
+};
+mapContainer.addEventListener('mouseup', stopPan);
+mapContainer.addEventListener('mouseleave', stopPan);
 
 mapContainer.addEventListener('wheel', (e) => {
     e.preventDefault();
     const scale = e.deltaY > 0 ? 1.1 : 0.9;
-    const w = viewBox[2];
-    const h = viewBox[3];
-
+    const oldW = viewBox[2];
+    const oldH = viewBox[3];
     viewBox[2] *= scale;
     viewBox[3] *= scale;
+    viewBox[0] -= (viewBox[2] - oldW) / 2;
+    viewBox[1] -= (viewBox[3] - oldH) / 2;
+    updateViewBox();
+});
 
-    // Zoom towards center
-    viewBox[0] -= (viewBox[2] - w) / 2;
-    viewBox[1] -= (viewBox[3] - h) / 2;
+// Touch Logic
+let isTouchPanning = false;
+let touchStartX = 0;
+let touchStartY = 0;
+let initialPinchDistance = null;
+const getDist = (ts) => Math.hypot(ts[0].clientX - ts[1].clientX, ts[0].clientY - ts[1].clientY);
 
-    svg.setAttribute('viewBox', viewBox.join(' '));
+mapContainer.addEventListener('touchstart', (e) => {
+    if (e.touches.length === 1) {
+        isTouchPanning = true;
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+    } else if (e.touches.length === 2) {
+        isTouchPanning = false;
+        initialPinchDistance = getDist(e.touches);
+    }
+}, { passive: false });
+
+mapContainer.addEventListener('touchmove', (e) => {
+    e.preventDefault();
+    if (e.touches.length === 1 && isTouchPanning) {
+        const sensitivity = 1.25;
+        viewBox[0] -= (e.touches[0].clientX - touchStartX) * (viewBox[2] / mapContainer.clientWidth) * sensitivity;
+        viewBox[1] -= (e.touches[0].clientY - touchStartY) * (viewBox[3] / mapContainer.clientHeight) * sensitivity;
+        updateViewBox();
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+    } else if (e.touches.length === 2 && initialPinchDistance > 0) {
+        const dist = getDist(e.touches);
+        const scale = initialPinchDistance / dist;
+        const oldW = viewBox[2];
+        const oldH = viewBox[3];
+        viewBox[2] *= scale;
+        viewBox[3] *= scale;
+        viewBox[0] -= (viewBox[2] - oldW) / 2;
+        viewBox[1] -= (viewBox[3] - oldH) / 2;
+        updateViewBox();
+        initialPinchDistance = dist;
+    }
+}, { passive: false });
+
+mapContainer.addEventListener('touchend', (e) => {
+    if (e.touches.length < 2) initialPinchDistance = null;
+    if (e.touches.length === 0) isTouchPanning = false;
+    if (e.touches.length === 1) {
+        isTouchPanning = true;
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+    }
 });
 
 
@@ -3276,6 +3400,8 @@ const CampaignManager = {
         this.populateSidebar();
     },
 
+
+
     populateSidebar() {
         const dropdown = document.getElementById('campaignDropdown');
         if (!dropdown) return;
@@ -3334,6 +3460,12 @@ const CampaignManager = {
         document.getElementById('campaignStartBtn').classList.add('hidden');
         document.getElementById('campaignCancelBtn').classList.remove('hidden'); // Show Cancel
         document.getElementById('campaignDropdown').disabled = true;
+
+        // Show Stats Banner & Options Btn
+        const banner = document.getElementById('adventureStatsBanner');
+        if (banner) banner.classList.remove('hidden');
+        const optionsBtn = document.getElementById('adventureOptionsBtn');
+        if (optionsBtn) optionsBtn.classList.remove('hidden');
     },
 
     showCampaignWinModal() {
@@ -3360,6 +3492,12 @@ const CampaignManager = {
         // 3. Force Sidebar back open (restore Campaign Menu state)
         const sidebar = document.getElementById('adventureSidebar');
         if (sidebar) sidebar.classList.remove('hidden');
+
+        // Hide Stats Banner & Options Btn
+        const banner = document.getElementById('adventureStatsBanner');
+        if (banner) banner.classList.add('hidden');
+        const optionsBtn = document.getElementById('adventureOptionsBtn');
+        if (optionsBtn) optionsBtn.classList.add('hidden');
 
         // 4. Reset UI Elements to Selection State
         document.querySelector('.sidebar-controls').classList.add('hidden');
@@ -3416,7 +3554,6 @@ window.selectedTradeRoutes = new Set(); // Stores strings "fromId-toId"
 
 function updateVisuals() {
     // 1. Clear ALL previous highlights
-    // 1. Clear ALL previous highlights
     document.querySelectorAll('.burg-dot, .burg-ring-selection, .burg-ring-gold').forEach(el => {
         el.classList.remove('selected', 'highlighted');
         if (el.classList.contains('burg-dot')) {
@@ -3428,7 +3565,6 @@ function updateVisuals() {
         el.classList.remove('selected', 'related-highlight');
     });
 
-    // 2. Highlight Selected Burgs and their Relations
     // 2. Highlight Selected Burgs and their Relations
     window.selectedBurgIds.forEach(id => {
         const row = document.querySelector(`tr[data-id="${id}"]`);
@@ -3498,15 +3634,9 @@ function updateVisuals() {
     window.selectedTradeRoutes.forEach(key => {
         const [fromId, toId] = key.split('-');
 
-        // Find Trade Row(s) - tricky because we don't have unique IDs on TR rows usually?
-        // We need to match based on from/to cells content or we can assume unique lookup.
-        // Actually, the previous code passed the element 'el'. But for general update, we search.
-        // Let's assume we can find it.
-
         // Highlight Key Trade Rows
         highlightTradeRowsByIds(fromId, toId, 'selected');
 
-        // Highlight Endpoints
         // Highlight Endpoints
         [fromId, toId].forEach(id => {
             // Select all circles (dot, ring, selection ring) to apply selection style
@@ -3592,6 +3722,12 @@ function highlightTradeRowsByIds(fromId, toId, className) {
 function selectBurg(id) {
     if (!id) return; // Ignore clear calls if any
 
+    // Restrict highlighting to Free Mode only
+    const modeBtn = document.getElementById('gameModeBtn');
+    if (modeBtn && !modeBtn.innerText.includes('Free Mode')) {
+        return;
+    }
+
     // Force String ID for consistency between Map (string) and Table (number)
     const strId = id.toString();
 
@@ -3637,18 +3773,33 @@ function clearHighlights() {
     window.selectedBurgIds.clear();
     window.selectedStateNames.clear();
     window.selectedTradeRoutes.clear();
-    updateDiplomacyColors(null);
+
+    const btn = document.getElementById('mapModeBtn');
+    if (btn && btn.getAttribute('data-current-mode') === 'state') {
+        updateDiplomacyColors(null);
+        window.diplomacySelectedStateId = null;
+    }
+
     updateVisuals();
 }
 
 function selectState(stateId) {
-    // Legacy support for diplomacy click actions, can keep as is or integrate.
-    // The original code toggled colors on click.
-    const btn = document.getElementById('toggleMapMode');
+    const btn = document.getElementById('mapModeBtn');
     if (btn) {
-        const currentMode = btn.getAttribute('data-mode');
+        const currentMode = btn.getAttribute('data-current-mode');
+        // Only run diplomacy update if already in state mode (or switch to it?)
+        // User said "when you are on the state map", so we assume mode is already 'state'.
         if (currentMode === 'state') {
-            updateDiplomacyColors(stateId);
+            const id = parseInt(stateId);
+            if (window.diplomacySelectedStateId === id) {
+                // Toggle Off
+                updateDiplomacyColors(null);
+                window.diplomacySelectedStateId = null;
+            } else {
+                // Toggle On
+                updateDiplomacyColors(id);
+                window.diplomacySelectedStateId = id;
+            }
         }
     }
 }

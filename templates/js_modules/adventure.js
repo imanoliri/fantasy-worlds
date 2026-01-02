@@ -187,12 +187,15 @@ const AdventureManager = {
         this.active = !this.active;
         const btn = document.getElementById('toggleAdventure');
         const sidebar = document.getElementById('adventureSidebar');
+        const banner = document.getElementById('adventureStatsBanner');
+        const optionsBtn = document.getElementById('adventureOptionsBtn');
 
         if (this.active) {
             if (btn) btn.classList.add('active');
-            if (sidebar) {
-                sidebar.classList.remove('hidden');
-            }
+            if (sidebar) sidebar.classList.remove('hidden');
+            if (banner) banner.classList.remove('hidden');
+            if (optionsBtn) optionsBtn.classList.remove('hidden');
+
             this.init(); // Ensure element exists
             if (this.party.cell === 0) {
                 this.start();
@@ -213,10 +216,11 @@ const AdventureManager = {
             this.movementId++; // Cancel any ongoing movement
             this.isMoving = false;
             if (btn) btn.classList.remove('active');
-            const sidebar = document.getElementById('adventureSidebar');
-            if (sidebar) {
-                sidebar.classList.add('hidden');
-            }
+
+            if (sidebar) sidebar.classList.add('hidden');
+            if (banner) banner.classList.add('hidden');
+            if (optionsBtn) optionsBtn.classList.add('hidden');
+
             if (this.partyElement) this.partyElement.style.display = 'none';
 
             // Toggle Missions
@@ -583,6 +587,20 @@ const AdventureManager = {
         }
     },
 
+    // Helper to generate mini stats bar for modals (Small Top-Right)
+    getModalStatsBarHtml() {
+        if (!this.active) return '';
+        // Compact version: Icons + Numbers only. Matches Map Banner Order.
+        return `
+            <div class="modal-stats-bar">
+                <span title="Soldiers">🛡️ <span class="adv-stat-soldiers">${this.party.soldiers}</span></span>
+                <span title="Tools">🛠️ <span class="adv-stat-tools">${this.party.tools}</span></span>
+                <span title="Food">🍎 <span class="adv-stat-food">${this.party.food}</span></span>
+                <span title="Gold">💰 <span class="adv-stat-gold">${this.party.gold}</span></span>
+            </div>
+        `;
+    },
+
     // UI Helpers
     openPopup(htmlContent) {
         if (!this.popupElement) {
@@ -600,7 +618,18 @@ const AdventureManager = {
         }
         overlay.style.display = 'block';
 
-        this.popupElement.innerHTML = htmlContent;
+        // Intelligent Injection: Try to put it before "actions" div for better flow
+        let finalHtml = htmlContent;
+        const statsHtml = this.getModalStatsBarHtml();
+
+        if (finalHtml.includes('<div class="actions">')) {
+            finalHtml = finalHtml.replace('<div class="actions">', statsHtml + '<div class="actions">');
+        } else {
+            // Fallback: Prepend
+            finalHtml = statsHtml + finalHtml;
+        }
+
+        this.popupElement.innerHTML = finalHtml;
         this.popupElement.style.display = 'block';
     },
 
@@ -664,13 +693,20 @@ const AdventureManager = {
         let shipHtml = '';
         if (isPort && burg.type === "Naval") {
             if (onShip) {
-                shipHtml = `<button class="btn-recruit" style="background-color: #34495e;" onclick="AdventureManager.leaveShip()" title="Return to land travel">Leave Ship ⚓</button>`;
+                shipHtml = `<button class="btn-recruit" style="background-color: #34495e;" onclick="AdventureManager.leaveShip()" title="Return to land travel" ${siege ? 'disabled' : ''}>Leave Ship ⚓</button>`;
             } else {
-                shipHtml = `<button class="btn-buy" style="background-color: #2980b9;" onclick="AdventureManager.rentShip(5)" title="Rent a ship for water travel (5 💰)">Rent Ship (5 💰) ⛵</button>`;
+                shipHtml = `<button class="btn-buy" style="background-color: #2980b9;" onclick="AdventureManager.rentShip(5)" title="Rent a ship for water travel (5 💰)" ${siege ? 'disabled' : ''}>Rent Ship (5 💰) ⛵</button>`;
             }
         }
 
-        this.popupElement.innerHTML = `
+        if (burg.capital) {
+            this.popupElement.classList.add('capital-popup');
+        } else {
+            this.popupElement.classList.remove('capital-popup');
+        }
+
+        // Content Buffer to build HTML
+        let html = `
             <h2>${burg.name}</h2>
             <div class="content-wrapper">
                 <div class="info">
@@ -682,17 +718,19 @@ const AdventureManager = {
                 </div>
                 ${notificationHtml}
             </div>
+            ${this.getModalStatsBarHtml()}
             <div class="actions">
                 ${shipHtml}
-                <button class="btn-buy" onclick="AdventureManager.buyFood(10, 1)" title="1 Gold for 10 Food">Buy 10 Food (1 💰)</button>
-                ${diplomatic ? `<button class="btn-recruit" style="background-color: #4169E1;" onclick="MissionDiplomacy.resolve(${burg.id})" title="Solve diplomatic issue">Diplomatic Mission (5 💰)</button>` : ''}
-                ${siege ? `<button class="btn-recruit" style="background-color: #000;" onclick="MissionSiege.showPopup()" title="Fight Sieging Army">Fight Siege Army (💣)</button>` : ''}
-                ${canRecruit ? `<button class="btn-recruit" onclick="AdventureManager.recruitSoldiers(5, ${soldierCost}, ${burg.cell_id})" title="Recruit 5 soldiers for 5 Tools and 5 Gold. Each Soldier Quartier over 1 in the burg decreases the gold cost by one (down to a minimum of 1)">Recruit 5 Soldiers (${soldierCost} 💰, 5 🛠️)</button>` : ''}
-                ${canBuyTools ? `<button class="btn-buy" onclick="AdventureManager.buyTools(${toolsAmount}, 1)" title="1 Gold for an amount of Tools equal to Craftsmen Quartiers in the burg (max 5)">Buy ${toolsAmount} Tools (1 💰)</button>` : ''}
+                <button class="btn-buy" onclick="AdventureManager.buyFood(10, 1)" title="1 Gold for 10 Food" ${siege ? 'disabled' : ''}>Buy 10 Food (1 💰)</button>
+                ${diplomatic ? `<button class="btn-recruit" style="background-color: #4169E1;" onclick="MissionDiplomacy.resolve(${burg.id})" title="Solve diplomatic issue" ${siege ? 'disabled' : ''}>Diplomatic Mission (5 💰)</button>` : ''}
+                ${siege ? `<button class="btn-recruit" style="background-color: #000;" onclick="MissionSiege.showPopup()" title="Fight Sieging Army">Fight Sieging Army (💣)</button>` : ''}
+                ${canRecruit ? `<button class="btn-recruit" onclick="AdventureManager.recruitSoldiers(5, ${soldierCost}, ${burg.cell_id})" title="Recruit 5 soldiers for 5 Tools and 5 Gold." ${siege ? 'disabled' : ''}>Recruit 5 Soldiers (${soldierCost} 💰, 5 🛠️)</button>` : ''}
+                ${canBuyTools ? `<button class="btn-buy" onclick="AdventureManager.buyTools(${toolsAmount}, 1)" title="1 Gold for an amount of Tools equal to Craftsmen Quartiers" ${siege ? 'disabled' : ''}>Buy ${toolsAmount} Tools (1 💰)</button>` : ''}
                 <button class="btn-leave" onclick="AdventureManager.closePopup()">Leave</button>
             </div>
         `;
 
+        this.popupElement.innerHTML = html;
         this.popupElement.style.display = 'block';
     },
 
@@ -816,13 +854,19 @@ const AdventureManager = {
     },
 
     updateStats() {
+        // Update all elements with the specific stat class
+        document.querySelectorAll('.adv-stat-soldiers').forEach(el => el.textContent = this.party.soldiers);
+        document.querySelectorAll('.adv-stat-food').forEach(el => el.textContent = this.party.food);
+        document.querySelectorAll('.adv-stat-gold').forEach(el => el.textContent = this.party.gold);
+        document.querySelectorAll('.adv-stat-tools').forEach(el => el.textContent = this.party.tools);
+
+        // Also update legacy IDs if they exist (Header Banner)
         if (document.getElementById('advSoldiers')) document.getElementById('advSoldiers').textContent = this.party.soldiers;
         if (document.getElementById('advFood')) document.getElementById('advFood').textContent = this.party.food;
         if (document.getElementById('advGold')) document.getElementById('advGold').textContent = this.party.gold;
+        if (document.getElementById('advTools')) document.getElementById('advTools').textContent = this.party.tools;
 
         if (this.events) this.events.emit('updateStats', this.party);
-
-        if (document.getElementById('advTools')) document.getElementById('advTools').textContent = this.party.tools;
 
         // Game Over Check
         if (this.party.soldiers <= 0 && this.active) {
@@ -966,12 +1010,9 @@ const AdventureManager = {
                 const mission = missionMap[type];
                 if (mission) {
                     if (enabled) {
-                        mission.init();
-                        mission.spawn(); // Try to spawn immediately
                         mission.toggle(true);
                     } else {
                         mission.toggle(false); // Hide visuals
-                        // We might want to clear data too, but hiding is safer for now
                     }
                     this.render();
                 }

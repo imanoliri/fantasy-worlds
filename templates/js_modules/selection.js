@@ -5,7 +5,6 @@ window.selectedTradeRoutes = new Set(); // Stores strings "fromId-toId"
 
 function updateVisuals() {
     // 1. Clear ALL previous highlights
-    // 1. Clear ALL previous highlights
     document.querySelectorAll('.burg-dot, .burg-ring-selection, .burg-ring-gold').forEach(el => {
         el.classList.remove('selected', 'highlighted');
         if (el.classList.contains('burg-dot')) {
@@ -17,7 +16,6 @@ function updateVisuals() {
         el.classList.remove('selected', 'related-highlight');
     });
 
-    // 2. Highlight Selected Burgs and their Relations
     // 2. Highlight Selected Burgs and their Relations
     window.selectedBurgIds.forEach(id => {
         const row = document.querySelector(`tr[data-id="${id}"]`);
@@ -87,15 +85,9 @@ function updateVisuals() {
     window.selectedTradeRoutes.forEach(key => {
         const [fromId, toId] = key.split('-');
 
-        // Find Trade Row(s) - tricky because we don't have unique IDs on TR rows usually?
-        // We need to match based on from/to cells content or we can assume unique lookup.
-        // Actually, the previous code passed the element 'el'. But for general update, we search.
-        // Let's assume we can find it.
-
         // Highlight Key Trade Rows
         highlightTradeRowsByIds(fromId, toId, 'selected');
 
-        // Highlight Endpoints
         // Highlight Endpoints
         [fromId, toId].forEach(id => {
             // Select all circles (dot, ring, selection ring) to apply selection style
@@ -181,6 +173,12 @@ function highlightTradeRowsByIds(fromId, toId, className) {
 function selectBurg(id) {
     if (!id) return; // Ignore clear calls if any
 
+    // Restrict highlighting to Free Mode only
+    const modeBtn = document.getElementById('gameModeBtn');
+    if (modeBtn && !modeBtn.innerText.includes('Free Mode')) {
+        return;
+    }
+
     // Force String ID for consistency between Map (string) and Table (number)
     const strId = id.toString();
 
@@ -226,18 +224,33 @@ function clearHighlights() {
     window.selectedBurgIds.clear();
     window.selectedStateNames.clear();
     window.selectedTradeRoutes.clear();
-    updateDiplomacyColors(null);
+
+    const btn = document.getElementById('mapModeBtn');
+    if (btn && btn.getAttribute('data-current-mode') === 'state') {
+        updateDiplomacyColors(null);
+        window.diplomacySelectedStateId = null;
+    }
+
     updateVisuals();
 }
 
 function selectState(stateId) {
-    // Legacy support for diplomacy click actions, can keep as is or integrate.
-    // The original code toggled colors on click.
-    const btn = document.getElementById('toggleMapMode');
+    const btn = document.getElementById('mapModeBtn');
     if (btn) {
-        const currentMode = btn.getAttribute('data-mode');
+        const currentMode = btn.getAttribute('data-current-mode');
+        // Only run diplomacy update if already in state mode (or switch to it?)
+        // User said "when you are on the state map", so we assume mode is already 'state'.
         if (currentMode === 'state') {
-            updateDiplomacyColors(stateId);
+            const id = parseInt(stateId);
+            if (window.diplomacySelectedStateId === id) {
+                // Toggle Off
+                updateDiplomacyColors(null);
+                window.diplomacySelectedStateId = null;
+            } else {
+                // Toggle On
+                updateDiplomacyColors(id);
+                window.diplomacySelectedStateId = id;
+            }
         }
     }
 }

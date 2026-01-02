@@ -1,3 +1,7 @@
+html {
+    height: 100%;
+}
+
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     margin: 0;
@@ -5,6 +9,8 @@ body {
     display: flex;
     flex-direction: column;
     height: 100vh;
+    height: 100dvh;
+    /* Mobile fix: dynamic viewport height */
     overflow: hidden;
 }
 
@@ -13,16 +19,70 @@ header {
     color: white;
     padding: 10px 20px;
     display: flex;
-    justify-content: space-between;
+    flex-direction: column;
     align-items: center;
+    /* Center content horizontally */
+    gap: 10px;
+    /* Space between top row and buttons */
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     z-index: 2000;
     position: relative;
 }
 
-h1 {
+.header-top {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    width: 100%;
+    justify-content: center;
+    /* Center the title and search */
+    position: relative;
+}
+
+h1.world-title-bar {
     margin: 0;
     font-size: 1.2rem;
+    font-weight: bold;
+    /* Ensure it looks bold like in the image */
+}
+
+#searchInput {
+    padding: 5px 10px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    font-size: 0.9rem;
+    background-color: white;
+    color: #333;
+    width: 200px;
+}
+
+#searchInput::placeholder {
+    color: #888;
+}
+
+#headerToggleBtn {
+    background: rgba(255, 255, 255, 0.1);
+    /* Circle background */
+    border: none;
+    color: #bdc3c7;
+    cursor: pointer;
+    font-size: 0.8rem;
+    /* Slightly smaller icon to fit nicely */
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    /* Make it circular */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.2s;
+    padding: 0;
+    /* Reset padding to allow centering */
+}
+
+#headerToggleBtn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    color: white;
 }
 
 .controls {
@@ -30,6 +90,13 @@ h1 {
     align-items: center;
     gap: 10px;
     font-size: 0.9rem;
+    padding: 0;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.controls.hidden {
+    display: none;
 }
 
 .container {
@@ -46,12 +113,16 @@ h1 {
     background: #ecf0f1;
     position: relative;
     overflow: hidden;
+    touch-action: none;
+    /* Prevent default browser zoom/scroll */
 }
 
 svg {
     width: 100%;
     height: 100%;
     cursor: grab;
+    touch-action: none;
+    /* Prevent default browser zoom/scroll */
 }
 
 svg:active {
@@ -140,6 +211,26 @@ body.show-gold-trades .trade-route-gold {
 
 .burg-info-badge.hidden {
     display: none;
+}
+
+/* Economy Badge Styling */
+.burg-info-badge.economy rect {
+    fill: rgba(0, 0, 0, 0.8);
+    /* Slightly darker */
+    stroke: #f1c40f;
+    stroke-width: 0.5px;
+}
+
+.badge-food {
+    font-weight: bold;
+    fill: #ffcccc;
+    /* Light red/pink number */
+}
+
+.badge-gold {
+    font-weight: bold;
+    fill: #fff5bd;
+    /* Light yellow number */
 }
 
 
@@ -370,6 +461,21 @@ caption {
     font-size: 0.95rem;
     transition: background-color 0.1s;
     border-left: 3px solid transparent;
+}
+
+/* Green Button Logic */
+.toggle-btn.green-btn,
+.dropbtn.green-btn {
+    background-color: #27ae60;
+    /* Green */
+    color: white;
+}
+
+.toggle-btn.green-btn:hover,
+.dropbtn.green-btn:hover {
+    background-color: #219150;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
 }
 
 .dropdown-content a:hover {
@@ -798,6 +904,61 @@ caption {
     animation: pulseTreasure 1.5s infinite ease-in-out;
 }
 
+/* Soldiers and Craftsmen Toggles */
+/* Info Banners Toggle (Military/Industrial) */
+body:not(.show-info-banners) .burg-info-badge.military {
+    display: none;
+}
+
+/* Info Banners Toggle */
+/* --- Economy Banner Permutations Logic --- */
+
+/* Default: Hide all permutations */
+.burg-info-badge.eco-combo,
+.burg-info-badge.eco-fallback-food,
+.burg-info-badge.eco-fallback-gold,
+.burg-info-badge.eco-only-food,
+.burg-info-badge.eco-only-gold {
+    display: none;
+}
+
+/* 1. Combo Banner: Visible ONLY if BOTH Food and Gold toggles are ON */
+body.show-food-banners.show-gold-banners .burg-info-badge.eco-combo {
+    display: block;
+}
+
+/* 2. Fallback Food: Visible if Food is ON and Gold is OFF */
+body.show-food-banners:not(.show-gold-banners) .burg-info-badge.eco-fallback-food {
+    display: block;
+}
+
+/* 3. Fallback Gold: Visible if Gold is ON and Food is OFF */
+body.show-gold-banners:not(.show-food-banners) .burg-info-badge.eco-fallback-gold {
+    display: block;
+}
+
+/* 4. Only Food: Visible if Food is ON (Gold data absent anyway) */
+body.show-food-banners .burg-info-badge.eco-only-food {
+    display: block;
+}
+
+/* 5. Only Gold: Visible if Gold is ON (Food data absent anyway) */
+body.show-gold-banners .burg-info-badge.eco-only-gold {
+    display: block;
+}
+
+/* Fix: Hide capital crown when capitals are hidden */
+body:not(.show-capitals) .capital-crown {
+    display: none;
+}
+
+/* Fix: Also hide crown if the burg itself is hidden (e.g. filtered) */
+.burg-dot[style*="display: none"]+.capital-crown,
+.burg-dot[hidden]+.capital-crown,
+.burg-dot.hidden+.capital-crown {
+    display: none;
+}
+
 @keyframes pulseTreasure {
     0% {
         transform: scale(1);
@@ -941,15 +1102,19 @@ caption {
     background: rgba(0, 0, 0, 0.2);
     padding: 10px;
     border-radius: 4px;
+    margin-top: 10px;
+}
+
+.campaign-objectives.collapsed .objective-list {
+    display: none;
 }
 
 .campaign-objectives h3 {
     margin-top: 0;
-    font-size: 1em;
-    color: #f1c40f;
-    border-bottom: 1px solid #7f8c8d;
-    padding-bottom: 5px;
     margin-bottom: 5px;
+    font-size: 1rem;
+    color: #f1c40f;
+    user-select: none;
 }
 
 .objective-list {
@@ -1073,4 +1238,208 @@ caption {
 
 .burg-info-badge.hidden {
     display: none;
+}
+
+/* Adventure Banner */
+/* Adventure Banner */
+.adventure-banner {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: fit-content;
+
+    background: seashell;
+    /* Ocre/Paper */
+    color: #2c3e50;
+    border: 2px solid #d4c5a0;
+    border-top: none;
+    /* attached to top */
+    border-radius: 0 0 8px 8px;
+
+    padding: 8px 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 30px;
+
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    z-index: 1500;
+    /* Higher than map tooltip usually */
+    pointer-events: auto;
+}
+
+/* Modal Stats Bar (In-Flow, Compact) */
+.modal-stats-bar {
+    position: relative;
+    /* Flow layout */
+    margin: 10px auto 20px auto;
+    /* Center and space (Top 10, Bottom 20) */
+    z-index: 10;
+
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.05);
+    padding: 6px 15px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: bold;
+    color: #2c3e50;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    width: fit-content;
+}
+
+.modal-stats-bar span {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    cursor: help;
+}
+
+.adventure-banner.hidden {
+    display: none;
+}
+
+.resource-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: help;
+    /* Indicate tooltip availability */
+}
+
+.floating-options-btn {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-color: #34495e;
+    color: white;
+    font-size: 1.5rem;
+    border: 2px solid #2c3e50;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+    transition: transform 0.2s, background-color 0.2s;
+}
+
+.floating-options-btn:hover {
+    transform: scale(1.1);
+    background-color: #2c3e50;
+}
+
+.floating-options-btn.hidden {
+    display: none;
+}
+
+/* Responsive Adventure Panel (Vertical Layout) */
+@media (orientation: portrait) {
+    .container {
+        flex-direction: column;
+    }
+
+    /* Map takes remaining vertical space */
+    .map-container {
+        flex: 1;
+        width: 100%;
+        height: auto;
+    }
+
+    /* Sidebar moves to bottom, fixed height, Grid layout */
+    .adventure-sidebar {
+        width: 100%;
+        height: auto;
+        max-height: 200px;
+        /* Allow growth but cap it */
+        font-size: small;
+        border-left: none;
+        border-top: 3px solid #34495e;
+        overflow-y: auto;
+        /* Enable vertical scrolling */
+        overflow-x: hidden;
+
+        display: grid;
+        /* First col: Header, Second: Log (Stats gone, Options floating) */
+        grid-template-columns: 160px 1fr;
+        grid-template-rows: 1fr;
+        grid-template-areas:
+            "header log";
+    }
+
+    /* Column 1 Top: Header/Controls */
+    .sidebar-header {
+        grid-area: header;
+        font-size: small;
+        width: 100%;
+        min-width: 0;
+        /* reset */
+        height: 100%;
+        border-bottom: none;
+        border-right: 2px solid #2c3e50;
+        box-sizing: border-box;
+
+        display: flex;
+        flex-direction: column;
+        /* Stack contents vertically */
+        justify-content: flex-start;
+        /* Align to top */
+        padding: 10px;
+    }
+
+    /* Stack buttons inside header vertically */
+    .sidebar-controls {
+        font-size: small;
+        flex-direction: column;
+        width: 100%;
+    }
+
+    /* Options Grid Area Removed */
+
+    /* Stats Panel is gone */
+
+    /* Column 2: Log (Span both rows) */
+    .log-panel {
+        grid-area: log;
+        width: 100%;
+        font-size: small;
+        /* Fill 1fr */
+        min-width: 150px;
+        /* Min width for readability */
+        height: 100%;
+        border-top: none;
+        box-sizing: border-box;
+    }
+
+    /* Fix Modal Centering on Mobile */
+    .burg-popup {
+        width: 90%;
+        font-size: small;
+        max-width: 350px;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+    .adventure-modal .modal-content {
+        width: 90%;
+        font-size: small;
+        max-width: 400px;
+    }
+}
+
+/* Disabled Buttons Styling */
+button:disabled {
+    opacity: 0.5 !important;
+    cursor: not-allowed !important;
+    pointer-events: none;
 }
