@@ -62,7 +62,6 @@ const MissionSiege = {
         this.element = siegeGroup;
         this.countElement = siegeCount;
 
-        const svg = document.getElementById('mapSvg');
         if (svg) {
             svg.appendChild(siegeRingGroup);
             svg.appendChild(siegeGroup);

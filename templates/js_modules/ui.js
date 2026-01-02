@@ -3,32 +3,6 @@ function toggleDropdown(id) {
     document.getElementById(id).classList.toggle("show");
 }
 
-function showStateTooltip(e, content) {
-    const tooltip = document.getElementById('tooltip');
-    tooltip.innerHTML = content;
-    tooltip.style.display = 'block';
-
-    // Position near the cursor
-    let left = e.clientX + 15;
-    let top = e.clientY + 15;
-
-    // Adjust if going off screen
-    if (left + 220 > window.innerWidth) {
-        left = e.clientX - 230;
-    }
-
-    if (top + 150 > window.innerHeight) {
-        top = e.clientY - 160;
-    }
-
-    tooltip.style.left = left + 'px';
-    tooltip.style.top = top + 'px';
-}
-
-function hideTooltip() {
-    const tooltip = document.getElementById('tooltip');
-    tooltip.style.display = 'none';
-}
 
 function toggleLayer(layerClass) {
     const body = document.body;

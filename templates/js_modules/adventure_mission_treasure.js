@@ -58,7 +58,7 @@ const MissionTreasure = {
         this.countElement = treasureCount;
 
         const svg = document.getElementById('mapSvg');
-        if (svg) svg.appendChild(this.element);
+        if (svg) svg.appendChild(treasureGroup);
     },
 
     spawn() {
