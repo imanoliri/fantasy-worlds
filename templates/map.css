@@ -13,16 +13,45 @@ header {
     color: white;
     padding: 10px 20px;
     display: flex;
-    justify-content: space-between;
+    flex-direction: column;
     align-items: center;
+    /* Center content horizontally */
+    gap: 10px;
+    /* Space between top row and buttons */
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     z-index: 2000;
     position: relative;
 }
 
-h1 {
+.header-top {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    width: 100%;
+    justify-content: center;
+    /* Center the title and search */
+    position: relative;
+}
+
+h1.world-title-bar {
     margin: 0;
     font-size: 1.2rem;
+    font-weight: bold;
+    /* Ensure it looks bold like in the image */
+}
+
+#searchInput {
+    padding: 5px 10px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    font-size: 0.9rem;
+    background-color: white;
+    color: #333;
+    width: 200px;
+}
+
+#searchInput::placeholder {
+    color: #888;
 }
 
 .controls {
@@ -30,6 +59,9 @@ h1 {
     align-items: center;
     gap: 10px;
     font-size: 0.9rem;
+    padding: 0;
+    justify-content: center;
+    flex-wrap: wrap;
 }
 
 .container {

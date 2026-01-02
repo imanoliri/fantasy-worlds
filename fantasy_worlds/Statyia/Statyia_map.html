@@ -10,10 +10,11 @@
 
 <body class="show-capitals show-food-trades show-gold-trades show-info-banners">
     <header>
-        <h1 style="display: none;">World: Statyia</h1>
+        <div class="header-top">
+            <h1 class="world-title-bar">World: Statyia</h1>
+            <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="Search burgs...">
+        </div>
         <div class="controls">
-            <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="Search burgs..."
-                style="display: none;">
 
             <div class="dropdown">
                 <button class="dropbtn" onclick="toggleDropdown('typeDropdown')">Types ▼</button>
