@@ -439,9 +439,11 @@ const CampaignManager = {
         document.getElementById('campaignCancelBtn').classList.remove('hidden'); // Show Cancel
         document.getElementById('campaignDropdown').disabled = true;
 
-        // Show Stats Banner
+        // Show Stats Banner & Options Btn
         const banner = document.getElementById('adventureStatsBanner');
         if (banner) banner.classList.remove('hidden');
+        const optionsBtn = document.getElementById('adventureOptionsBtn');
+        if (optionsBtn) optionsBtn.classList.remove('hidden');
     },
 
     showCampaignWinModal() {
@@ -469,9 +471,11 @@ const CampaignManager = {
         const sidebar = document.getElementById('adventureSidebar');
         if (sidebar) sidebar.classList.remove('hidden');
 
-        // Hide Stats Banner
+        // Hide Stats Banner & Options Btn
         const banner = document.getElementById('adventureStatsBanner');
         if (banner) banner.classList.add('hidden');
+        const optionsBtn = document.getElementById('adventureOptionsBtn');
+        if (optionsBtn) optionsBtn.classList.add('hidden');
 
         // 4. Reset UI Elements to Selection State
         document.querySelector('.sidebar-controls').classList.add('hidden');

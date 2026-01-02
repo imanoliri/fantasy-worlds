@@ -188,12 +188,14 @@ const AdventureManager = {
         const btn = document.getElementById('toggleAdventure');
         const sidebar = document.getElementById('adventureSidebar');
         const banner = document.getElementById('adventureStatsBanner');
+        const optionsBtn = document.getElementById('adventureOptionsBtn');
 
         if (this.active) {
             if (btn) btn.classList.add('active');
             if (sidebar) sidebar.classList.remove('hidden');
             if (banner) banner.classList.remove('hidden');
-            
+            if (optionsBtn) optionsBtn.classList.remove('hidden');
+
             this.init(); // Ensure element exists
             if (this.party.cell === 0) {
                 this.start();
@@ -214,9 +216,10 @@ const AdventureManager = {
             this.movementId++; // Cancel any ongoing movement
             this.isMoving = false;
             if (btn) btn.classList.remove('active');
-            
+
             if (sidebar) sidebar.classList.add('hidden');
             if (banner) banner.classList.add('hidden');
+            if (optionsBtn) optionsBtn.classList.add('hidden');
 
             if (this.partyElement) this.partyElement.style.display = 'none';
 

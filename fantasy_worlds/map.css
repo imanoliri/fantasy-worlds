@@ -1124,6 +1124,36 @@ body:not(.show-info-banners) .burg-info-badge {
     /* Indicate tooltip availability */
 }
 
+.floating-options-btn {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-color: #34495e;
+    color: white;
+    font-size: 1.5rem;
+    border: 2px solid #2c3e50;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+    transition: transform 0.2s, background-color 0.2s;
+}
+
+.floating-options-btn:hover {
+    transform: scale(1.1);
+    background-color: #2c3e50;
+}
+
+.floating-options-btn.hidden {
+    display: none;
+}
+
 /* Responsive Adventure Panel (Vertical Layout) */
 @media (orientation: portrait) {
     .container {
@@ -1147,12 +1177,11 @@ body:not(.show-info-banners) .burg-info-badge {
         overflow-x: auto;
 
         display: grid;
-        /* First col: Header+Options, Second: Log (Stats is gone) */
+        /* First col: Header, Second: Log (Stats gone, Options floating) */
         grid-template-columns: 160px 1fr;
-        grid-template-rows: 1fr auto;
+        grid-template-rows: 1fr;
         grid-template-areas:
-            "header log"
-            "options log";
+            "header log";
     }
 
     /* Column 1 Top: Header/Controls */
@@ -1180,27 +1209,7 @@ body:not(.show-info-banners) .burg-info-badge {
         width: 100%;
     }
 
-    /* Column 1 Bottom: Options Button */
-    .sidebar-options-btn-container {
-        grid-area: options;
-        width: 100%;
-        min-width: 0;
-        height: auto;
-        /* Take content height */
-        border-top: none;
-        border-left: none;
-        /* No border left */
-        border-right: 2px solid #2c3e50;
-        /* Continue header border */
-
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 10px !important;
-        box-sizing: border-box;
-        background: #34495e;
-        /* Match header bg */
-    }
+    /* Options Grid Area Removed */
 
     /* Stats Panel is gone */
 
