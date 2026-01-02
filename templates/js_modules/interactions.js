@@ -190,8 +190,9 @@ mapContainer.addEventListener('touchmove', (e) => {
 
     if (e.touches.length === 1 && isTouchPanning) {
         // Handle Pan
-        const dx = (e.touches[0].clientX - touchStartX) * (viewBox[2] / mapContainer.clientWidth);
-        const dy = (e.touches[0].clientY - touchStartY) * (viewBox[3] / mapContainer.clientHeight);
+        const sensitivity = 1.5;
+        const dx = (e.touches[0].clientX - touchStartX) * (viewBox[2] / mapContainer.clientWidth) * sensitivity;
+        const dy = (e.touches[0].clientY - touchStartY) * (viewBox[3] / mapContainer.clientHeight) * sensitivity;
 
         viewBox[0] -= dx;
         viewBox[1] -= dy;
