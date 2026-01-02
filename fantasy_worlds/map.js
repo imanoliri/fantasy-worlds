@@ -2944,6 +2944,92 @@ mapContainer.addEventListener('wheel', (e) => {
 });
 
 
+// ---------------------------------------------------------
+// Touch Interactions (Mobile Pan & Zoom)
+// ---------------------------------------------------------
+let isTouchPanning = false;
+let initialPinchDistance = null;
+let touchStartX = 0;
+let touchStartY = 0;
+
+function getDistance(touches) {
+    const dx = touches[0].clientX - touches[1].clientX;
+    const dy = touches[0].clientY - touches[1].clientY;
+    return Math.sqrt(dx * dx + dy * dy);
+}
+
+mapContainer.addEventListener('touchstart', (e) => {
+    if (e.touches.length === 1) {
+        // Single finger pan
+        isTouchPanning = true;
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+    } else if (e.touches.length === 2) {
+        // Two finger pinch
+        isTouchPanning = false; // Stop panning if pinching
+        initialPinchDistance = getDistance(e.touches);
+    }
+}, { passive: false });
+
+mapContainer.addEventListener('touchmove', (e) => {
+    e.preventDefault(); // Prevent page scrolling/zooming
+
+    if (e.touches.length === 1 && isTouchPanning) {
+        // Handle Pan
+        const dx = (e.touches[0].clientX - touchStartX) * (viewBox[2] / mapContainer.clientWidth);
+        const dy = (e.touches[0].clientY - touchStartY) * (viewBox[3] / mapContainer.clientHeight);
+
+        viewBox[0] -= dx;
+        viewBox[1] -= dy;
+        svg.setAttribute('viewBox', viewBox.join(' '));
+
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+
+    } else if (e.touches.length === 2 && initialPinchDistance > 0) {
+        // Handle Pinch Zoom
+        const newDistance = getDistance(e.touches);
+        const scale = initialPinchDistance / newDistance; // Inverse: dist grows -> scale shrinks (zoom in)
+
+        // Limit sensitivity slightly if needed, but direct map is usually fine
+        // Apply Center Zoom logic could be complex, simple viewbox scale is easier:
+
+        // Calculate center relative to verify zoom focus (approximate center of screen for now)
+        // ideally we zoom towards the midpoint of the two fingers, but center-zoom is stable
+
+        const w = viewBox[2];
+        const h = viewBox[3];
+
+        viewBox[2] *= scale;
+        viewBox[3] *= scale;
+
+        // Adjust x/y to keep center stable
+        viewBox[0] -= (viewBox[2] - w) / 2;
+        viewBox[1] -= (viewBox[3] - h) / 2;
+
+        svg.setAttribute('viewBox', viewBox.join(' '));
+
+        initialPinchDistance = newDistance; // Update for continuous check
+    }
+}, { passive: false });
+
+mapContainer.addEventListener('touchend', (e) => {
+    if (e.touches.length < 2) {
+        initialPinchDistance = null;
+    }
+    if (e.touches.length === 0) {
+        isTouchPanning = false;
+    }
+    // If one finger remains, we could seamless switch to pan, but might jump. 
+    // Resetting pan start is safer:
+    if (e.touches.length === 1) {
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+        isTouchPanning = true;
+    }
+});
+
+
 /* Campaign Mode Logic */
 
 // Base Class for all Campaigns
