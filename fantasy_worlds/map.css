@@ -213,6 +213,26 @@ body.show-gold-trades .trade-route-gold {
     display: none;
 }
 
+/* Economy Badge Styling */
+.burg-info-badge.economy rect {
+    fill: rgba(0, 0, 0, 0.8);
+    /* Slightly darker */
+    stroke: #f1c40f;
+    stroke-width: 0.5px;
+}
+
+.badge-food {
+    font-weight: bold;
+    fill: #ffcccc;
+    /* Light red/pink number */
+}
+
+.badge-gold {
+    font-weight: bold;
+    fill: #fff5bd;
+    /* Light yellow number */
+}
+
 
 @keyframes pulse {
     0% {
@@ -885,9 +905,46 @@ caption {
 }
 
 /* Soldiers and Craftsmen Toggles */
-/* Info Banners Toggle */
-body:not(.show-info-banners) .burg-info-badge {
+/* Info Banners Toggle (Military/Industrial) */
+body:not(.show-info-banners) .burg-info-badge.military {
     display: none;
+}
+
+/* Info Banners Toggle */
+/* --- Economy Banner Permutations Logic --- */
+
+/* Default: Hide all permutations */
+.burg-info-badge.eco-combo,
+.burg-info-badge.eco-fallback-food,
+.burg-info-badge.eco-fallback-gold,
+.burg-info-badge.eco-only-food,
+.burg-info-badge.eco-only-gold {
+    display: none;
+}
+
+/* 1. Combo Banner: Visible ONLY if BOTH Food and Gold toggles are ON */
+body.show-food-banners.show-gold-banners .burg-info-badge.eco-combo {
+    display: block;
+}
+
+/* 2. Fallback Food: Visible if Food is ON and Gold is OFF */
+body.show-food-banners:not(.show-gold-banners) .burg-info-badge.eco-fallback-food {
+    display: block;
+}
+
+/* 3. Fallback Gold: Visible if Gold is ON and Food is OFF */
+body.show-gold-banners:not(.show-food-banners) .burg-info-badge.eco-fallback-gold {
+    display: block;
+}
+
+/* 4. Only Food: Visible if Food is ON (Gold data absent anyway) */
+body.show-food-banners .burg-info-badge.eco-only-food {
+    display: block;
+}
+
+/* 5. Only Gold: Visible if Gold is ON (Food data absent anyway) */
+body.show-gold-banners .burg-info-badge.eco-only-gold {
+    display: block;
 }
 
 /* Fix: Hide capital crown when capitals are hidden */

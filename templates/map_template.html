@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="../map.css">
 </head>
 
-<body class="show-capitals show-food-trades show-gold-trades show-info-banners">
+<body class="show-capitals show-food-trades show-gold-trades show-info-banners show-food-banners show-gold-banners">
     <header>
         <div class="header-top">
             <h1 class="world-title-bar">{{ map_name }}</h1>
@@ -61,6 +61,10 @@
                                 data-layer-class="show-capitals"> Capitals</label>
                         <label><input type="checkbox" id="layerInfoBanners" checked data-change-action="toggleLayer"
                                 data-layer-class="show-info-banners"> Info Banners</label>
+                        <label><input type="checkbox" id="layerFoodBanners" checked data-change-action="toggleLayer"
+                                data-layer-class="show-food-banners"> Food Banners</label>
+                        <label><input type="checkbox" id="layerGoldBanners" checked data-change-action="toggleLayer"
+                                data-layer-class="show-gold-banners"> Gold Banners</label>
                     </div>
                 </div>
             </div>
@@ -156,8 +160,8 @@
                 <!-- Info Badges (Rendered last to stay on top) -->
                 {% for b in burgs_draw_order %}
                 {% if b.soldier_quartiers >= 3 or b.craftsman_quartiers >= 3 %}
-                <g class="burg-info-badge" data-id="{{ b.id }}" transform="translate({{ b.x }}, {{ b.y + b.r + 8 }})"
-                    pointer-events="none">
+                <g class="burg-info-badge military" data-id="{{ b.id }}"
+                    transform="translate({{ b.x }}, {{ b.y + b.r + 8 }})" pointer-events="none">
                     <rect
                         x="{% if b.soldier_quartiers >= 1 and b.craftsman_quartiers >= 1 %}-18{% else %}-10{% endif %}"
                         y="-6"
@@ -168,6 +172,75 @@
                         </tspan>{% endif %}
                         {% if b.craftsman_quartiers >= 1 %}<tspan class="badge-craftsmen">🛠️{{ b.craftsman_quartiers }}
                         </tspan>{% endif %}
+                    </text>
+                </g>
+                {% endif %}
+                <!-- Permutation Based Economy Banners -->
+                {% set food_val = b.net_food | int %}
+                {% set gold_val = b.net_gold | int %}
+                {% set has_food = (b.net_food | float >= 100) %}
+                {% set has_gold = (b.net_gold | float >= 50) %}
+
+                {% set has_military = (b.soldier_quartiers >= 3 or b.craftsman_quartiers >= 3) %}
+                {# Offset 20 makes it touch #}
+                {% set eco_offset = (b.r + 20) if has_military else (b.r + 8) %}
+
+                {% if has_food and has_gold %}
+                {# 1. Combo Banner (Food + Gold) #}
+                {% set w_combo = 11 + (food_val|string|length * 5.5) + 11 + (gold_val|string|length * 5.5) %}
+                <g class="burg-info-badge eco-combo" data-id="{{ b.id }}"
+                    transform="translate({{ b.x }}, {{ b.y + eco_offset }})" pointer-events="none">
+                    <rect x="{{ -(w_combo / 2) }}" y="-6" width="{{ w_combo }}" height="12" rx="3"
+                        fill="rgba(0,0,0,0.8)" />
+                    <text x="0" y="3" text-anchor="middle" font-size="8px" fill="white" font-family="Arial, sans-serif">
+                        <tspan class="badge-food">🍎{{ food_val }}</tspan>
+                        <tspan class="badge-gold">💰{{ gold_val }}</tspan>
+                    </text>
+                </g>
+
+                {# 2. Fallback Food (Has Gold, but Gold toggled off) #}
+                {% set w_food = 11 + (food_val|string|length * 5.5) %}
+                <g class="burg-info-badge eco-fallback-food" data-id="{{ b.id }}"
+                    transform="translate({{ b.x }}, {{ b.y + eco_offset }})" pointer-events="none">
+                    <rect x="{{ -(w_food / 2) }}" y="-6" width="{{ w_food }}" height="12" rx="3"
+                        fill="rgba(0,0,0,0.8)" />
+                    <text x="0" y="3" text-anchor="middle" font-size="8px" fill="white" font-family="Arial, sans-serif">
+                        <tspan class="badge-food">🍎{{ food_val }}</tspan>
+                    </text>
+                </g>
+
+                {# 3. Fallback Gold (Has Food, but Food toggled off) #}
+                {% set w_gold = 11 + (gold_val|string|length * 5.5) %}
+                <g class="burg-info-badge eco-fallback-gold" data-id="{{ b.id }}"
+                    transform="translate({{ b.x }}, {{ b.y + eco_offset }})" pointer-events="none">
+                    <rect x="{{ -(w_gold / 2) }}" y="-6" width="{{ w_gold }}" height="12" rx="3"
+                        fill="rgba(0,0,0,0.8)" />
+                    <text x="0" y="3" text-anchor="middle" font-size="8px" fill="white" font-family="Arial, sans-serif">
+                        <tspan class="badge-gold">💰{{ gold_val }}</tspan>
+                    </text>
+                </g>
+
+                {% elif has_food %}
+                {# 4. Food Only (No Gold Data) #}
+                {% set w_food = 11 + (food_val|string|length * 5.5) %}
+                <g class="burg-info-badge eco-only-food" data-id="{{ b.id }}"
+                    transform="translate({{ b.x }}, {{ b.y + eco_offset }})" pointer-events="none">
+                    <rect x="{{ -(w_food / 2) }}" y="-6" width="{{ w_food }}" height="12" rx="3"
+                        fill="rgba(0,0,0,0.8)" />
+                    <text x="0" y="3" text-anchor="middle" font-size="8px" fill="white" font-family="Arial, sans-serif">
+                        <tspan class="badge-food">🍎{{ food_val }}</tspan>
+                    </text>
+                </g>
+
+                {% elif has_gold %}
+                {# 5. Gold Only (No Food Data) #}
+                {% set w_gold = 11 + (gold_val|string|length * 5.5) %}
+                <g class="burg-info-badge eco-only-gold" data-id="{{ b.id }}"
+                    transform="translate({{ b.x }}, {{ b.y + eco_offset }})" pointer-events="none">
+                    <rect x="{{ -(w_gold / 2) }}" y="-6" width="{{ w_gold }}" height="12" rx="3"
+                        fill="rgba(0,0,0,0.8)" />
+                    <text x="0" y="3" text-anchor="middle" font-size="8px" fill="white" font-family="Arial, sans-serif">
+                        <tspan class="badge-gold">💰{{ gold_val }}</tspan>
                     </text>
                 </g>
                 {% endif %}

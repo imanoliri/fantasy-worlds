@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="../map.css">
 </head>
 
-<body class="show-capitals show-food-trades show-gold-trades show-info-banners">
+<body class="show-capitals show-food-trades show-gold-trades show-info-banners show-food-banners show-gold-banners">
     <header>
         <div class="header-top">
             <h1 class="world-title-bar">Statyia</h1>
@@ -113,6 +113,10 @@
                                 data-layer-class="show-capitals"> Capitals</label>
                         <label><input type="checkbox" id="layerInfoBanners" checked data-change-action="toggleLayer"
                                 data-layer-class="show-info-banners"> Info Banners</label>
+                        <label><input type="checkbox" id="layerFoodBanners" checked data-change-action="toggleLayer"
+                                data-layer-class="show-food-banners"> Food Banners</label>
+                        <label><input type="checkbox" id="layerGoldBanners" checked data-change-action="toggleLayer"
+                                data-layer-class="show-gold-banners"> Gold Banners</label>
                     </div>
                 </div>
             </div>
@@ -37818,8 +37822,8 @@
                 <!-- Info Badges (Rendered last to stay on top) -->
                 
                 
-                <g class="burg-info-badge" data-id="11" transform="translate(1661.5, 304.5)"
-                    pointer-events="none">
+                <g class="burg-info-badge military" data-id="11"
+                    transform="translate(1661.5, 304.5)" pointer-events="none">
                     <rect
                         x="-18"
                         y="-6"
@@ -37833,10 +37837,32 @@
                     </text>
                 </g>
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
-                <g class="burg-info-badge" data-id="119" transform="translate(1420.83, 363.98)"
-                    pointer-events="none">
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <g class="burg-info-badge eco-only-gold" data-id="11"
+                    transform="translate(1661.5, 316.5)" pointer-events="none">
+                    <rect x="-11.0" y="-6" width="22.0" height="12" rx="3"
+                        fill="rgba(0,0,0,0.8)" />
+                    <text x="0" y="3" text-anchor="middle" font-size="8px" fill="white" font-family="Arial, sans-serif">
+                        <tspan class="badge-gold">💰70</tspan>
+                    </text>
+                </g>
+                
+                
+                
+                <g class="burg-info-badge military" data-id="119"
+                    transform="translate(1420.83, 363.98)" pointer-events="none">
                     <rect
                         x="-18"
                         y="-6"
@@ -37850,10 +37876,33 @@
                     </text>
                 </g>
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
-                <g class="burg-info-badge" data-id="159" transform="translate(1243.7, 426.47)"
-                    pointer-events="none">
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <g class="burg-info-badge eco-only-food" data-id="119"
+                    transform="translate(1420.83, 375.98)" pointer-events="none">
+                    <rect x="-13.75" y="-6" width="27.5" height="12" rx="3"
+                        fill="rgba(0,0,0,0.8)" />
+                    <text x="0" y="3" text-anchor="middle" font-size="8px" fill="white" font-family="Arial, sans-serif">
+                        <tspan class="badge-food">🍎125</tspan>
+                    </text>
+                </g>
+
+                
+                
+                
+                <g class="burg-info-badge military" data-id="159"
+                    transform="translate(1243.7, 426.47)" pointer-events="none">
                     <rect
                         x="-18"
                         y="-6"
@@ -37867,12 +37916,69 @@
                     </text>
                 </g>
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
-                <g class="burg-info-badge" data-id="303" transform="translate(678.47, 472.91435635019184)"
-                    pointer-events="none">
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <g class="burg-info-badge eco-combo" data-id="165"
+                    transform="translate(758.5, 607)" pointer-events="none">
+                    <rect x="-24.75" y="-6" width="49.5" height="12" rx="3"
+                        fill="rgba(0,0,0,0.8)" />
+                    <text x="0" y="3" text-anchor="middle" font-size="8px" fill="white" font-family="Arial, sans-serif">
+                        <tspan class="badge-food">🍎170</tspan>
+                        <tspan class="badge-gold">💰55</tspan>
+                    </text>
+                </g>
+
+                
+                
+                <g class="burg-info-badge eco-fallback-food" data-id="165"
+                    transform="translate(758.5, 607)" pointer-events="none">
+                    <rect x="-13.75" y="-6" width="27.5" height="12" rx="3"
+                        fill="rgba(0,0,0,0.8)" />
+                    <text x="0" y="3" text-anchor="middle" font-size="8px" fill="white" font-family="Arial, sans-serif">
+                        <tspan class="badge-food">🍎170</tspan>
+                    </text>
+                </g>
+
+                
+                
+                <g class="burg-info-badge eco-fallback-gold" data-id="165"
+                    transform="translate(758.5, 607)" pointer-events="none">
+                    <rect x="-11.0" y="-6" width="22.0" height="12" rx="3"
+                        fill="rgba(0,0,0,0.8)" />
+                    <text x="0" y="3" text-anchor="middle" font-size="8px" fill="white" font-family="Arial, sans-serif">
+                        <tspan class="badge-gold">💰55</tspan>
+                    </text>
+                </g>
+
+                
+                
+                
+                <g class="burg-info-badge military" data-id="303"
+                    transform="translate(678.47, 472.91435635019184)" pointer-events="none">
                     <rect
                         x="-18"
                         y="-6"
@@ -37886,10 +37992,21 @@
                     </text>
                 </g>
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
-                <g class="burg-info-badge" data-id="111" transform="translate(1604.87, 412.7171548512159)"
-                    pointer-events="none">
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <g class="burg-info-badge military" data-id="111"
+                    transform="translate(1604.87, 412.7171548512159)" pointer-events="none">
                     <rect
                         x="-18"
                         y="-6"
@@ -37903,18 +38020,73 @@
                     </text>
                 </g>
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
-                <g class="burg-info-badge" data-id="13" transform="translate(1629, 558.999991386732)"
-                    pointer-events="none">
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <g class="burg-info-badge military" data-id="13"
+                    transform="translate(1629, 558.999991386732)" pointer-events="none">
                     <rect
                         x="-18"
                         y="-6"
@@ -37928,18 +38100,97 @@
                     </text>
                 </g>
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
-                <g class="burg-info-badge" data-id="4" transform="translate(1584.15, 458.4473306464145)"
-                    pointer-events="none">
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <g class="burg-info-badge eco-only-food" data-id="32"
+                    transform="translate(1617.72, 524.8041048691081)" pointer-events="none">
+                    <rect x="-13.75" y="-6" width="27.5" height="12" rx="3"
+                        fill="rgba(0,0,0,0.8)" />
+                    <text x="0" y="3" text-anchor="middle" font-size="8px" fill="white" font-family="Arial, sans-serif">
+                        <tspan class="badge-food">🍎110</tspan>
+                    </text>
+                </g>
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <g class="burg-info-badge eco-only-food" data-id="288"
+                    transform="translate(576.53, 315.41923464835645)" pointer-events="none">
+                    <rect x="-13.75" y="-6" width="27.5" height="12" rx="3"
+                        fill="rgba(0,0,0,0.8)" />
+                    <text x="0" y="3" text-anchor="middle" font-size="8px" fill="white" font-family="Arial, sans-serif">
+                        <tspan class="badge-food">🍎110</tspan>
+                    </text>
+                </g>
+
+                
+                
+                
+                <g class="burg-info-badge military" data-id="4"
+                    transform="translate(1584.15, 458.4473306464145)" pointer-events="none">
                     <rect
                         x="-18"
                         y="-6"
@@ -37953,104 +38204,668 @@
                     </text>
                 </g>
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <g class="burg-info-badge eco-only-food" data-id="503"
+                    transform="translate(302, 290.4505443737181)" pointer-events="none">
+                    <rect x="-13.75" y="-6" width="27.5" height="12" rx="3"
+                        fill="rgba(0,0,0,0.8)" />
+                    <text x="0" y="3" text-anchor="middle" font-size="8px" fill="white" font-family="Arial, sans-serif">
+                        <tspan class="badge-food">🍎110</tspan>
+                    </text>
+                </g>
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <g class="burg-info-badge eco-only-food" data-id="499"
+                    transform="translate(1198.5, 645.3201606685204)" pointer-events="none">
+                    <rect x="-13.75" y="-6" width="27.5" height="12" rx="3"
+                        fill="rgba(0,0,0,0.8)" />
+                    <text x="0" y="3" text-anchor="middle" font-size="8px" fill="white" font-family="Arial, sans-serif">
+                        <tspan class="badge-food">🍎100</tspan>
+                    </text>
+                </g>
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <g class="burg-info-badge eco-only-food" data-id="425"
+                    transform="translate(1519.48, 425.06432942517705)" pointer-events="none">
+                    <rect x="-13.75" y="-6" width="27.5" height="12" rx="3"
+                        fill="rgba(0,0,0,0.8)" />
+                    <text x="0" y="3" text-anchor="middle" font-size="8px" fill="white" font-family="Arial, sans-serif">
+                        <tspan class="badge-food">🍎100</tspan>
+                    </text>
+                </g>
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
-                <g class="burg-info-badge" data-id="9" transform="translate(515.1, 362.629577556306)"
-                    pointer-events="none">
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <g class="burg-info-badge military" data-id="9"
+                    transform="translate(515.1, 362.629577556306)" pointer-events="none">
                     <rect
                         x="-18"
                         y="-6"
@@ -38064,887 +38879,5749 @@
                     </text>
                 </g>
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
                 
                 
                 
+
                 
                 
                 
+
                 
                 
                 
+                <!-- Permutation Based Economy Banners -->
                 
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
+                
+                
+                
+                <!-- Permutation Based Economy Banners -->
+                
+                
+                
+                
+
+                
+                
+                
+
                 
                 
             </svg>
