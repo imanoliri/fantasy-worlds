@@ -1114,6 +1114,35 @@ body:not(.show-info-banners) .burg-info-badge {
     pointer-events: auto;
 }
 
+/* Modal Stats Bar (In-Flow, Compact) */
+.modal-stats-bar {
+    position: relative;
+    /* Flow layout */
+    margin: 10px auto 20px auto;
+    /* Center and space (Top 10, Bottom 20) */
+    z-index: 10;
+
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.05);
+    padding: 6px 15px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: bold;
+    color: #2c3e50;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    width: fit-content;
+}
+
+.modal-stats-bar span {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    cursor: help;
+}
+
 .adventure-banner.hidden {
     display: none;
 }

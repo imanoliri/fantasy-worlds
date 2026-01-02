@@ -2240,6 +2240,20 @@ const AdventureManager = {
         }
     },
 
+    // Helper to generate mini stats bar for modals (Small Top-Right)
+    getModalStatsBarHtml() {
+        if (!this.active) return '';
+        // Compact version: Icons + Numbers only
+        return `
+            <div class="modal-stats-bar">
+                <span title="Soldiers">⚔️ <span class="adv-stat-soldiers">${this.party.soldiers}</span></span>
+                <span title="Food">🍎 <span class="adv-stat-food">${this.party.food}</span></span>
+                <span title="Gold">💰 <span class="adv-stat-gold">${this.party.gold}</span></span>
+                <span title="Tools">🛠️ <span class="adv-stat-tools">${this.party.tools}</span></span>
+            </div>
+        `;
+    },
+
     // UI Helpers
     openPopup(htmlContent) {
         if (!this.popupElement) {
@@ -2257,7 +2271,18 @@ const AdventureManager = {
         }
         overlay.style.display = 'block';
 
-        this.popupElement.innerHTML = htmlContent;
+        // Intelligent Injection: Try to put it before "actions" div for better flow
+        let finalHtml = htmlContent;
+        const statsHtml = this.getModalStatsBarHtml();
+
+        if (finalHtml.includes('<div class="actions">')) {
+            finalHtml = finalHtml.replace('<div class="actions">', statsHtml + '<div class="actions">');
+        } else {
+            // Fallback: Prepend
+            finalHtml = statsHtml + finalHtml;
+        }
+
+        this.popupElement.innerHTML = finalHtml;
         this.popupElement.style.display = 'block';
     },
 
@@ -2327,7 +2352,14 @@ const AdventureManager = {
             }
         }
 
-        this.popupElement.innerHTML = `
+        if (burg.capital) {
+            this.popupElement.classList.add('capital-popup');
+        } else {
+            this.popupElement.classList.remove('capital-popup');
+        }
+
+        // Content Buffer to build HTML
+        let html = `
             <h2>${burg.name}</h2>
             <div class="content-wrapper">
                 <div class="info">
@@ -2339,6 +2371,7 @@ const AdventureManager = {
                 </div>
                 ${notificationHtml}
             </div>
+            ${this.getModalStatsBarHtml()}
             <div class="actions">
                 ${shipHtml}
                 <button class="btn-buy" onclick="AdventureManager.buyFood(10, 1)" title="1 Gold for 10 Food">Buy 10 Food (1 💰)</button>
@@ -2350,6 +2383,7 @@ const AdventureManager = {
             </div>
         `;
 
+        this.popupElement.innerHTML = html;
         this.popupElement.style.display = 'block';
     },
 
@@ -2473,13 +2507,19 @@ const AdventureManager = {
     },
 
     updateStats() {
+        // Update all elements with the specific stat class
+        document.querySelectorAll('.adv-stat-soldiers').forEach(el => el.textContent = this.party.soldiers);
+        document.querySelectorAll('.adv-stat-food').forEach(el => el.textContent = this.party.food);
+        document.querySelectorAll('.adv-stat-gold').forEach(el => el.textContent = this.party.gold);
+        document.querySelectorAll('.adv-stat-tools').forEach(el => el.textContent = this.party.tools);
+
+        // Also update legacy IDs if they exist (Header Banner)
         if (document.getElementById('advSoldiers')) document.getElementById('advSoldiers').textContent = this.party.soldiers;
         if (document.getElementById('advFood')) document.getElementById('advFood').textContent = this.party.food;
         if (document.getElementById('advGold')) document.getElementById('advGold').textContent = this.party.gold;
+        if (document.getElementById('advTools')) document.getElementById('advTools').textContent = this.party.tools;
 
         if (this.events) this.events.emit('updateStats', this.party);
-
-        if (document.getElementById('advTools')) document.getElementById('advTools').textContent = this.party.tools;
 
         // Game Over Check
         if (this.party.soldiers <= 0 && this.active) {
