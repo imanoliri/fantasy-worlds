@@ -141,8 +141,7 @@
                     stroke-width="{{ b.stroke_width }}" class="burg-dot{{ b.capital_class }} {{ b.dot_class_str }}"
                     data-id="{{ b.id }}" data-name="{{ b.name }}" data-pop="{{ b.population }}" data-type="{{ b.type }}"
                     data-state="{{ b.state_name }}" data-gold="{{ b.net_gold }}" data-food="{{ b.net_food }}"
-                    data-quartiers="{{ b.quartier_details }}" data-cell-id="{{ b.cell_id }}"
-                    onclick="selectBurg({{ b.id }})" />
+                    data-quartiers="{{ b.quartier_details }}" data-cell-id="{{ b.cell_id }}" />
                 </circle>
                 {% if b.is_capital %}
                 <text x="{{ b.x }}" y="{{ b.y }}" dy="0.35em" text-anchor="middle" font-size="{{ b.r + 2 }}px"
