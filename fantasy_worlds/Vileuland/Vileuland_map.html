@@ -67442,6 +67442,11 @@
 
                 if (mode === 'adventure') {
                     btn.innerHTML = "Adventure ▼";
+
+                    // Cleanup Campaign UI if present
+                    document.getElementById('campaignSelectContainer').classList.add('hidden');
+                    document.querySelector('.sidebar-controls').classList.remove('hidden');
+
                     // Only toggle if not already active
                     if (!window.AdventureManager || !window.AdventureManager.active) {
                         toggleAdventureMode();
@@ -67469,6 +67474,10 @@
                     document.getElementById('gameModeBtn').classList.add('active');
                 } else {
                     btn.innerHTML = "Free Mode ▼";
+
+                    // Cleanup Campaign UI
+                    document.getElementById('campaignSelectContainer').classList.add('hidden');
+                    document.querySelector('.sidebar-controls').classList.remove('hidden');
 
                     // Explicitly hide sidebar (fixes bug where it stays open if Adventure wasn't active)
                     const sidebar = document.getElementById('adventureSidebar');
