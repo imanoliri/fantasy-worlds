@@ -438,6 +438,10 @@ const CampaignManager = {
         document.getElementById('campaignStartBtn').classList.add('hidden');
         document.getElementById('campaignCancelBtn').classList.remove('hidden'); // Show Cancel
         document.getElementById('campaignDropdown').disabled = true;
+
+        // Show Stats Banner
+        const banner = document.getElementById('adventureStatsBanner');
+        if (banner) banner.classList.remove('hidden');
     },
 
     showCampaignWinModal() {
@@ -464,6 +468,10 @@ const CampaignManager = {
         // 3. Force Sidebar back open (restore Campaign Menu state)
         const sidebar = document.getElementById('adventureSidebar');
         if (sidebar) sidebar.classList.remove('hidden');
+
+        // Hide Stats Banner
+        const banner = document.getElementById('adventureStatsBanner');
+        if (banner) banner.classList.add('hidden');
 
         // 4. Reset UI Elements to Selection State
         document.querySelector('.sidebar-controls').classList.add('hidden');

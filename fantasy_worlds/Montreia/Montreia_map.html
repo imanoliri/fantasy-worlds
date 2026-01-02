@@ -185,6 +185,26 @@
 
     <div class="container">
         <div class="map-container" id="mapContainer">
+            <!-- Adventure Stats Banner -->
+            <div id="adventureStatsBanner" class="adventure-banner hidden">
+                <div class="resource-item" title="Soldiers">
+                    <span class="icon">🛡️</span>
+                    <span id="advSoldiers" class="value">0</span>
+                </div>
+                <div class="resource-item" title="Tools">
+                    <span class="icon">🛠️</span>
+                    <span id="advTools" class="value">0</span>
+                </div>
+                <div class="resource-item" title="Food">
+                    <span class="icon">🍎</span>
+                    <span id="advFood" class="value">0</span>
+                </div>
+                <div class="resource-item" title="Gold">
+                    <span class="icon">💰</span>
+                    <span id="advGold" class="value">0</span>
+                </div>
+            </div>
+
             <svg id="mapSvg" viewBox="260.5999999999999 65.5 1366.4 839.84"
                 preserveAspectRatio="xMidYMid meet">
                 <!-- Background Polygons -->
@@ -34909,29 +34929,7 @@
                 </div>
             </div>
 
-            <div class="stats-panel">
-                <h3>Party Stats</h3>
-                <div class="stat-row">
-                    <span class="icon">🛡️</span>
-                    <span class="label">Soldiers:</span>
-                    <span id="advSoldiers" class="value">0</span>
-                </div>
-                <div class="stat-row">
-                    <span class="icon">🛠️</span>
-                    <span class="label">Tools:</span>
-                    <span id="advTools" class="value">0</span>
-                </div>
-                <div class="stat-row">
-                    <span class="icon">🍎</span>
-                    <span class="label">Food:</span>
-                    <span id="advFood" class="value">0</span>
-                </div>
-                <div class="stat-row">
-                    <span class="icon">💰</span>
-                    <span class="label">Gold:</span>
-                    <span id="advGold" class="value">0</span>
-                </div>
-            </div>
+            <!-- Stats Panel Removed from here -->
 
             <div class="log-panel">
                 <h3>Adventure Log</h3>

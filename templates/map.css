@@ -1081,7 +1081,49 @@ body:not(.show-info-banners) .burg-info-badge {
     display: none;
 }
 
-/* Responsive Adventure Panel (Vertical Layout) */
+/* Adventure Banner */
+/* Adventure Banner */
+.adventure-banner {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: fit-content;
+
+    background: seashell;
+    /* Ocre/Paper */
+    color: #2c3e50;
+    border: 2px solid #d4c5a0;
+    border-top: none;
+    /* attached to top */
+    border-radius: 0 0 8px 8px;
+
+    padding: 8px 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 30px;
+
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    z-index: 1500;
+    /* Higher than map tooltip usually */
+    pointer-events: auto;
+}
+
+.adventure-banner.hidden {
+    display: none;
+}
+
+.resource-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: help;
+    /* Indicate tooltip availability */
+}
+
 /* Responsive Adventure Panel (Vertical Layout) */
 @media (orientation: portrait) {
     .container {
@@ -1105,13 +1147,12 @@ body:not(.show-info-banners) .burg-info-badge {
         overflow-x: auto;
 
         display: grid;
-        /* First col: Header+Options, Second: Stats, Third: Log */
-        grid-template-columns: 160px 180px 1fr;
+        /* First col: Header+Options, Second: Log (Stats is gone) */
+        grid-template-columns: 160px 1fr;
         grid-template-rows: 1fr auto;
-        /* Header takes available, Options at bottom */
         grid-template-areas:
-            "header stats log"
-            "options stats log";
+            "header log"
+            "options log";
     }
 
     /* Column 1 Top: Header/Controls */
@@ -1161,18 +1202,9 @@ body:not(.show-info-banners) .burg-info-badge {
         /* Match header bg */
     }
 
-    /* Column 2: Stats (Span both rows) */
-    .stats-panel {
-        grid-area: stats;
-        width: 100%;
-        min-width: 0;
-        height: 100%;
-        border-right: 2px solid #2c3e50;
-        box-sizing: border-box;
-        overflow-y: auto;
-    }
+    /* Stats Panel is gone */
 
-    /* Column 3: Log (Span both rows) */
+    /* Column 2: Log (Span both rows) */
     .log-panel {
         grid-area: log;
         width: 100%;
