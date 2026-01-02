@@ -50,36 +50,33 @@ svg.addEventListener('mousemove', (e) => {
 
         tooltip.style.left = left + 'px';
         tooltip.style.top = top + 'px';
-    } else if (e.target.tagName === 'path') {
-        const btn = document.getElementById('toggleMapMode');
-        const mode = btn.getAttribute('data-mode') || 'biome';
-
-        let content = '';
-        if (mode === 'biome') {
-            const biome = e.target.getAttribute('data-biome');
-            if (biome) content = `<strong>Biome:</strong> ${biome}`;
-        } else if (mode === 'state') {
-            const state = e.target.getAttribute('data-state');
-            if (state) content = `<strong>State:</strong> ${state}`;
-        } else if (mode === 'heightmap') {
-            const h = e.target.getAttribute('data-height');
-            if (h) content = `<strong>Height:</strong> ${h}`;
-        } else if (mode === 'temperature') {
-            const t = e.target.getAttribute('data-temp');
-            if (t) content = `<strong>Temp:</strong> ${t}°C`;
-        }
-
-        if (content) {
-            tooltip.innerHTML = content;
-            tooltip.style.display = 'block';
-            tooltip.style.left = (e.clientX + 15) + 'px';
-            tooltip.style.top = (e.clientY + 15) + 'px';
-        } else {
-            tooltip.style.display = 'none';
-        }
+        tooltip.style.left = left + 'px';
+        tooltip.style.top = top + 'px';
+        /* 
+        } else if (e.target.tagName === 'path') {
+            const btn = document.getElementById('toggleMapMode');
+            const mode = btn.getAttribute('data-mode') || 'biome';
+    
+            let content = '';
+            // Logic removed to reduce noise and fix "tooltip sticking" issue
+            // The user prefers the tooltip to disappear when leaving a burg.
+            
+            if (content) {
+                tooltip.innerHTML = content;
+                tooltip.style.display = 'block';
+                tooltip.style.left = (e.clientX + 15) + 'px';
+                tooltip.style.top = (e.clientY + 15) + 'px';
+            } else {
+                tooltip.style.display = 'none';
+            }
+        */
     } else {
         tooltip.style.display = 'none';
     }
+});
+
+svg.addEventListener('mouseleave', () => {
+    tooltip.style.display = 'none';
 });
 
 // Table Tooltip Interactions
@@ -155,4 +152,91 @@ mapContainer.addEventListener('wheel', (e) => {
     viewBox[1] -= (viewBox[3] - h) / 2;
 
     svg.setAttribute('viewBox', viewBox.join(' '));
+});
+
+
+// ---------------------------------------------------------
+// Touch Interactions (Mobile Pan & Zoom)
+// ---------------------------------------------------------
+let isTouchPanning = false;
+let initialPinchDistance = null;
+let touchStartX = 0;
+let touchStartY = 0;
+
+function getDistance(touches) {
+    const dx = touches[0].clientX - touches[1].clientX;
+    const dy = touches[0].clientY - touches[1].clientY;
+    return Math.sqrt(dx * dx + dy * dy);
+}
+
+mapContainer.addEventListener('touchstart', (e) => {
+    if (e.touches.length === 1) {
+        // Single finger pan
+        isTouchPanning = true;
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+    } else if (e.touches.length === 2) {
+        // Two finger pinch
+        isTouchPanning = false; // Stop panning if pinching
+        initialPinchDistance = getDistance(e.touches);
+    }
+}, { passive: false });
+
+mapContainer.addEventListener('touchmove', (e) => {
+    e.preventDefault(); // Prevent page scrolling/zooming
+
+    if (e.touches.length === 1 && isTouchPanning) {
+        // Handle Pan
+        const sensitivity = 1.25;
+        const dx = (e.touches[0].clientX - touchStartX) * (viewBox[2] / mapContainer.clientWidth) * sensitivity;
+        const dy = (e.touches[0].clientY - touchStartY) * (viewBox[3] / mapContainer.clientHeight) * sensitivity;
+
+        viewBox[0] -= dx;
+        viewBox[1] -= dy;
+        svg.setAttribute('viewBox', viewBox.join(' '));
+
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+
+    } else if (e.touches.length === 2 && initialPinchDistance > 0) {
+        // Handle Pinch Zoom
+        const newDistance = getDistance(e.touches);
+        const scale = initialPinchDistance / newDistance; // Inverse: dist grows -> scale shrinks (zoom in)
+
+        // Limit sensitivity slightly if needed, but direct map is usually fine
+        // Apply Center Zoom logic could be complex, simple viewbox scale is easier:
+
+        // Calculate center relative to verify zoom focus (approximate center of screen for now)
+        // ideally we zoom towards the midpoint of the two fingers, but center-zoom is stable
+
+        const w = viewBox[2];
+        const h = viewBox[3];
+
+        viewBox[2] *= scale;
+        viewBox[3] *= scale;
+
+        // Adjust x/y to keep center stable
+        viewBox[0] -= (viewBox[2] - w) / 2;
+        viewBox[1] -= (viewBox[3] - h) / 2;
+
+        svg.setAttribute('viewBox', viewBox.join(' '));
+
+        initialPinchDistance = newDistance; // Update for continuous check
+    }
+}, { passive: false });
+
+mapContainer.addEventListener('touchend', (e) => {
+    if (e.touches.length < 2) {
+        initialPinchDistance = null;
+    }
+    if (e.touches.length === 0) {
+        isTouchPanning = false;
+    }
+    // If one finger remains, we could seamless switch to pan, but might jump. 
+    // Resetting pan start is safer:
+    if (e.touches.length === 1) {
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+        isTouchPanning = true;
+    }
 });

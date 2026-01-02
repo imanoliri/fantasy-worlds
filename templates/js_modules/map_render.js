@@ -11,27 +11,47 @@ const relationColors = {
     "x": "#800080"          // Selected State (Purple)
 };
 
-function toggleMapMode() {
-    const btn = document.getElementById('toggleMapMode');
+const mapModes = ['biome', 'state', 'heightmap', 'temperature', 'none'];
+
+function cycleMapMode() {
+    const btn = document.getElementById('mapModeBtn');
+    // Default to 'biome' if no attribute set
+    const currentMode = btn.getAttribute('data-current-mode') || 'biome';
+
+    const currentIndex = mapModes.indexOf(currentMode);
+    const nextIndex = (currentIndex + 1) % mapModes.length;
+    const nextMode = mapModes[nextIndex];
+
+    setMapMode(nextMode);
+}
+
+function setMapMode(mode) {
+    const mapGroup = document.getElementById('mapBackground');
     const paths = document.querySelectorAll('#mapBackground path');
+    const mapBtn = document.getElementById('mapModeBtn');
 
-    // Use data attribute for state tracking
-    const currentMode = btn.getAttribute('data-mode') || 'biome';
+    // Update button state tracking
+    if (mapBtn) {
+        mapBtn.setAttribute('data-current-mode', mode);
+    }
 
-    if (currentMode === 'biome') {
-        // Switch to State
-        btn.innerText = 'Mode: State';
-        btn.setAttribute('data-mode', 'state');
+    if (mode === 'none') {
+        mapGroup.style.display = 'none';
+        if (mapBtn) mapBtn.innerText = 'Map: None';
+        return;
+    }
+
+    // Ensure map is visible for other modes
+    mapGroup.style.display = 'block';
+
+    if (mode === 'state') {
+        if (mapBtn) mapBtn.innerText = 'Map: Political';
         paths.forEach(p => {
             p.setAttribute('fill', p.getAttribute('data-state-color'));
         });
-    } else if (currentMode === 'state') {
-        // Switch to Heightmap
-        btn.innerText = 'Mode: Heightmap';
-        btn.setAttribute('data-mode', 'heightmap');
-
+    } else if (mode === 'heightmap') {
+        if (mapBtn) mapBtn.innerText = 'Map: Heightmap';
         paths.forEach(p => {
-            // Heightmap logic: darken color based on height
             let h = parseInt(p.getAttribute('data-height'));
             let c = 255 - h * 2;
             if (c < 0) c = 0;
@@ -41,18 +61,15 @@ function toggleMapMode() {
                 p.setAttribute('fill', `rgb(${c}, ${c}, ${c})`);
             }
         });
-    } else if (currentMode === 'heightmap') {
-        // Switch to Temperature
-        btn.innerText = 'Mode: Temperature';
-        btn.setAttribute('data-mode', 'temperature');
+    } else if (mode === 'temperature') {
+        if (mapBtn) mapBtn.innerText = 'Map: Temperature';
         paths.forEach(p => {
             const t = parseInt(p.getAttribute('data-temp'));
             p.setAttribute('fill', getColorForTemp(t));
         });
     } else {
-        // Switch to Biome
-        btn.innerText = 'Mode: Biome';
-        btn.setAttribute('data-mode', 'biome');
+        // Biome (Default)
+        if (mapBtn) mapBtn.innerText = 'Map: Biome';
         paths.forEach(p => {
             p.setAttribute('fill', p.getAttribute('data-biome-color'));
         });
