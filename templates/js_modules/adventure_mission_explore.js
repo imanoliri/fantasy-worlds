@@ -37,8 +37,14 @@ const MissionExplore = {
             this.elements.push(locGroup);
         }
 
+        // Mission: Exploration {
         const svg = document.getElementById('mapSvg');
         if (svg) svg.appendChild(locationsGroup);
+        this.locations = [null, null, null, null];
+        for (let i = 0; i < 4; i++) {
+            this.spawnLocation(i);
+        }
+        this.updateVisuals();
     },
 
     spawn() {

@@ -57,7 +57,9 @@ const MissionBattle = {
         this.countElement = enemyCount;
 
         const svg = document.getElementById('mapSvg');
-        if (svg) svg.appendChild(this.element);
+        if (svg) svg.appendChild(enemyGroup);
+
+        // Mission: Battle
     },
 
     spawn() {

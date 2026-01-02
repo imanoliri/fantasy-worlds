@@ -236,13 +236,13 @@ function clearHighlights() {
 }
 
 function selectState(stateId) {
-    // Legacy support for diplomacy click actions, can keep as is or integrate.
-    // The original code toggled colors on click.
-    const btn = document.getElementById('toggleMapMode');
+    const btn = document.getElementById('mapModeBtn');
     if (btn) {
-        const currentMode = btn.getAttribute('data-mode');
+        const currentMode = btn.getAttribute('data-current-mode');
+        // Only run diplomacy update if already in state mode (or switch to it?)
+        // User said "when you are on the state map", so we assume mode is already 'state'.
         if (currentMode === 'state') {
-            updateDiplomacyColors(stateId);
+            updateDiplomacyColors(parseInt(stateId)); // Ensure ID is number for matrix lookup
         }
     }
 }

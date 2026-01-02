@@ -42,7 +42,9 @@ const MissionHunt = {
         this.countElement = beastCount;
 
         const svg = document.getElementById('mapSvg');
-        if (svg) svg.appendChild(this.element);
+        if (svg) svg.appendChild(beastGroup);
+
+        // Mission: Beast Hunt
     },
 
     spawn() {
