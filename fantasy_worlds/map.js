@@ -2836,36 +2836,33 @@ svg.addEventListener('mousemove', (e) => {
 
         tooltip.style.left = left + 'px';
         tooltip.style.top = top + 'px';
-    } else if (e.target.tagName === 'path') {
-        const btn = document.getElementById('toggleMapMode');
-        const mode = btn.getAttribute('data-mode') || 'biome';
-
-        let content = '';
-        if (mode === 'biome') {
-            const biome = e.target.getAttribute('data-biome');
-            if (biome) content = `<strong>Biome:</strong> ${biome}`;
-        } else if (mode === 'state') {
-            const state = e.target.getAttribute('data-state');
-            if (state) content = `<strong>State:</strong> ${state}`;
-        } else if (mode === 'heightmap') {
-            const h = e.target.getAttribute('data-height');
-            if (h) content = `<strong>Height:</strong> ${h}`;
-        } else if (mode === 'temperature') {
-            const t = e.target.getAttribute('data-temp');
-            if (t) content = `<strong>Temp:</strong> ${t}°C`;
-        }
-
-        if (content) {
-            tooltip.innerHTML = content;
-            tooltip.style.display = 'block';
-            tooltip.style.left = (e.clientX + 15) + 'px';
-            tooltip.style.top = (e.clientY + 15) + 'px';
-        } else {
-            tooltip.style.display = 'none';
-        }
+        tooltip.style.left = left + 'px';
+        tooltip.style.top = top + 'px';
+        /* 
+        } else if (e.target.tagName === 'path') {
+            const btn = document.getElementById('toggleMapMode');
+            const mode = btn.getAttribute('data-mode') || 'biome';
+    
+            let content = '';
+            // Logic removed to reduce noise and fix "tooltip sticking" issue
+            // The user prefers the tooltip to disappear when leaving a burg.
+            
+            if (content) {
+                tooltip.innerHTML = content;
+                tooltip.style.display = 'block';
+                tooltip.style.left = (e.clientX + 15) + 'px';
+                tooltip.style.top = (e.clientY + 15) + 'px';
+            } else {
+                tooltip.style.display = 'none';
+            }
+        */
     } else {
         tooltip.style.display = 'none';
     }
+});
+
+svg.addEventListener('mouseleave', () => {
+    tooltip.style.display = 'none';
 });
 
 // Table Tooltip Interactions
@@ -2976,7 +2973,7 @@ mapContainer.addEventListener('touchmove', (e) => {
 
     if (e.touches.length === 1 && isTouchPanning) {
         // Handle Pan
-        const sensitivity = 1.5;
+        const sensitivity = 1.25;
         const dx = (e.touches[0].clientX - touchStartX) * (viewBox[2] / mapContainer.clientWidth) * sensitivity;
         const dy = (e.touches[0].clientY - touchStartY) * (viewBox[3] / mapContainer.clientHeight) * sensitivity;
 
