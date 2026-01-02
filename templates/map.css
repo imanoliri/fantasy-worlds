@@ -54,6 +54,20 @@ h1.world-title-bar {
     color: #888;
 }
 
+#headerToggleBtn {
+    background: transparent;
+    border: none;
+    color: #bdc3c7;
+    cursor: pointer;
+    font-size: 0.9rem;
+    padding: 5px;
+    transition: color 0.2s;
+}
+
+#headerToggleBtn:hover {
+    color: white;
+}
+
 .controls {
     display: flex;
     align-items: center;
@@ -62,6 +76,20 @@ h1.world-title-bar {
     padding: 0;
     justify-content: center;
     flex-wrap: wrap;
+    transition: max-height 0.3s ease-out, opacity 0.3s ease-out;
+    max-height: 500px;
+    /* Rough max height for animation */
+    overflow: hidden;
+    opacity: 1;
+}
+
+.controls.hidden {
+    display: none;
+    /* Simple hide as requested, or use max-height: 0 for animation */
+    max-height: 0;
+    opacity: 0;
+    padding: 0;
+    /* Remove padding when hidden to fully collapse */
 }
 
 .container {

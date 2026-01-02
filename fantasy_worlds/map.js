@@ -110,6 +110,19 @@ function toggleMap() {
     }
 }
 
+function toggleHeaderControls() {
+    const controls = document.querySelector('.controls');
+    const btn = document.getElementById('headerToggleBtn');
+    controls.classList.toggle('hidden');
+
+    // Rotate triangle based on visibility
+    if (controls.classList.contains('hidden')) {
+        btn.innerHTML = '▲';
+    } else {
+        btn.innerHTML = '▼';
+    }
+}
+
 
 const relationColors = {
     "Ally": "#32CD32",      // Lime Green

@@ -97,3 +97,16 @@ function toggleMap() {
         mapGroup.style.display = 'none';
     }
 }
+
+function toggleHeaderControls() {
+    const controls = document.querySelector('.controls');
+    const btn = document.getElementById('headerToggleBtn');
+    controls.classList.toggle('hidden');
+
+    // Rotate triangle based on visibility
+    if (controls.classList.contains('hidden')) {
+        btn.innerHTML = '▲';
+    } else {
+        btn.innerHTML = '▼';
+    }
+}
