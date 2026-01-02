@@ -2273,13 +2273,13 @@ const AdventureManager = {
     // Helper to generate mini stats bar for modals (Small Top-Right)
     getModalStatsBarHtml() {
         if (!this.active) return '';
-        // Compact version: Icons + Numbers only
+        // Compact version: Icons + Numbers only. Matches Map Banner Order.
         return `
             <div class="modal-stats-bar">
-                <span title="Soldiers">⚔️ <span class="adv-stat-soldiers">${this.party.soldiers}</span></span>
+                <span title="Soldiers">🛡️ <span class="adv-stat-soldiers">${this.party.soldiers}</span></span>
+                <span title="Tools">🛠️ <span class="adv-stat-tools">${this.party.tools}</span></span>
                 <span title="Food">🍎 <span class="adv-stat-food">${this.party.food}</span></span>
                 <span title="Gold">💰 <span class="adv-stat-gold">${this.party.gold}</span></span>
-                <span title="Tools">🛠️ <span class="adv-stat-tools">${this.party.tools}</span></span>
             </div>
         `;
     },
