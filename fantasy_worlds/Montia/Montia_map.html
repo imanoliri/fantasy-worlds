@@ -45580,7 +45580,10 @@
                     </select>
                     <!-- Description removed, now tooltip -->
                     <div id="campaignObjectives" class="campaign-objectives hidden">
-                        <h3>Objectives</h3>
+                        <h3 onclick="CampaignManager.toggleObjectives()"
+                            style="cursor: pointer; display: flex; align-items: center; justify-content: space-between;">
+                            Objectives <span id="objectivesToggleIcon">▼</span>
+                        </h3>
                         <ul id="objectivesList" class="objective-list"></ul>
                     </div>
                     <button id="campaignStartBtn" class="adventure-btn start-btn hidden"

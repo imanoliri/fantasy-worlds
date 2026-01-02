@@ -947,15 +947,19 @@ body:not(.show-info-banners) .burg-info-badge {
     background: rgba(0, 0, 0, 0.2);
     padding: 10px;
     border-radius: 4px;
+    margin-top: 10px;
+}
+
+.campaign-objectives.collapsed .objective-list {
+    display: none;
 }
 
 .campaign-objectives h3 {
     margin-top: 0;
-    font-size: 1em;
-    color: #f1c40f;
-    border-bottom: 1px solid #7f8c8d;
-    padding-bottom: 5px;
     margin-bottom: 5px;
+    font-size: 1rem;
+    color: #f1c40f;
+    user-select: none;
 }
 
 .objective-list {
