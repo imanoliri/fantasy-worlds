@@ -30,12 +30,33 @@ function hideTooltip() {
     tooltip.style.display = 'none';
 }
 
-function toggleLayer(layerClass) {
-    const body = document.body;
-    if (body.classList.contains(layerClass)) {
-        body.classList.remove(layerClass);
+function toggleFoodTrades() {
+    const btn = document.getElementById('toggleFoodTrades');
+    btn.classList.toggle('active');
+    if (btn.classList.contains('active')) {
+        document.body.classList.add('show-food-trades');
     } else {
-        body.classList.add(layerClass);
+        document.body.classList.remove('show-food-trades');
+    }
+}
+
+function toggleGoldTrades() {
+    const btn = document.getElementById('toggleGoldTrades');
+    btn.classList.toggle('active');
+    if (btn.classList.contains('active')) {
+        document.body.classList.add('show-gold-trades');
+    } else {
+        document.body.classList.remove('show-gold-trades');
+    }
+}
+
+function toggleCapitals() {
+    const btn = document.getElementById('toggleCapitals');
+    btn.classList.toggle('active');
+    if (btn.classList.contains('active')) {
+        document.body.classList.add('show-capitals');
+    } else {
+        document.body.classList.remove('show-capitals');
     }
 }
 
@@ -95,18 +116,5 @@ function toggleMap() {
         mapGroup.style.display = 'block';
     } else {
         mapGroup.style.display = 'none';
-    }
-}
-
-function toggleHeaderControls() {
-    const controls = document.querySelector('.controls');
-    const btn = document.getElementById('headerToggleBtn');
-    controls.classList.toggle('hidden');
-
-    // Rotate triangle based on visibility
-    if (controls.classList.contains('hidden')) {
-        btn.innerHTML = '▲';
-    } else {
-        btn.innerHTML = '▼';
     }
 }
