@@ -40,8 +40,7 @@
                         <label><input type="checkbox" value="all" checked data-change-action="toggleAllStates"> All
                             States</label>
                         {% for s in states_data %}
-                        <label onmouseover="showStateTooltip(event, '{{ s.tooltip_info }}')"
-                            onmouseout="hideTooltip()"><input type="checkbox" value="{{ s.name }}" checked
+                        <label data-tooltip="{{ s.tooltip_info }}"><input type="checkbox" value="{{ s.name }}" checked
                                 data-change-action="filterTable"> {{ s.name }}</label>
                         {% endfor %}
                     </div>

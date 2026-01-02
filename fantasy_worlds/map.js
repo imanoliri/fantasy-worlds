@@ -2869,7 +2869,13 @@ function hideTooltip() {
 document.body.addEventListener('mousemove', (e) => {
     const target = e.target;
 
-    // Burg Tooltip
+    // 1. Generic Data Tooltip (e.g., UI Labels)
+    const tooltipTarget = target.closest('[data-tooltip]');
+    if (tooltipTarget) {
+        return showTooltip(tooltipTarget.getAttribute('data-tooltip'), e.clientX, e.clientY);
+    }
+
+    // 2. Burg Tooltip
     if (target.classList.contains('burg-dot')) {
         const d = target.dataset;
         const displayName = target.classList.contains('capital') ? `★ ${d.name}` : d.name;
@@ -2878,13 +2884,13 @@ document.body.addEventListener('mousemove', (e) => {
         return showTooltip(content, e.clientX, e.clientY);
     }
 
-    // Table Tooltip
+    // 3. Table Tooltip
     if (target.classList.contains('quartier-cell')) {
         const details = target.getAttribute('data-details');
         if (details) return showTooltip(details, e.clientX, e.clientY);
     }
 
-    // Map Cell Tooltip (Cells)
+    // 4. Map Cell Tooltip (Cells)
     if (target.tagName === 'path' && target.closest('#mapBackground')) {
         const modeBtn = document.getElementById('mapModeBtn');
         const mode = modeBtn ? (modeBtn.getAttribute('data-current-mode') || 'biome') : 'biome';
@@ -2901,21 +2907,14 @@ document.body.addEventListener('mousemove', (e) => {
         } else if (mode === 'temperature') {
             content = `<strong>Temperature</strong><br>${d.temp}°C`;
         } else {
-            // Fallback / None: Show basic info or nothing
-            // User "problem 1" implies they want values, so showing generic info might be good if mode is 'none' but map is visible? 
-            // But if map is hidden (none), paths aren't visible/hoverable.
-            // If mode is unexpected, show Biome/State as default.
             content = `<strong>${d.stateName}</strong><br>Biome: ${d.biome}`;
         }
 
         return showTooltip(content, e.clientX, e.clientY);
     }
 
-    // Hide if inside containers but not on target
-    if ((target.closest('#mapSvg') && !target.classList.contains('burg-dot')) ||
-        (target.closest('.tables-wrapper') && !target.classList.contains('quartier-cell'))) {
-        hideTooltip();
-    }
+    // 5. No match -> Hide Tooltip
+    hideTooltip();
 });
 // Ensure hide on leave
 if (mapContainer) mapContainer.addEventListener('mouseleave', hideTooltip);
