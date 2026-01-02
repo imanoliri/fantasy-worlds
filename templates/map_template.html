@@ -12,71 +12,76 @@
     <header>
         <div class="header-top">
             <h1 class="world-title-bar">{{ map_name }}</h1>
-            <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="Search burgs...">
-            <button id="headerToggleBtn" onclick="toggleHeaderControls()" title="Toggle Controls">▼</button>
+            <input type="text" id="searchInput" placeholder="Search burgs...">
+            <button id="headerToggleBtn" data-click-action="toggleHeaderControls" title="Toggle Controls">▼</button>
         </div>
         <div class="controls">
 
             <div class="dropdown">
-                <button class="dropbtn" onclick="toggleDropdown('typeDropdown')">Types ▼</button>
+                <button class="dropbtn" data-dropdown-toggle="typeDropdown">Types ▼</button>
                 <div class="dropdown-content" id="typeDropdown">
                     <div class="checkbox-list" id="typeCheckboxes">
-                        <label><input type="checkbox" value="all" checked onchange="toggleAllTypes(this)"> All
+                        <label><input type="checkbox" value="all" checked data-change-action="toggleAllTypes"> All
                             Types</label>
                         {% for t in burg_types %}
-                        <label><input type="checkbox" value="{{ t }}" checked onchange="filterTable()"> {{ t }}</label>
+                        <label><input type="checkbox" value="{{ t }}" checked data-change-action="filterTable"> {{ t
+                            }}</label>
                         {% endfor %}
-                        <label><input type="checkbox" value="Capital" checked onchange="filterTable()"> Capital</label>
+                        <label><input type="checkbox" value="Capital" checked data-change-action="filterTable">
+                            Capital</label>
                     </div>
                 </div>
             </div>
 
             <div class="dropdown">
-                <button class="dropbtn" onclick="toggleDropdown('stateDropdown')">States ▼</button>
+                <button class="dropbtn" data-dropdown-toggle="stateDropdown">States ▼</button>
                 <div class="dropdown-content" id="stateDropdown">
                     <div class="checkbox-list" id="stateCheckboxes">
-                        <label><input type="checkbox" value="all" checked onchange="toggleAllStates(this)"> All
+                        <label><input type="checkbox" value="all" checked data-change-action="toggleAllStates"> All
                             States</label>
                         {% for s in states_data %}
-                        <label onmouseover="showStateTooltip(event, '{{ s.tooltip_info }}')"
-                            onmouseout="hideTooltip()"><input type="checkbox" value="{{ s.name }}" checked
-                                onchange="filterTable()"> {{ s.name }}</label>
+                        <label data-tooltip="{{ s.tooltip_info }}"><input type="checkbox" value="{{ s.name }}" checked
+                                data-change-action="filterTable"> {{ s.name }}</label>
                         {% endfor %}
                     </div>
                 </div>
             </div>
 
             <div class="dropdown">
-                <button class="dropbtn" onclick="toggleDropdown('layerDropdown')">Map Layers ▼</button>
+                <button class="dropbtn" data-dropdown-toggle="layerDropdown">Map Layers ▼</button>
                 <div class="dropdown-content" id="layerDropdown">
                     <div class="checkbox-list">
-                        <label><input type="checkbox" id="layerFood" checked onchange="toggleLayer('show-food-trades')">
+                        <label><input type="checkbox" id="layerFood" checked data-change-action="toggleLayer"
+                                data-layer-class="show-food-trades">
                             Food Trade</label>
-                        <label><input type="checkbox" id="layerGold" checked onchange="toggleLayer('show-gold-trades')">
+                        <label><input type="checkbox" id="layerGold" checked data-change-action="toggleLayer"
+                                data-layer-class="show-gold-trades">
                             Gold Trade</label>
-                        <label><input type="checkbox" id="layerCapitals" checked
-                                onchange="toggleLayer('show-capitals')"> Capitals</label>
-                        <label><input type="checkbox" id="layerInfoBanners" checked
-                                onchange="toggleLayer('show-info-banners')"> Info Banners</label>
+                        <label><input type="checkbox" id="layerCapitals" checked data-change-action="toggleLayer"
+                                data-layer-class="show-capitals"> Capitals</label>
+                        <label><input type="checkbox" id="layerInfoBanners" checked data-change-action="toggleLayer"
+                                data-layer-class="show-info-banners"> Info Banners</label>
                     </div>
                 </div>
             </div>
-            <button class="toggle-btn" id="toggleStateTable" onclick="toggleStateTable()">States</button>
-            <button class="toggle-btn" id="toggleTable" onclick="toggleTable()">Burgs</button>
-            <button class="toggle-btn" id="toggleFoodTradeTable" onclick="toggleFoodTradeTable()">Food Trade</button>
-            <button class="toggle-btn" id="toggleGoldTradeTable" onclick="toggleGoldTradeTable()">Gold Trade</button>
-            <button class="toggle-btn green-btn" id="mapModeBtn" onclick="cycleMapMode()">Map: Biome</button>
+            <button class="toggle-btn" id="toggleStateTable" data-click-action="toggleStateTable">States</button>
+            <button class="toggle-btn" id="toggleTable" data-click-action="toggleTable">Burgs</button>
+            <button class="toggle-btn" id="toggleFoodTradeTable" data-click-action="toggleFoodTradeTable">Food
+                Trade</button>
+            <button class="toggle-btn" id="toggleGoldTradeTable" data-click-action="toggleGoldTradeTable">Gold
+                Trade</button>
+            <button class="toggle-btn green-btn" id="mapModeBtn" data-click-action="cycleMapMode">Map: Biome</button>
 
             <div class="dropdown">
-                <button class="toggle-btn special dropbtn" id="gameModeBtn"
-                    onclick="toggleDropdown('gameModeDropdown')">Free Mode ▼</button>
+                <button class="toggle-btn special dropbtn" id="gameModeBtn" data-dropdown-toggle="gameModeDropdown">Free
+                    Mode ▼</button>
                 <div class="dropdown-content" id="gameModeDropdown">
-                    <a href="#" onclick="selectGameMode('none')">Free Mode</a>
-                    <a href="#" onclick="selectGameMode('adventure')">⚔️ Adventure</a>
-                    <a href="#" onclick="selectGameMode('campaign')">📜 Campaign</a>
+                    <a href="#" data-game-mode="none">Free Mode</a>
+                    <a href="#" data-game-mode="adventure">⚔️ Adventure</a>
+                    <a href="#" data-game-mode="campaign">📜 Campaign</a>
                 </div>
             </div>
-            <button class="toggle-btn" onclick="clearHighlights()">Clear Selection</button>
+            <button class="toggle-btn" data-click-action="clearHighlights">Clear Selection</button>
 
         </div>
     </header>
@@ -105,7 +110,7 @@
 
             <!-- Floating Options Button -->
             <button id="adventureOptionsBtn" class="adventure-btn floating-options-btn hidden"
-                onclick="AdventureManager.toggleOptions()">⚙️</button>
+                data-click-action="AdventureManager.toggleOptions">⚙️</button>
 
             <svg id="mapSvg" viewBox="{{ min_x-50 }} {{ min_y-50 }} {{ width }} {{ height }}"
                 preserveAspectRatio="xMidYMid meet">
@@ -115,8 +120,7 @@
                     <path d="{{ p.d }}" fill="{{ p.fill }}" stroke="none" data-state-color="{{ p.state_fill }}"
                         data-biome-color="{{ p.biome_fill }}" data-state-id="{{ p.state_id }}" data-height="{{ p.h }}"
                         data-temp="{{ p.t }}" data-biome="{{ p.biome_name }}" data-state="{{ p.state_name }}"
-                        data-cell-id="{{ p.cell_id }}" {% if p.is_water %}data-is-water="true" {% endif %}
-                        onclick="selectState({{ p.state_id }})" />
+                        data-cell-id="{{ p.cell_id }}" {% if p.is_water %}data-is-water="true" {% endif %} />
                     {% endfor %}
                 </g>
 
@@ -141,8 +145,7 @@
                     stroke-width="{{ b.stroke_width }}" class="burg-dot{{ b.capital_class }} {{ b.dot_class_str }}"
                     data-id="{{ b.id }}" data-name="{{ b.name }}" data-pop="{{ b.population }}" data-type="{{ b.type }}"
                     data-state="{{ b.state_name }}" data-gold="{{ b.net_gold }}" data-food="{{ b.net_food }}"
-                    data-quartiers="{{ b.quartier_details }}" data-cell-id="{{ b.cell_id }}"
-                    onclick="selectBurg({{ b.id }})" />
+                    data-quartiers="{{ b.quartier_details }}" data-cell-id="{{ b.cell_id }}" />
                 </circle>
                 {% if b.is_capital %}
                 <text x="{{ b.x }}" y="{{ b.y }}" dy="0.35em" text-anchor="middle" font-size="{{ b.r + 2 }}px"
@@ -176,14 +179,15 @@
         <div id="adventureSidebar" class="adventure-sidebar hidden">
             <div class="sidebar-header">
                 <div class="sidebar-controls">
-                    <button class="adventure-btn start-btn" onclick="AdventureManager.start()">Start New</button>
-                    <button class="adventure-btn pause-btn" onclick="toggleAdventureMode()">Pause</button>
+                    <button class="adventure-btn start-btn" data-click-action="AdventureManager.start">Start
+                        New</button>
+                    <button class="adventure-btn pause-btn" data-click-action="toggleAdventureMode">Pause</button>
                 </div>
 
                 <!-- Campaign Controls -->
                 <div id="campaignSelectContainer" class="campaign-panel hidden">
                     <select id="campaignDropdown" class="campaign-dropdown"
-                        onchange="CampaignManager.selectCampaign(this.value)">
+                        data-change-action="CampaignManager.selectCampaign">
                         <option value="" disabled selected>Select a Campaign...</option>
                     </select>
                     <!-- Description removed, now tooltip -->
@@ -191,9 +195,9 @@
                         <ul id="objectivesList" class="objective-list"></ul>
                     </div>
                     <button id="campaignStartBtn" class="adventure-btn start-btn hidden"
-                        onclick="CampaignManager.startCampaign()">Start</button>
+                        data-click-action="CampaignManager.startCampaign">Start</button>
                     <button id="campaignCancelBtn" class="adventure-btn pause-btn hidden"
-                        onclick="CampaignManager.cancelCampaign()" style="margin-top: 5px;">Cancel</button>
+                        data-click-action="CampaignManager.cancelCampaign" style="margin-top: 5px;">Cancel</button>
                 </div>
             </div>
 
@@ -214,14 +218,14 @@
                     <caption>Gold Trade Routes</caption>
                     <thead>
                         <tr>
-                            <th onclick="sortTable(0, this, 'goldTradeTable')">From</th>
-                            <th onclick="sortTable(1, this, 'goldTradeTable')">To</th>
-                            <th onclick="sortTable(2, this, 'goldTradeTable')">Gold</th>
+                            <th data-sort-col="0" data-sort-table="goldTradeTable">From</th>
+                            <th data-sort-col="1" data-sort-table="goldTradeTable">To</th>
+                            <th data-sort-col="2" data-sort-table="goldTradeTable">Gold</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for row in gold_rows %}
-                        <tr onclick="highlightTradeRoute(this, {{ row.from_id }}, {{ row.to_id }})">
+                        <tr data-trade-from="{{ row.from_id }}" data-trade-to="{{ row.to_id }}">
                             <td>{{ row.from_name }}</td>
                             <td>{{ row.to_name }}</td>
                             <td>{{ row.amount }}</td>
@@ -236,14 +240,14 @@
                     <caption>Food Trade Routes</caption>
                     <thead>
                         <tr>
-                            <th onclick="sortTable(0, this, 'foodTradeTable')">From</th>
-                            <th onclick="sortTable(1, this, 'foodTradeTable')">To</th>
-                            <th onclick="sortTable(2, this, 'foodTradeTable')">Food</th>
+                            <th data-sort-col="0" data-sort-table="foodTradeTable">From</th>
+                            <th data-sort-col="1" data-sort-table="foodTradeTable">To</th>
+                            <th data-sort-col="2" data-sort-table="foodTradeTable">Food</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for row in food_rows %}
-                        <tr onclick="highlightTradeRoute(this, {{ row.from_id }}, {{ row.to_id }})">
+                        <tr data-trade-from="{{ row.from_id }}" data-trade-to="{{ row.to_id }}">
                             <td>{{ row.from_name }}</td>
                             <td>{{ row.to_name }}</td>
                             <td>{{ row.amount }}</td>
@@ -258,21 +262,21 @@
                     <caption>Burgs</caption>
                     <thead>
                         <tr>
-                            <th onclick="sortTable(0, this, 'burgTable')">Name</th>
-                            <th onclick="sortTable(1, this, 'burgTable')">Type</th>
-                            <th onclick="sortTable(2, this, 'burgTable')">State</th>
-                            <th onclick="sortTable(3, this, 'burgTable')">Quartiers</th>
-                            <th onclick="sortTable(4, this, 'burgTable')">Craftsman</th>
-                            <th onclick="sortTable(5, this, 'burgTable')">Soldier</th>
-                            <th onclick="sortTable(6, this, 'burgTable')">Pop</th>
-                            <th onclick="sortTable(7, this, 'burgTable')">Food</th>
-                            <th onclick="sortTable(8, this, 'burgTable')">Gold</th>
+                            <th data-sort-col="0" data-sort-table="burgTable">Name</th>
+                            <th data-sort-col="1" data-sort-table="burgTable">Type</th>
+                            <th data-sort-col="2" data-sort-table="burgTable">State</th>
+                            <th data-sort-col="3" data-sort-table="burgTable">Quartiers</th>
+                            <th data-sort-col="4" data-sort-table="burgTable">Craftsman</th>
+                            <th data-sort-col="5" data-sort-table="burgTable">Soldier</th>
+                            <th data-sort-col="6" data-sort-table="burgTable">Pop</th>
+                            <th data-sort-col="7" data-sort-table="burgTable">Food</th>
+                            <th data-sort-col="8" data-sort-table="burgTable">Gold</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for b in burgs_data %}
-                        <tr data-id="{{ b.id }}" data-original-index="{{ loop.index0 }}" class="{{ b.row_class }}"
-                            onclick="highlightBurg({{ b.id }})">
+                        <tr data-id="{{ b.id }}" data-burg-id="{{ b.id }}" data-original-index="{{ loop.index0 }}"
+                            class="{{ b.row_class }}">
                             <td>{{ b.name_display }}</td>
                             <td>{{ b.type }}</td>
                             <td>{{ b.state_name }}</td>
@@ -293,22 +297,22 @@
                     <caption>States</caption>
                     <thead>
                         <tr>
-                            <th onclick="sortTable(0, this, 'stateTable')">Color</th>
-                            <th onclick="sortTable(1, this, 'stateTable')">Name</th>
-                            <th onclick="sortTable(2, this, 'stateTable')">Capital</th>
-                            <th onclick="sortTable(3, this, 'stateTable')">Type</th>
-                            <th onclick="sortTable(4, this, 'stateTable')">Culture</th>
-                            <th onclick="sortTable(5, this, 'stateTable')">Burgs</th>
-                            <th onclick="sortTable(6, this, 'stateTable')">Area</th>
-                            <th onclick="sortTable(7, this, 'stateTable')">Cells</th>
-                            <th onclick="sortTable(8, this, 'stateTable')">Form</th>
-                            <th onclick="sortTable(9, this, 'stateTable')">Fullname</th>
+                            <th data-sort-col="0" data-sort-table="stateTable">Color</th>
+                            <th data-sort-col="1" data-sort-table="stateTable">Name</th>
+                            <th data-sort-col="2" data-sort-table="stateTable">Capital</th>
+                            <th data-sort-col="3" data-sort-table="stateTable">Type</th>
+                            <th data-sort-col="4" data-sort-table="stateTable">Culture</th>
+                            <th data-sort-col="5" data-sort-table="stateTable">Burgs</th>
+                            <th data-sort-col="6" data-sort-table="stateTable">Area</th>
+                            <th data-sort-col="7" data-sort-table="stateTable">Cells</th>
+                            <th data-sort-col="8" data-sort-table="stateTable">Form</th>
+                            <th data-sort-col="9" data-sort-table="stateTable">Fullname</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for s in states_data %}
-                        <tr data-original-index="{{ loop.index0 }}"
-                            onclick="highlightState('{{ s.safe_name }}', '{{ s.color }}')">
+                        <tr data-original-index="{{ loop.index0 }}" data-state-name="{{ s.safe_name }}"
+                            data-state-color="{{ s.color }}">
                             <td><span class="color-box"
                                     style="background-color: {{ s.color }}; display: inline-block; width: 15px; height: 15px; border: 1px solid #333;"></span>
                             </td>
@@ -338,7 +342,7 @@
                 <p style="font-size: 1.2em; margin-bottom: 20px;">You have successfully defended the realm and completed
                     all objectives.</p>
                 <div class="actions" style="display: flex; gap: 10px; justify-content: center;">
-                    <button class="btn-enter" onclick="CampaignManager.endCampaign()"
+                    <button class="btn-enter" data-click-action="CampaignManager.endCampaign"
                         style="background: #27ae60;">Return to Free Mode</button>
                 </div>
             </div>
@@ -352,20 +356,20 @@
                     <div class="options-column">
                         <h3>Game Settings</h3>
                         <label class="option-item"><input type="checkbox" id="optTreasure" checked
-                                onchange="AdventureManager.toggleMissionOption('Treasure', this.checked)"> Treasure
+                                data-mission-toggle="Treasure"> Treasure
                             Hunt</label>
                         <label class="option-item"><input type="checkbox" id="optHunt" checked
-                                onchange="AdventureManager.toggleMissionOption('Hunt', this.checked)"> Beast
+                                data-mission-toggle="Hunt"> Beast
                             Hunt</label>
                         <label class="option-item"><input type="checkbox" id="optBattle" checked
-                                onchange="AdventureManager.toggleMissionOption('Battle', this.checked)"> Battles</label>
+                                data-mission-toggle="Battle"> Battles</label>
                         <label class="option-item"><input type="checkbox" id="optSiege" checked
-                                onchange="AdventureManager.toggleMissionOption('Siege', this.checked)"> Sieges</label>
+                                data-mission-toggle="Siege"> Sieges</label>
                         <label class="option-item"><input type="checkbox" id="optDiplomacy" checked
-                                onchange="AdventureManager.toggleMissionOption('Diplomacy', this.checked)">
+                                data-mission-toggle="Diplomacy">
                             Diplomacy</label>
                         <label class="option-item"><input type="checkbox" id="optExplore" checked
-                                onchange="AdventureManager.toggleMissionOption('Explore', this.checked)">
+                                data-mission-toggle="Explore">
                             Exploration</label>
                     </div>
                     <div class="options-column">
@@ -374,7 +378,7 @@
                     </div>
                 </div>
                 <div class="actions">
-                    <button class="btn-leave" onclick="AdventureManager.toggleOptions()">Close</button>
+                    <button class="btn-leave" data-click-action="AdventureManager.toggleOptions">Close</button>
                 </div>
             </div>
         </div>
@@ -387,9 +391,9 @@
                 </h2>
                 <p style="font-size: 1.2em; margin-bottom: 30px;">Your party has fallen. All soldiers are lost.</p>
                 <div class="actions" style="display: flex; gap: 10px; justify-content: center;">
-                    <button class="btn-leave" onclick="AdventureManager.closeGameOver()"
+                    <button class="btn-leave" data-click-action="AdventureManager.closeGameOver"
                         style="background: #95a5a6;">Close & Look Around</button>
-                    <button class="btn-enter" onclick="AdventureManager.restartGame()"
+                    <button class="btn-enter" data-click-action="AdventureManager.restartGame"
                         style="background: #27ae60;">Start New Adventure</button>
                 </div>
             </div>
@@ -403,9 +407,9 @@
                 </h2>
                 <p style="font-size: 1.2em; margin-bottom: 30px;">You have amassed 300 of every resource!</p>
                 <div class="actions" style="display: flex; gap: 10px; justify-content: center;">
-                    <button class="btn-leave" onclick="AdventureManager.closeWinModal()"
+                    <button class="btn-leave" data-click-action="AdventureManager.closeWinModal"
                         style="background: #95a5a6;">Keep Playing</button>
-                    <button class="btn-enter" onclick="AdventureManager.exitAdventureMode()"
+                    <button class="btn-enter" data-click-action="AdventureManager.exitAdventureMode"
                         style="background: #27ae60;">Exit Adventure Mode</button>
                 </div>
             </div>

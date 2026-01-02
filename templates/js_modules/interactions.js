@@ -1,112 +1,164 @@
-svg.addEventListener('click', (e) => {
-    // Adventure Mode
-    if (window.AdventureManager && window.AdventureManager.active) {
-        window.AdventureManager.handleClick(e.target);
-        return;
+const tablesWrapper = document.querySelector('.tables-wrapper');
+
+// --- Global Click Delegation ---
+document.body.addEventListener('click', (e) => {
+    const target = e.target;
+
+    // Adventure Mode Map Clicks
+    if (window.AdventureManager?.active && target.closest('#mapSvg')) {
+        return AdventureManager.handleClick(target);
     }
 
-    if (e.target.classList.contains('burg-dot')) {
-        const id = e.target.getAttribute('data-id');
-        selectBurg(id);
+    // Map Elements
+    if (target.classList.contains('burg-dot')) {
+        return selectBurg(target.getAttribute('data-id'));
+    }
+    if (target.hasAttribute('data-state-id')) {
+        return window.selectState && selectState(target.getAttribute('data-state-id'));
+    }
+
+    // Generic Action (data-click-action="Object.method" or "func")
+    const action = target.getAttribute('data-click-action');
+    if (action) {
+        const [obj, method] = action.split('.');
+        return method ? window[obj][method]() : window[action]();
+    }
+
+    // Specific UI Interactions
+    if (target.hasAttribute('data-dropdown-toggle')) {
+        return toggleDropdown(target.getAttribute('data-dropdown-toggle'));
+    }
+    if (target.hasAttribute('data-game-mode')) {
+        return selectGameMode(target.getAttribute('data-game-mode'));
+    }
+
+    // Table Interactions
+    const th = target.closest('th');
+    if (th?.hasAttribute('data-sort-col')) {
+        return sortTable(parseInt(th.getAttribute('data-sort-col')), th, th.getAttribute('data-sort-table'));
+    }
+
+    const tr = target.closest('tr');
+    if (tr) {
+        if (tr.hasAttribute('data-burg-id')) {
+            return highlightBurg(tr.getAttribute('data-burg-id'));
+        }
+        if (tr.hasAttribute('data-state-name')) {
+            return highlightState(tr.getAttribute('data-state-name'), tr.getAttribute('data-state-color'));
+        }
+        if (tr.hasAttribute('data-trade-from')) {
+            return highlightTradeRoute(tr, tr.getAttribute('data-trade-from'), tr.getAttribute('data-trade-to'));
+        }
     }
 });
 
+// --- Global Change Delegation ---
+document.body.addEventListener('change', ({ target }) => {
+    if (target.type === 'checkbox') {
+        const action = target.getAttribute('data-change-action');
+        if (action === 'toggleAllTypes') toggleAllTypes(target);
+        if (action === 'toggleAllStates') toggleAllStates(target);
+        if (action === 'toggleLayer') toggleLayer(target.getAttribute('data-layer-class'));
+        if (action === 'filterTable') filterTable();
+
+        if (target.hasAttribute('data-mission-toggle') && window.AdventureManager) {
+            AdventureManager.toggleMissionOption(target.getAttribute('data-mission-toggle'), target.checked);
+        }
+    } else if (target.tagName === 'SELECT') {
+        if (target.getAttribute('data-change-action') === 'CampaignManager.selectCampaign') {
+            CampaignManager.selectCampaign(target.value);
+        }
+    }
+});
+
+// --- Map Context Menu ---
 svg.addEventListener('contextmenu', (e) => {
-    if (window.AdventureManager && window.AdventureManager.active) {
-        e.preventDefault(); // Prevent default context menu
-        window.AdventureManager.handleRightClick(e.target);
+    if (window.AdventureManager?.active) {
+        e.preventDefault();
+        AdventureManager.handleRightClick(e.target);
     }
 });
 
-svg.addEventListener('mousemove', (e) => {
-    if (e.target.classList.contains('burg-dot')) {
-        const name = e.target.getAttribute('data-name');
-        const pop = parseInt(e.target.getAttribute('data-pop')).toLocaleString();
-        const type = e.target.getAttribute('data-type');
-        const state = e.target.getAttribute('data-state');
-        const gold = e.target.getAttribute('data-gold');
-        const food = e.target.getAttribute('data-food');
-        const quartiers = e.target.getAttribute('data-quartiers');
-        const isCapital = e.target.classList.contains('capital');
+// --- Tooltips ---
+const showTooltip = (content, x, y) => {
+    tooltip.innerHTML = content;
+    tooltip.style.display = 'block';
 
-        let displayName = isCapital ? `★ ${name}` : name;
+    let top = y + 10;
+    if (top + 100 > window.innerHeight) top = y - 100;
+    tooltip.style.left = (x + 10) + 'px';
+    tooltip.style.top = top + 'px';
+};
 
-        let tooltipContent = `<strong>${displayName}</strong><br>State: ${state}<br>Type: ${type}<br>Pop: ${pop}<br>Food: ${food}<br>Gold: ${gold}`;
-        if (quartiers) {
-            tooltipContent += `<hr style="margin: 5px 0; border: 0; border-top: 1px solid rgba(255,255,255,0.3);">${quartiers}`;
-        }
 
-        tooltip.innerHTML = tooltipContent;
-        tooltip.style.display = 'block';
 
-        // Smart positioning to keep within viewport
-        let top = e.clientY + 10;
-        let left = e.clientX + 10;
-
-        // Check if tooltip goes off bottom
-        if (top + 100 > window.innerHeight) {
-            top = e.clientY - 100; // Move above cursor
-        }
-
-        tooltip.style.left = left + 'px';
-        tooltip.style.top = top + 'px';
-        tooltip.style.left = left + 'px';
-        tooltip.style.top = top + 'px';
-        /* 
-        } else if (e.target.tagName === 'path') {
-            const btn = document.getElementById('toggleMapMode');
-            const mode = btn.getAttribute('data-mode') || 'biome';
-    
-            let content = '';
-            // Logic removed to reduce noise and fix "tooltip sticking" issue
-            // The user prefers the tooltip to disappear when leaving a burg.
-            
-            if (content) {
-                tooltip.innerHTML = content;
-                tooltip.style.display = 'block';
-                tooltip.style.left = (e.clientX + 15) + 'px';
-                tooltip.style.top = (e.clientY + 15) + 'px';
-            } else {
-                tooltip.style.display = 'none';
-            }
-        */
-    } else {
-        tooltip.style.display = 'none';
-    }
-});
-
-svg.addEventListener('mouseleave', () => {
+function hideTooltip() {
+    const tooltip = document.getElementById('tooltip');
     tooltip.style.display = 'none';
-});
+}
 
-// Table Tooltip Interactions
-table.addEventListener('mousemove', (e) => {
-    if (e.target.classList.contains('quartier-cell')) {
-        const details = e.target.getAttribute('data-details');
-        if (details) {
-            tooltip.innerHTML = details;
-            tooltip.style.display = 'block';
-            tooltip.style.left = (e.clientX + 10) + 'px';
-            tooltip.style.top = (e.clientY + 10) + 'px';
-        }
-    } else {
-        // Only hide if not over map dot (which is separate)
-        // But we are in table container, so map tooltip is not active
-        tooltip.style.display = 'none';
+document.body.addEventListener('mousemove', (e) => {
+    const target = e.target;
+
+    // 1. Generic Data Tooltip (e.g., UI Labels)
+    const tooltipTarget = target.closest('[data-tooltip]');
+    if (tooltipTarget) {
+        return showTooltip(tooltipTarget.getAttribute('data-tooltip'), e.clientX, e.clientY);
     }
-});
 
-table.addEventListener('mouseleave', () => {
-    tooltip.style.display = 'none';
-});
+    // 2. Burg Tooltip
+    if (target.classList.contains('burg-dot')) {
+        const d = target.dataset;
+        const displayName = target.classList.contains('capital') ? `★ ${d.name}` : d.name;
+        let content = `<strong>${displayName}</strong><br>State: ${d.state}<br>Type: ${d.type}<br>Pop: ${parseInt(d.pop).toLocaleString()}<br>Food: ${d.food}<br>Gold: ${d.gold}`;
+        if (d.quartiers) content += `<hr style="margin:5px 0;border-top:1px solid rgba(255,255,255,0.3)">${d.quartiers}`;
+        return showTooltip(content, e.clientX, e.clientY);
+    }
 
-// Pan and Zoom (Basic)
+    // 3. Table Tooltip
+    if (target.classList.contains('quartier-cell')) {
+        const details = target.getAttribute('data-details');
+        if (details) return showTooltip(details, e.clientX, e.clientY);
+    }
+
+    // 4. Map Cell Tooltip (Cells)
+    if (target.tagName === 'path' && target.closest('#mapBackground')) {
+        const modeBtn = document.getElementById('mapModeBtn');
+        const mode = modeBtn ? (modeBtn.getAttribute('data-current-mode') || 'biome') : 'biome';
+
+        const d = target.dataset;
+        let content = '';
+
+        if (mode === 'biome') {
+            content = `<strong>Biome</strong><br>${d.biome}`;
+        } else if (mode === 'state') {
+            content = `<strong>State</strong><br>${d.state}`;
+        } else if (mode === 'heightmap') {
+            content = `<strong>Height</strong><br>${d.height}`;
+        } else if (mode === 'temperature') {
+            content = `<strong>Temperature</strong><br>${d.temp}°C`;
+        } else {
+            content = `<strong>${d.stateName}</strong><br>Biome: ${d.biome}`;
+        }
+
+        return showTooltip(content, e.clientX, e.clientY);
+    }
+
+    // 5. No match -> Hide Tooltip
+    hideTooltip();
+});
+// Ensure hide on leave
+if (mapContainer) mapContainer.addEventListener('mouseleave', hideTooltip);
+if (tablesWrapper) tablesWrapper.addEventListener('mouseleave', hideTooltip);
+
+// --- Pan and Zoom (Mouse & Touch) ---
 let isPanning = false;
 let startX, startY;
 let viewBox = svg.getAttribute('viewBox').split(' ').map(parseFloat);
+const updateViewBox = () => svg.setAttribute('viewBox', viewBox.join(' '));
 
 mapContainer.addEventListener('mousedown', (e) => {
-    if (e.target === svg || e.target.tagName === 'circle' || e.target.tagName === 'line' || e.target.tagName === 'path') {
+    if (['svg', 'circle', 'line', 'path'].includes(e.target.tagName) || e.target === svg) {
         isPanning = true;
         startX = e.clientX;
         startY = e.clientY;
@@ -117,126 +169,81 @@ mapContainer.addEventListener('mousedown', (e) => {
 mapContainer.addEventListener('mousemove', (e) => {
     if (!isPanning) return;
     e.preventDefault();
-    const dx = (e.clientX - startX) * (viewBox[2] / mapContainer.clientWidth);
-    const dy = (e.clientY - startY) * (viewBox[3] / mapContainer.clientHeight);
-
-    viewBox[0] -= dx;
-    viewBox[1] -= dy;
-    svg.setAttribute('viewBox', viewBox.join(' '));
-
+    const w = mapContainer.clientWidth;
+    const h = mapContainer.clientHeight;
+    viewBox[0] -= (e.clientX - startX) * (viewBox[2] / w);
+    viewBox[1] -= (e.clientY - startY) * (viewBox[3] / h);
+    updateViewBox();
     startX = e.clientX;
     startY = e.clientY;
 });
 
-mapContainer.addEventListener('mouseup', () => {
+const stopPan = () => {
     isPanning = false;
     mapContainer.style.cursor = 'default';
-});
-
-mapContainer.addEventListener('mouseleave', () => {
-    isPanning = false;
-    mapContainer.style.cursor = 'default';
-});
+};
+mapContainer.addEventListener('mouseup', stopPan);
+mapContainer.addEventListener('mouseleave', stopPan);
 
 mapContainer.addEventListener('wheel', (e) => {
     e.preventDefault();
     const scale = e.deltaY > 0 ? 1.1 : 0.9;
-    const w = viewBox[2];
-    const h = viewBox[3];
-
+    const oldW = viewBox[2];
+    const oldH = viewBox[3];
     viewBox[2] *= scale;
     viewBox[3] *= scale;
-
-    // Zoom towards center
-    viewBox[0] -= (viewBox[2] - w) / 2;
-    viewBox[1] -= (viewBox[3] - h) / 2;
-
-    svg.setAttribute('viewBox', viewBox.join(' '));
+    viewBox[0] -= (viewBox[2] - oldW) / 2;
+    viewBox[1] -= (viewBox[3] - oldH) / 2;
+    updateViewBox();
 });
 
-
-// ---------------------------------------------------------
-// Touch Interactions (Mobile Pan & Zoom)
-// ---------------------------------------------------------
+// Touch Logic
 let isTouchPanning = false;
-let initialPinchDistance = null;
 let touchStartX = 0;
 let touchStartY = 0;
-
-function getDistance(touches) {
-    const dx = touches[0].clientX - touches[1].clientX;
-    const dy = touches[0].clientY - touches[1].clientY;
-    return Math.sqrt(dx * dx + dy * dy);
-}
+let initialPinchDistance = null;
+const getDist = (ts) => Math.hypot(ts[0].clientX - ts[1].clientX, ts[0].clientY - ts[1].clientY);
 
 mapContainer.addEventListener('touchstart', (e) => {
     if (e.touches.length === 1) {
-        // Single finger pan
         isTouchPanning = true;
         touchStartX = e.touches[0].clientX;
         touchStartY = e.touches[0].clientY;
     } else if (e.touches.length === 2) {
-        // Two finger pinch
-        isTouchPanning = false; // Stop panning if pinching
-        initialPinchDistance = getDistance(e.touches);
+        isTouchPanning = false;
+        initialPinchDistance = getDist(e.touches);
     }
 }, { passive: false });
 
 mapContainer.addEventListener('touchmove', (e) => {
-    e.preventDefault(); // Prevent page scrolling/zooming
-
+    e.preventDefault();
     if (e.touches.length === 1 && isTouchPanning) {
-        // Handle Pan
         const sensitivity = 1.25;
-        const dx = (e.touches[0].clientX - touchStartX) * (viewBox[2] / mapContainer.clientWidth) * sensitivity;
-        const dy = (e.touches[0].clientY - touchStartY) * (viewBox[3] / mapContainer.clientHeight) * sensitivity;
-
-        viewBox[0] -= dx;
-        viewBox[1] -= dy;
-        svg.setAttribute('viewBox', viewBox.join(' '));
-
+        viewBox[0] -= (e.touches[0].clientX - touchStartX) * (viewBox[2] / mapContainer.clientWidth) * sensitivity;
+        viewBox[1] -= (e.touches[0].clientY - touchStartY) * (viewBox[3] / mapContainer.clientHeight) * sensitivity;
+        updateViewBox();
         touchStartX = e.touches[0].clientX;
         touchStartY = e.touches[0].clientY;
-
     } else if (e.touches.length === 2 && initialPinchDistance > 0) {
-        // Handle Pinch Zoom
-        const newDistance = getDistance(e.touches);
-        const scale = initialPinchDistance / newDistance; // Inverse: dist grows -> scale shrinks (zoom in)
-
-        // Limit sensitivity slightly if needed, but direct map is usually fine
-        // Apply Center Zoom logic could be complex, simple viewbox scale is easier:
-
-        // Calculate center relative to verify zoom focus (approximate center of screen for now)
-        // ideally we zoom towards the midpoint of the two fingers, but center-zoom is stable
-
-        const w = viewBox[2];
-        const h = viewBox[3];
-
+        const dist = getDist(e.touches);
+        const scale = initialPinchDistance / dist;
+        const oldW = viewBox[2];
+        const oldH = viewBox[3];
         viewBox[2] *= scale;
         viewBox[3] *= scale;
-
-        // Adjust x/y to keep center stable
-        viewBox[0] -= (viewBox[2] - w) / 2;
-        viewBox[1] -= (viewBox[3] - h) / 2;
-
-        svg.setAttribute('viewBox', viewBox.join(' '));
-
-        initialPinchDistance = newDistance; // Update for continuous check
+        viewBox[0] -= (viewBox[2] - oldW) / 2;
+        viewBox[1] -= (viewBox[3] - oldH) / 2;
+        updateViewBox();
+        initialPinchDistance = dist;
     }
 }, { passive: false });
 
 mapContainer.addEventListener('touchend', (e) => {
-    if (e.touches.length < 2) {
-        initialPinchDistance = null;
-    }
-    if (e.touches.length === 0) {
-        isTouchPanning = false;
-    }
-    // If one finger remains, we could seamless switch to pan, but might jump. 
-    // Resetting pan start is safer:
+    if (e.touches.length < 2) initialPinchDistance = null;
+    if (e.touches.length === 0) isTouchPanning = false;
     if (e.touches.length === 1) {
+        isTouchPanning = true;
         touchStartX = e.touches[0].clientX;
         touchStartY = e.touches[0].clientY;
-        isTouchPanning = true;
     }
 });
