@@ -3326,16 +3326,7 @@ const CampaignManager = {
         this.populateSidebar();
     },
 
-    toggleObjectives() {
-        const container = document.getElementById('campaignObjectives');
-        const icon = document.getElementById('objectivesToggleIcon');
-        if (container) {
-            container.classList.toggle('collapsed');
-            if (icon) {
-                icon.textContent = container.classList.contains('collapsed') ? '▶' : '▼';
-            }
-        }
-    },
+
 
     populateSidebar() {
         const dropdown = document.getElementById('campaignDropdown');
