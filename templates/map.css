@@ -1284,12 +1284,15 @@ body:not(.show-capitals) .capital-crown {
     /* Sidebar moves to bottom, fixed height, Grid layout */
     .adventure-sidebar {
         width: 100%;
-        height: 200px;
+        height: auto;
+        max-height: 250px;
+        /* Allow growth but cap it */
         font-size: small;
         border-left: none;
         border-top: 3px solid #34495e;
-        overflow-y: hidden;
-        overflow-x: auto;
+        overflow-y: auto;
+        /* Enable vertical scrolling */
+        overflow-x: hidden;
 
         display: grid;
         /* First col: Header, Second: Log (Stats gone, Options floating) */
