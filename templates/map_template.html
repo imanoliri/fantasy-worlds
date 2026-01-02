@@ -63,17 +63,7 @@
             <button class="toggle-btn" id="toggleTable" onclick="toggleTable()">Burgs</button>
             <button class="toggle-btn" id="toggleFoodTradeTable" onclick="toggleFoodTradeTable()">Food Trade</button>
             <button class="toggle-btn" id="toggleGoldTradeTable" onclick="toggleGoldTradeTable()">Gold Trade</button>
-            <div class="dropdown">
-                <button class="dropbtn green-btn" id="mapModeBtn" onclick="toggleDropdown('mapModeDropdown')">Map: Biome
-                    ▼</button>
-                <div class="dropdown-content" id="mapModeDropdown">
-                    <a href="#" onclick="setMapMode('biome')">Biome</a>
-                    <a href="#" onclick="setMapMode('state')">Political</a>
-                    <a href="#" onclick="setMapMode('heightmap')">Heightmap</a>
-                    <a href="#" onclick="setMapMode('temperature')">Temperature</a>
-                    <a href="#" onclick="setMapMode('none')">None</a>
-                </div>
-            </div>
+            <button class="toggle-btn green-btn" id="mapModeBtn" onclick="cycleMapMode()">Map: Biome</button>
 
             <div class="dropdown">
                 <button class="toggle-btn special dropbtn" id="gameModeBtn"

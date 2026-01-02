@@ -124,21 +124,33 @@ const relationColors = {
     "x": "#800080"          // Selected State (Purple)
 };
 
+const mapModes = ['biome', 'state', 'heightmap', 'temperature', 'none'];
+
+function cycleMapMode() {
+    const btn = document.getElementById('mapModeBtn');
+    // Default to 'biome' if no attribute set
+    const currentMode = btn.getAttribute('data-current-mode') || 'biome';
+
+    const currentIndex = mapModes.indexOf(currentMode);
+    const nextIndex = (currentIndex + 1) % mapModes.length;
+    const nextMode = mapModes[nextIndex];
+
+    setMapMode(nextMode);
+}
+
 function setMapMode(mode) {
-    const btn = document.querySelector('.map-mode-btn'); // Logic to update button text if needed
     const mapGroup = document.getElementById('mapBackground');
     const paths = document.querySelectorAll('#mapBackground path');
-    const mapBtn = document.getElementById('mapModeBtn'); // The dropdown button
+    const mapBtn = document.getElementById('mapModeBtn');
 
-    // Close the dropdown
-    const dropdown = document.getElementById('mapModeDropdown');
-    if (dropdown) {
-        dropdown.classList.remove('show');
+    // Update button state tracking
+    if (mapBtn) {
+        mapBtn.setAttribute('data-current-mode', mode);
     }
 
     if (mode === 'none') {
         mapGroup.style.display = 'none';
-        if (mapBtn) mapBtn.innerText = 'Map: None ▼';
+        if (mapBtn) mapBtn.innerText = 'Map: None';
         return;
     }
 
@@ -146,12 +158,12 @@ function setMapMode(mode) {
     mapGroup.style.display = 'block';
 
     if (mode === 'state') {
-        if (mapBtn) mapBtn.innerText = 'Map: Political ▼';
+        if (mapBtn) mapBtn.innerText = 'Map: Political';
         paths.forEach(p => {
             p.setAttribute('fill', p.getAttribute('data-state-color'));
         });
     } else if (mode === 'heightmap') {
-        if (mapBtn) mapBtn.innerText = 'Map: Heightmap ▼';
+        if (mapBtn) mapBtn.innerText = 'Map: Heightmap';
         paths.forEach(p => {
             let h = parseInt(p.getAttribute('data-height'));
             let c = 255 - h * 2;
@@ -163,14 +175,14 @@ function setMapMode(mode) {
             }
         });
     } else if (mode === 'temperature') {
-        if (mapBtn) mapBtn.innerText = 'Map: Temperature ▼';
+        if (mapBtn) mapBtn.innerText = 'Map: Temperature';
         paths.forEach(p => {
             const t = parseInt(p.getAttribute('data-temp'));
             p.setAttribute('fill', getColorForTemp(t));
         });
     } else {
         // Biome (Default)
-        if (mapBtn) mapBtn.innerText = 'Map: Biome ▼';
+        if (mapBtn) mapBtn.innerText = 'Map: Biome';
         paths.forEach(p => {
             p.setAttribute('fill', p.getAttribute('data-biome-color'));
         });
