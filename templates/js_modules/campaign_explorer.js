@@ -1,6 +1,3 @@
-// ---------------------------------------------------------
-// Specific Campaign: The Grand Explorer
-// ---------------------------------------------------------
 class ExplorerCampaign extends BaseCampaign {
     constructor() {
         super("explorer_v1", "The Grand Explorer", "Travel the world, hunt beasts, find treasures, and reach the designated city.");

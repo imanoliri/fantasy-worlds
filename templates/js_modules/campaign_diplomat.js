@@ -1,6 +1,3 @@
-// ---------------------------------------------------------
-// Specific Campaign: The Diplomat
-// ---------------------------------------------------------
 class DiplomatCampaign extends BaseCampaign {
     constructor() {
         super("diplomat_v1", "The Diplomat", "Travel to every capital and complete a diplomatic mission.");

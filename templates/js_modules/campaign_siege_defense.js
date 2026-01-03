@@ -1,6 +1,3 @@
-// ---------------------------------------------------------
-// Specific Campaign: The Siege Defense
-// ---------------------------------------------------------
 class SiegeDefenseCampaign extends BaseCampaign {
     constructor() {
         super("siege_defense_v1", "The Siege Defense", "A dark army surrounds the capital. You must gather resources, build an army, and break the siege before the city falls.");
