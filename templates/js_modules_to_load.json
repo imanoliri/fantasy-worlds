@@ -12,5 +12,8 @@
     "adventure.js",
     "interactions.js",
     "campaign.js",
+    "campaign_siege_defense.js",
+    "campaign_explorer.js",
+    "campaign_diplomat.js",
     "selection.js"
 ]
