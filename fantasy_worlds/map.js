@@ -1182,6 +1182,26 @@ const MissionSiege = {
             svg.appendChild(siegeRingGroup);
             svg.appendChild(siegeGroup);
         }
+
+        // Register Event Listener for Burg Popup
+        if (AdventureManager.events) {
+            AdventureManager.events.on('burgPopupOpened', this.handleburgPopupOpened.bind(this));
+        }
+    },
+
+    handleburgPopupOpened(context) {
+        if (!this.data || !AdventureManager.active) return;
+
+        // Check if this burg is the one under siege
+        if (this.data.burgId === context.burg.id) {
+            // Disable all buttons except 'fight_siege'
+            context.buttons.forEach(btn => {
+                if (btn.id !== 'fight_siege') {
+                    btn.disabled = true;
+                    btn.title = "City is under siege!";
+                }
+            });
+        }
     },
 
     spawn() {
@@ -2350,20 +2370,117 @@ const AdventureManager = {
         const soldierCost = Math.max(1, 6 - soldierQuartiers);
         const canRecruit = soldierQuartiers >= 1;
 
-        const diplomatic = MissionDiplomacy.targets.includes(burg.id);
-        const siege = (MissionSiege.data && MissionSiege.data.burgId === burg.id);
-
         const isPort = this.isPort(burg.cell_id);
         const onShip = this.party.onShip;
 
-        let shipHtml = '';
+        // --- Allow Button Modification by Event Listeners ---
+        const context = {
+            burg,
+            party: this.party,
+            buttons: []
+        };
+
+        // Port Actions
         if (isPort && burg.type === "Naval") {
             if (onShip) {
-                shipHtml = `<button class="btn-recruit" style="background-color: #34495e;" onclick="AdventureManager.leaveShip()" title="Return to land travel" ${siege ? 'disabled' : ''}>Leave Ship ⚓</button>`;
+                context.buttons.push({
+                    id: 'leave_ship',
+                    label: 'Leave Ship ⚓',
+                    title: 'Return to land travel',
+                    onClick: 'AdventureManager.leaveShip()',
+                    style: 'background-color: #34495e;',
+                    class: 'btn-recruit',
+                    disabled: false
+                });
             } else {
-                shipHtml = `<button class="btn-buy" style="background-color: #2980b9;" onclick="AdventureManager.rentShip(5)" title="Rent a ship for water travel (5 💰)" ${siege ? 'disabled' : ''}>Rent Ship (5 💰) ⛵</button>`;
+                context.buttons.push({
+                    id: 'rent_ship',
+                    label: 'Rent Ship (5 💰) ⛵',
+                    title: 'Rent a ship for water travel (5 💰)',
+                    onClick: 'AdventureManager.rentShip(5)',
+                    style: 'background-color: #2980b9;',
+                    class: 'btn-buy',
+                    disabled: false
+                });
             }
         }
+
+        // Buy Food
+        context.buttons.push({
+            id: 'buy_food',
+            label: 'Buy 10 Food (1 💰)',
+            title: '1 Gold for 10 Food',
+            onClick: 'AdventureManager.buyFood(10, 1)',
+            class: 'btn-buy',
+            disabled: false
+        });
+
+        // Standard Diplomacy
+        if (MissionDiplomacy.targets.includes(burg.id)) {
+            context.buttons.push({
+                id: 'standard_diplomacy',
+                label: 'Diplomatic Mission (5 💰)',
+                title: 'Solve diplomatic issue',
+                onClick: `MissionDiplomacy.resolve(${burg.id})`,
+                style: 'background-color: #4169E1;',
+                class: 'btn-recruit',
+                disabled: false
+            });
+        }
+
+        // Siege (Special: Always added if active, usually handled by listener but here defined as potential action)
+        if (MissionSiege.data && MissionSiege.data.burgId === burg.id) {
+            context.buttons.push({
+                id: 'fight_siege',
+                label: 'Fight Sieging Army (💣)',
+                title: 'Fight Sieging Army',
+                onClick: 'MissionSiege.showPopup()',
+                style: 'background-color: #000;',
+                class: 'btn-recruit',
+                disabled: false
+            });
+        }
+
+        // Recruit
+        if (canRecruit) {
+            context.buttons.push({
+                id: 'recruit_soldiers',
+                label: `Recruit 5 Soldiers (${soldierCost} 💰, 5 🛠️)`,
+                title: `Recruit 5 soldiers for 5 Tools and 5 Gold.`,
+                onClick: `AdventureManager.recruitSoldiers(5, ${soldierCost}, ${burg.cell_id})`,
+                class: 'btn-recruit',
+                disabled: false
+            });
+        }
+
+        // Buy Tools
+        if (canBuyTools) {
+            context.buttons.push({
+                id: 'buy_tools',
+                label: `Buy ${toolsAmount} Tools (1 💰)`,
+                title: `1 Gold for an amount of Tools equal to Craftsmen Quartiers`,
+                onClick: `AdventureManager.buyTools(${toolsAmount}, 1)`,
+                class: 'btn-buy',
+                disabled: false
+            });
+        }
+
+
+        // 2. Emit Event to allow Listeners (Siege, Campaigns) to modify buttons
+        if (this.events && typeof this.events.emit === 'function') {
+            this.events.emit('burgPopupOpened', context);
+        }
+
+        // 3. Render Buttons
+        let actionsHtml = context.buttons.map(btn => {
+            const style = btn.style ? `style="${btn.style}"` : '';
+            const cls = btn.class || 'btn-recruit'; // default class
+            const disabled = btn.disabled ? 'disabled' : '';
+            return `<button class="${cls}" ${style} onclick="${btn.onClick}" title="${btn.title}" ${disabled}>${btn.label}</button>`;
+        }).join('\n');
+
+        // Always add Leave button at the end
+        actionsHtml += `\n<button class="btn-leave" onclick="AdventureManager.closePopup()">Leave</button>`;
 
         if (burg.capital) {
             this.popupElement.classList.add('capital-popup');
@@ -2386,13 +2503,7 @@ const AdventureManager = {
             </div>
             ${this.getModalStatsBarHtml()}
             <div class="actions">
-                ${shipHtml}
-                <button class="btn-buy" onclick="AdventureManager.buyFood(10, 1)" title="1 Gold for 10 Food" ${siege ? 'disabled' : ''}>Buy 10 Food (1 💰)</button>
-                ${diplomatic ? `<button class="btn-recruit" style="background-color: #4169E1;" onclick="MissionDiplomacy.resolve(${burg.id})" title="Solve diplomatic issue" ${siege ? 'disabled' : ''}>Diplomatic Mission (5 💰)</button>` : ''}
-                ${siege ? `<button class="btn-recruit" style="background-color: #000;" onclick="MissionSiege.showPopup()" title="Fight Sieging Army">Fight Sieging Army (💣)</button>` : ''}
-                ${canRecruit ? `<button class="btn-recruit" onclick="AdventureManager.recruitSoldiers(5, ${soldierCost}, ${burg.cell_id})" title="Recruit 5 soldiers for 5 Tools and 5 Gold." ${siege ? 'disabled' : ''}>Recruit 5 Soldiers (${soldierCost} 💰, 5 🛠️)</button>` : ''}
-                ${canBuyTools ? `<button class="btn-buy" onclick="AdventureManager.buyTools(${toolsAmount}, 1)" title="1 Gold for an amount of Tools equal to Craftsmen Quartiers" ${siege ? 'disabled' : ''}>Buy ${toolsAmount} Tools (1 💰)</button>` : ''}
-                <button class="btn-leave" onclick="AdventureManager.closePopup()">Leave</button>
+                ${actionsHtml}
             </div>
         `;
 
@@ -3274,6 +3385,149 @@ class SiegeDefenseCampaign extends BaseCampaign {
 }
 
 // ---------------------------------------------------------
+// Specific Campaign: The Diplomat
+// ---------------------------------------------------------
+class DiplomatCampaign extends BaseCampaign {
+    constructor() {
+        super("diplomat_v1", "The Diplomat", "Visit every Capital City and complete a diplomatic mission. Missions unavailable if resources are low or you recently visited an enemy state.");
+
+        // Internal State
+        this.completedCapitals = new Set();
+        this.totalCapitals = 0;
+
+        // Tracking
+        this.currentBurgId = null;
+        this.previousBurgId = null;
+        this.lastCellId = -1;
+
+        // Define Objectives
+        this.addObjective("obj1", "Fulfill a diplomatic mission in each Capital (0/0)", "visit", (p) => {
+            return this.completedCapitals.size >= this.totalCapitals && this.totalCapitals > 0;
+        });
+    }
+
+    onStart() {
+        super.onStart();
+        // Count total capitals
+        if (window.burgsData) {
+            const capitals = burgsData.filter(b => b.is_capital);
+            this.totalCapitals = capitals.length;
+
+            const obj = this.objectives.find(o => o.id === "obj1");
+            if (obj) {
+                obj.text = `Fulfill a diplomatic mission in each Capital (0/${this.totalCapitals})`;
+                this.renderObjectives();
+            }
+        }
+
+        // Register Popup Listener
+        this._boundHandlePopup = this.handlePopup.bind(this);
+        if (AdventureManager.events) {
+            AdventureManager.events.on('burgPopupOpened', this._boundHandlePopup);
+        }
+    }
+
+    onEnd() {
+        // Remove Listener
+        if (AdventureManager.events && this._boundHandlePopup) {
+            const listeners = AdventureManager.events.listeners['burgPopupOpened'];
+            if (listeners) {
+                const idx = listeners.indexOf(this._boundHandlePopup);
+                if (idx > -1) listeners.splice(idx, 1);
+            }
+        }
+        super.onEnd();
+    }
+
+    onUpdateStats(party) {
+        super.onUpdateStats(party);
+        // Track Burg Visits
+        if (party.cell !== this.lastCellId) {
+            this.lastCellId = party.cell;
+            if (window.burgsData) {
+                const burg = burgsData.find(b => b.cell_id === party.cell);
+                if (burg) {
+                    if (this.currentBurgId !== burg.id) {
+                        this.previousBurgId = this.currentBurgId;
+                        this.currentBurgId = burg.id;
+                    }
+                }
+            }
+        }
+    }
+
+    handlePopup(context) {
+        if (!context.burg.capital) return;
+
+        // 1. Hide/Disable Standard Diplomacy Button
+        // We find the standard button and remove it, OR we could just disable it.
+        // User requirement: "Prevent standard button... to avoid conflicts"
+        const stdIdx = context.buttons.findIndex(b => b.id === 'standard_diplomacy');
+        if (stdIdx > -1) {
+            context.buttons.splice(stdIdx, 1); // Remove it entirely
+        }
+
+        // 2. Add Campaign Mission Button
+        const check = this.checkCondition(context.burg);
+
+        // Button Logic
+        const btn = {
+            id: 'diplomat_mission',
+            label: 'Diplomat Mission 📜',
+            title: 'Complete Diplomatic Mission',
+            style: 'background-color: #8e44ad;', // Purple
+            class: 'btn-recruit',
+            disabled: false,
+            onClick: ''
+        };
+
+        if (this.completedCapitals.has(context.burg.id)) {
+            btn.label = 'Diplomatic Mission Fulfilled ✅';
+            btn.style = 'background-color: #27ae60;'; // Green
+            btn.disabled = true;
+        } else if (!check.allowed) {
+            // Unavailable logic
+            btn.label = 'Diplomat Mission 📜 (Unavailable)';
+            btn.style = 'background-color: #8e44ad; opacity: 0.5; filter: grayscale(100%); cursor: pointer;';
+            btn.title = check.reason || "Conditions not met";
+            // Click triggers feedback
+            btn.onClick = `CampaignManager.currentCampaignInstance.showUnavailableReason('${(check.reason || "").replace(/'/g, "\\'")}')`;
+        } else {
+            // Available
+            btn.onClick = `CampaignManager.currentCampaignInstance.resolve(${context.burg.id})`;
+        }
+
+        // Add to buttons list (at the end or specific position)
+        // context.buttons.push(btn);
+        // Better: insert before 'Leave' (which isn't in list yet) so push is fine.
+        // Or if we want it where standard diplomacy was...
+        context.buttons.push(btn);
+    }
+
+    showUnavailableReason(reason) {
+        AdventureManager.showFeedback(reason);
+    }
+
+    resolve(burgId) {
+        if (this.completedCapitals.has(burgId)) return;
+        this.completedCapitals.add(burgId);
+        const obj = this.objectives.find(o => o.id === "obj1");
+        if (obj) {
+            obj.text = `Fulfilled a diplomatic mission in each Capital (${this.completedCapitals.size}/${this.totalCapitals})`;
+            this.renderObjectives();
+        }
+        AdventureManager.showFeedback("Diplomatic Mission Successful!");
+        this.checkObjectives(AdventureManager.party);
+    }
+
+    checkCondition(burg) {
+        // Example Condition: Must have 50 Gold
+        if (AdventureManager.party.gold < 50) return { allowed: false, reason: "Need 50 Gold for bribes." };
+        return { allowed: true };
+    }
+}
+
+// ---------------------------------------------------------
 // Specific Campaign: The Grand Explorer
 // ---------------------------------------------------------
 class ExplorerCampaign extends BaseCampaign {
@@ -3393,6 +3647,7 @@ const CampaignManager = {
     // Registry of Campaign Classes
     availableCampaigns: [
         SiegeDefenseCampaign,
+        DiplomatCampaign,
         ExplorerCampaign
     ],
 

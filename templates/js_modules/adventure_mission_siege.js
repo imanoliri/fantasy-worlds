@@ -66,6 +66,26 @@ const MissionSiege = {
             svg.appendChild(siegeRingGroup);
             svg.appendChild(siegeGroup);
         }
+
+        // Register Event Listener for Burg Popup
+        if (AdventureManager.events) {
+            AdventureManager.events.on('burgPopupOpened', this.handleburgPopupOpened.bind(this));
+        }
+    },
+
+    handleburgPopupOpened(context) {
+        if (!this.data || !AdventureManager.active) return;
+
+        // Check if this burg is the one under siege
+        if (this.data.burgId === context.burg.id) {
+            // Disable all buttons except 'fight_siege'
+            context.buttons.forEach(btn => {
+                if (btn.id !== 'fight_siege') {
+                    btn.disabled = true;
+                    btn.title = "City is under siege!";
+                }
+            });
+        }
     },
 
     spawn() {

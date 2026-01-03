@@ -684,20 +684,117 @@ const AdventureManager = {
         const soldierCost = Math.max(1, 6 - soldierQuartiers);
         const canRecruit = soldierQuartiers >= 1;
 
-        const diplomatic = MissionDiplomacy.targets.includes(burg.id);
-        const siege = (MissionSiege.data && MissionSiege.data.burgId === burg.id);
-
         const isPort = this.isPort(burg.cell_id);
         const onShip = this.party.onShip;
 
-        let shipHtml = '';
+        // --- Allow Button Modification by Event Listeners ---
+        const context = {
+            burg,
+            party: this.party,
+            buttons: []
+        };
+
+        // Port Actions
         if (isPort && burg.type === "Naval") {
             if (onShip) {
-                shipHtml = `<button class="btn-recruit" style="background-color: #34495e;" onclick="AdventureManager.leaveShip()" title="Return to land travel" ${siege ? 'disabled' : ''}>Leave Ship ⚓</button>`;
+                context.buttons.push({
+                    id: 'leave_ship',
+                    label: 'Leave Ship ⚓',
+                    title: 'Return to land travel',
+                    onClick: 'AdventureManager.leaveShip()',
+                    style: 'background-color: #34495e;',
+                    class: 'btn-recruit',
+                    disabled: false
+                });
             } else {
-                shipHtml = `<button class="btn-buy" style="background-color: #2980b9;" onclick="AdventureManager.rentShip(5)" title="Rent a ship for water travel (5 💰)" ${siege ? 'disabled' : ''}>Rent Ship (5 💰) ⛵</button>`;
+                context.buttons.push({
+                    id: 'rent_ship',
+                    label: 'Rent Ship (5 💰) ⛵',
+                    title: 'Rent a ship for water travel (5 💰)',
+                    onClick: 'AdventureManager.rentShip(5)',
+                    style: 'background-color: #2980b9;',
+                    class: 'btn-buy',
+                    disabled: false
+                });
             }
         }
+
+        // Buy Food
+        context.buttons.push({
+            id: 'buy_food',
+            label: 'Buy 10 Food (1 💰)',
+            title: '1 Gold for 10 Food',
+            onClick: 'AdventureManager.buyFood(10, 1)',
+            class: 'btn-buy',
+            disabled: false
+        });
+
+        // Standard Diplomacy
+        if (MissionDiplomacy.targets.includes(burg.id)) {
+            context.buttons.push({
+                id: 'standard_diplomacy',
+                label: 'Diplomatic Mission (5 💰)',
+                title: 'Solve diplomatic issue',
+                onClick: `MissionDiplomacy.resolve(${burg.id})`,
+                style: 'background-color: #4169E1;',
+                class: 'btn-recruit',
+                disabled: false
+            });
+        }
+
+        // Siege (Special: Always added if active, usually handled by listener but here defined as potential action)
+        if (MissionSiege.data && MissionSiege.data.burgId === burg.id) {
+            context.buttons.push({
+                id: 'fight_siege',
+                label: 'Fight Sieging Army (💣)',
+                title: 'Fight Sieging Army',
+                onClick: 'MissionSiege.showPopup()',
+                style: 'background-color: #000;',
+                class: 'btn-recruit',
+                disabled: false
+            });
+        }
+
+        // Recruit
+        if (canRecruit) {
+            context.buttons.push({
+                id: 'recruit_soldiers',
+                label: `Recruit 5 Soldiers (${soldierCost} 💰, 5 🛠️)`,
+                title: `Recruit 5 soldiers for 5 Tools and 5 Gold.`,
+                onClick: `AdventureManager.recruitSoldiers(5, ${soldierCost}, ${burg.cell_id})`,
+                class: 'btn-recruit',
+                disabled: false
+            });
+        }
+
+        // Buy Tools
+        if (canBuyTools) {
+            context.buttons.push({
+                id: 'buy_tools',
+                label: `Buy ${toolsAmount} Tools (1 💰)`,
+                title: `1 Gold for an amount of Tools equal to Craftsmen Quartiers`,
+                onClick: `AdventureManager.buyTools(${toolsAmount}, 1)`,
+                class: 'btn-buy',
+                disabled: false
+            });
+        }
+
+
+        // 2. Emit Event to allow Listeners (Siege, Campaigns) to modify buttons
+        if (this.events && typeof this.events.emit === 'function') {
+            this.events.emit('burgPopupOpened', context);
+        }
+
+        // 3. Render Buttons
+        let actionsHtml = context.buttons.map(btn => {
+            const style = btn.style ? `style="${btn.style}"` : '';
+            const cls = btn.class || 'btn-recruit'; // default class
+            const disabled = btn.disabled ? 'disabled' : '';
+            return `<button class="${cls}" ${style} onclick="${btn.onClick}" title="${btn.title}" ${disabled}>${btn.label}</button>`;
+        }).join('\n');
+
+        // Always add Leave button at the end
+        actionsHtml += `\n<button class="btn-leave" onclick="AdventureManager.closePopup()">Leave</button>`;
 
         if (burg.capital) {
             this.popupElement.classList.add('capital-popup');
@@ -720,13 +817,7 @@ const AdventureManager = {
             </div>
             ${this.getModalStatsBarHtml()}
             <div class="actions">
-                ${shipHtml}
-                <button class="btn-buy" onclick="AdventureManager.buyFood(10, 1)" title="1 Gold for 10 Food" ${siege ? 'disabled' : ''}>Buy 10 Food (1 💰)</button>
-                ${diplomatic ? `<button class="btn-recruit" style="background-color: #4169E1;" onclick="MissionDiplomacy.resolve(${burg.id})" title="Solve diplomatic issue" ${siege ? 'disabled' : ''}>Diplomatic Mission (5 💰)</button>` : ''}
-                ${siege ? `<button class="btn-recruit" style="background-color: #000;" onclick="MissionSiege.showPopup()" title="Fight Sieging Army">Fight Sieging Army (💣)</button>` : ''}
-                ${canRecruit ? `<button class="btn-recruit" onclick="AdventureManager.recruitSoldiers(5, ${soldierCost}, ${burg.cell_id})" title="Recruit 5 soldiers for 5 Tools and 5 Gold." ${siege ? 'disabled' : ''}>Recruit 5 Soldiers (${soldierCost} 💰, 5 🛠️)</button>` : ''}
-                ${canBuyTools ? `<button class="btn-buy" onclick="AdventureManager.buyTools(${toolsAmount}, 1)" title="1 Gold for an amount of Tools equal to Craftsmen Quartiers" ${siege ? 'disabled' : ''}>Buy ${toolsAmount} Tools (1 💰)</button>` : ''}
-                <button class="btn-leave" onclick="AdventureManager.closePopup()">Leave</button>
+                ${actionsHtml}
             </div>
         `;
 
