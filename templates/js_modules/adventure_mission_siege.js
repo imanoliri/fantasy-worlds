@@ -78,14 +78,38 @@ const MissionSiege = {
 
         // Check if this burg is the one under siege
         if (this.data.burgId === context.burg.id) {
-            // Disable all buttons except 'fight_siege'
+            // Disable all existing buttons
             context.buttons.forEach(btn => {
-                if (btn.id !== 'fight_siege') {
-                    btn.disabled = true;
-                    btn.title = "City is under siege!";
-                }
+                btn.disabled = true;
+                btn.title = "City is under siege! You must break the siege first.";
+            });
+
+            // Inject "Fight Siege" button
+            const insertIndex = this.getSiegeInsertIndex(context.buttons);
+            context.buttons.splice(insertIndex, 0, {
+                id: 'fight_siege',
+                label: 'Fight Sieging Army (💣)',
+                title: 'Fight Sieging Army',
+                onClick: 'MissionSiege.showPopup()',
+                style: 'background-color: #000;',
+                class: 'btn-recruit',
+                disabled: false
             });
         }
+    },
+
+    getSiegeInsertIndex(buttons) {
+        const priorityBefore = ['leave_ship', 'rent_ship', 'buy_food', 'standard_diplomacy', 'diplomat_mission'];
+        let idx = buttons.map(b => b.id).lastIndexOf(id => priorityBefore.includes(id));
+
+        // Polyfill-ish logic if lastIndexOf with predicate isn't standard in this env, use explicit loop efficiently:
+        for (let i = buttons.length - 1; i >= 0; i--) {
+            if (priorityBefore.includes(buttons[i].id)) return i + 1;
+        }
+
+        // If not found, try before 'recruit' or 'tools'
+        const afterIdx = buttons.findIndex(b => ['recruit_soldiers', 'buy_tools'].includes(b.id));
+        return afterIdx >= 0 ? afterIdx : 0;
     },
 
     spawn() {

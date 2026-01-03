@@ -742,18 +742,7 @@ const AdventureManager = {
             });
         }
 
-        // Siege (Special: Always added if active, usually handled by listener but here defined as potential action)
-        if (MissionSiege.data && MissionSiege.data.burgId === burg.id) {
-            context.buttons.push({
-                id: 'fight_siege',
-                label: 'Fight Sieging Army (💣)',
-                title: 'Fight Sieging Army',
-                onClick: 'MissionSiege.showPopup()',
-                style: 'background-color: #000;',
-                class: 'btn-recruit',
-                disabled: false
-            });
-        }
+
 
         // Recruit
         if (canRecruit) {
