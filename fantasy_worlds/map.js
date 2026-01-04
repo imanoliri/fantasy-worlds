@@ -3932,17 +3932,6 @@ class DiplomatCampaign extends BaseCampaign {
     onStart() {
         super.onStart();
 
-        // 1. Disable Standard Diplomatic Missions via Event Listener
-        this._blockDiplomacyHandler = (e) => {
-            if (e.type === 'diplomacy') {
-                e.cancelled = true;
-                console.log("DiplomatCampaign blocked diplomacy mission.");
-            }
-        };
-
-        AdventureManager.events.on('beforeMissionSpawn', this._blockDiplomacyHandler);
-
-
         const initCampaignData = () => {
             console.log("DiplomatCampaign: burgsData length:", burgsData.length);
             const capitals = burgsData.filter(b => b.is_capital);
@@ -3959,9 +3948,13 @@ class DiplomatCampaign extends BaseCampaign {
 
     onEnd() {
         super.onEnd();
+    }
 
-        AdventureManager.events.off('beforeMissionSpawn', this._blockDiplomacyHandler);
-
+    onBeforeMissionSpawn(data) {
+        if (data.type === 'diplomacy') {
+            data.cancelled = true;
+            console.log("DiplomatCampaign blocked diplomacy mission.");
+        }
     }
 
     updateObjectiveText() {
