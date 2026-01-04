@@ -109,15 +109,15 @@ function selectGameMode(mode) {
     if (mode === 'adventure') {
         btn.innerHTML = "Adventure ▼";
 
-        // Cleanup Campaign UI if present
-        document.getElementById('campaignSelectContainer').classList.add('hidden');
-        document.querySelector('.sidebar-controls').classList.remove('hidden');
-
         // If coming from Campaign Mode, we must RESET to ensure fresh Adventure
         if (window.CampaignManager && window.CampaignManager.active) {
             CampaignManager.cancelCampaign();
             // cancelCampaign calls reset(), so AdventureManager.active becomes false
         }
+
+        // Cleanup Campaign UI if present (Do this AFTER cancelCampaign, which might reset UI)
+        document.getElementById('campaignSelectContainer').classList.add('hidden');
+        document.querySelector('.sidebar-controls').classList.remove('hidden');
 
         // Only toggle if not already active (or forced fresh start implies we must start it)
         if (!window.AdventureManager || !window.AdventureManager.active) {
