@@ -195,16 +195,17 @@ class HordeCampaign extends BaseCampaign {
         AdventureManager.closePopup(); // Close battle popup
 
         if (isWin) {
-            // Victory
-            // Losses: Low (5-15%)
-            const lossPct = 0.05 + (Math.random() * 0.10);
-            const losses = Math.floor(playerSoldiers * lossPct);
-            AdventureManager.party.soldiers = Math.max(0, playerSoldiers - losses);
-
-            // Rewards (Aligned with BattleMission + Food = Gold)
+            // Rewards (Aligned with BattleMission plus Food = Gold)
             const goldReward = Math.floor(enemySoldiers / 10) * 3;
             const soldierReward = Math.floor(enemySoldiers / 10) * 3;
-            const foodReward = goldReward;
+
+            // Food Reward: 40% of city's net food
+            let foodReward = 0;
+            // Ensure we have a valid food value
+            const cityFood = burg.net_food || 0;
+            if (cityFood > 0) {
+                foodReward = Math.floor(cityFood * 0.4);
+            }
 
             AdventureManager.party.gold += goldReward;
             AdventureManager.party.soldiers += soldierReward;
@@ -213,7 +214,7 @@ class HordeCampaign extends BaseCampaign {
             // Mark as pillaged if capital (or just pillaged city in general)
             this.pillagedCapitals.add(burg.id);
 
-            AdventureManager.showFeedback(`Victory! Pillaged ${burg.name}. Lost ${losses} soldiers. Gained ${goldReward} gold, ${foodReward} food, ${soldierReward} soldiers.`);
+            AdventureManager.showFeedback(`Victory! Pillaged ${burg.name}. Gained ${goldReward} gold, ${foodReward} food, ${soldierReward} soldiers.`);
 
             // Floating Text (Win)
             const cell = graphData[AdventureManager.party.cell];
