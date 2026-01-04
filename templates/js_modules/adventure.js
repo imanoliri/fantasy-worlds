@@ -266,7 +266,12 @@ const AdventureManager = {
             this.party.food = 50;
             this.party.gold = 10;
             this.party.tools = 10;
+            this.party.tools = 10;
             this.party.onShip = false;
+
+            // Emit Event (Campaigns may override start location/stats here)
+            this.events.emit('start', this.party);
+
             this.partyElement.style.display = "block";
 
             // Spawn Missions based on Options
@@ -279,9 +284,6 @@ const AdventureManager = {
 
             this.updateStats();
             this.render();
-
-            // Emit Event (Campaigns may override start location here)
-            this.events.emit('start', this.party);
 
             // Trigger Start Ping (Use actual party cell in case it was moved)
             const startNode = graphData[this.party.cell];

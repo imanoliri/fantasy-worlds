@@ -8,6 +8,7 @@ class BaseCampaign {
         this.description = description;
         this.active = false;
         this.objectives = [];
+        this.startConfig = null;
     }
 
     // Lifecycle Hooks
@@ -22,7 +23,19 @@ class BaseCampaign {
     }
 
     // Event Handlers
-    onAdventureStart() { }
+    onAdventureStart() {
+        if (this.startConfig) {
+            // Apply Resources Override
+            if (this.startConfig.resources) {
+                AdventureManager.party = { ...AdventureManager.party, ...this.startConfig.resources };
+            }
+            // Apply Start Cell Override
+            if (this.startConfig.cell !== undefined) {
+                AdventureManager.party.cell = this.startConfig.cell;
+            }
+            AdventureManager.updateStats();
+        }
+    }
     onMissionStart(data) { }
     onMissionComplete(data) { }
     onBurgPopupOpened(context) { }

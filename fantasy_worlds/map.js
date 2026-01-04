@@ -2005,7 +2005,12 @@ const AdventureManager = {
             this.party.food = 50;
             this.party.gold = 10;
             this.party.tools = 10;
+            this.party.tools = 10;
             this.party.onShip = false;
+
+            // Emit Event (Campaigns may override start location/stats here)
+            this.events.emit('start', this.party);
+
             this.partyElement.style.display = "block";
 
             // Spawn Missions based on Options
@@ -2018,9 +2023,6 @@ const AdventureManager = {
 
             this.updateStats();
             this.render();
-
-            // Emit Event (Campaigns may override start location here)
-            this.events.emit('start', this.party);
 
             // Trigger Start Ping (Use actual party cell in case it was moved)
             const startNode = graphData[this.party.cell];
@@ -3183,6 +3185,7 @@ class BaseCampaign {
         this.description = description;
         this.active = false;
         this.objectives = [];
+        this.startConfig = null;
     }
 
     // Lifecycle Hooks
@@ -3197,7 +3200,19 @@ class BaseCampaign {
     }
 
     // Event Handlers
-    onAdventureStart() { }
+    onAdventureStart() {
+        if (this.startConfig) {
+            // Apply Resources Override
+            if (this.startConfig.resources) {
+                AdventureManager.party = { ...AdventureManager.party, ...this.startConfig.resources };
+            }
+            // Apply Start Cell Override
+            if (this.startConfig.cell !== undefined) {
+                AdventureManager.party.cell = this.startConfig.cell;
+            }
+            AdventureManager.updateStats();
+        }
+    }
     onMissionStart(data) { }
     onMissionComplete(data) { }
     onBurgPopupOpened(context) { }
@@ -3480,15 +3495,12 @@ class SiegeDefenseCampaign extends BaseCampaign {
 
     onStart() {
         super.onStart();
-        // Apply Start Config
-        if (this.startConfig.resources) {
-            AdventureManager.party = { ...AdventureManager.party, ...this.startConfig.resources };
-            AdventureManager.updateStats(); // Ensure UI reflects changes immediately
-        }
     }
 
     onAdventureStart() {
-        // Enforce Start Location
+        super.onAdventureStart();
+
+        // Enforce Start Location (Campaign specific logic overrides generic startConfig.cell if needed)
         let startCell = this.startConfig.cell;
 
         // PRIORITIZE: Start at the location of the Siege

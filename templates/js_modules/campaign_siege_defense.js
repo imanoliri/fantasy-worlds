@@ -26,15 +26,12 @@ class SiegeDefenseCampaign extends BaseCampaign {
 
     onStart() {
         super.onStart();
-        // Apply Start Config
-        if (this.startConfig.resources) {
-            AdventureManager.party = { ...AdventureManager.party, ...this.startConfig.resources };
-            AdventureManager.updateStats(); // Ensure UI reflects changes immediately
-        }
     }
 
     onAdventureStart() {
-        // Enforce Start Location
+        super.onAdventureStart();
+
+        // Enforce Start Location (Campaign specific logic overrides generic startConfig.cell if needed)
         let startCell = this.startConfig.cell;
 
         // PRIORITIZE: Start at the location of the Siege
