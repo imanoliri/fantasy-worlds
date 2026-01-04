@@ -498,62 +498,6 @@
         </script>
         <script src="../map.js"></script>
         <script>
-            function selectGameMode(mode) {
-                const btn = document.getElementById('gameModeBtn');
-                const dropdown = document.getElementById('gameModeDropdown');
-
-                if (mode === 'adventure') {
-                    btn.innerHTML = "Adventure ▼";
-
-                    // Cleanup Campaign UI if present
-                    document.getElementById('campaignSelectContainer').classList.add('hidden');
-                    document.querySelector('.sidebar-controls').classList.remove('hidden');
-
-                    // Only toggle if not already active
-                    if (!window.AdventureManager || !window.AdventureManager.active) {
-                        toggleAdventureMode();
-                    }
-                } else if (mode === 'campaign') {
-                    btn.innerHTML = "Campaign ▼";
-                    // Stop Adventure if active
-                    if (window.AdventureManager && window.AdventureManager.active) {
-                        toggleAdventureMode();
-                    }
-                    console.log("Campaign Mode selected");
-
-                    // 1. Show Sidebar
-                    const sidebar = document.getElementById('adventureSidebar');
-                    if (sidebar) sidebar.classList.remove('hidden');
-
-                    // 2. Initialize Campaign Manager
-                    if (window.CampaignManager) {
-                        CampaignManager.init();
-                        // Hide standard controls
-                        document.querySelector('.sidebar-controls').classList.add('hidden');
-                        document.getElementById('campaignSelectContainer').classList.remove('hidden');
-                    }
-
-                    document.getElementById('gameModeBtn').classList.add('active');
-                } else {
-                    btn.innerHTML = "Free Mode ▼";
-
-                    // Cleanup Campaign UI
-                    document.getElementById('campaignSelectContainer').classList.add('hidden');
-                    document.querySelector('.sidebar-controls').classList.remove('hidden');
-
-                    // Explicitly hide sidebar (fixes bug where it stays open if Adventure wasn't active)
-                    const sidebar = document.getElementById('adventureSidebar');
-                    if (sidebar) sidebar.classList.add('hidden');
-
-                    // Stop Adventure if active
-                    if (window.AdventureManager && window.AdventureManager.active) {
-                        toggleAdventureMode();
-                    }
-                }
-
-                // Close dropdown
-                dropdown.classList.remove('show');
-            }
         </script>
 </body>
 

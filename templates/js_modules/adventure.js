@@ -252,6 +252,26 @@ const AdventureManager = {
         }
     },
 
+    reset() {
+        this.active = false;
+        this.party.cell = 0; // 0 indicates "Not Started" / "Fresh" for start() logic
+
+        // Reset Visuals
+        if (this.pathElement) this.pathElement.style.display = 'none';
+        if (this.previewPathElement) this.previewPathElement.style.display = 'none';
+        if (this.partyElement) this.partyElement.style.display = 'none';
+
+        // Clear Log
+        const logContainer = document.getElementById('adventureLog');
+        if (logContainer) logContainer.innerHTML = '';
+
+        // Reset sidebar state if UI is open
+        const btn = document.getElementById('toggleAdventure');
+        if (btn) btn.classList.remove('active');
+        const sidebar = document.getElementById('adventureSidebar');
+        if (sidebar) sidebar.classList.add('hidden');
+    },
+
     start(overrideConfig = null) {
         // Clear Adventure Log
         const logContainer = document.getElementById('adventureLog');

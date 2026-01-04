@@ -89,12 +89,91 @@ function toggleHeaderControls() {
     const btn = document.getElementById('headerToggleBtn');
     controls.classList.toggle('hidden');
 
-    // Rotate triangle based on visibility
     if (controls.classList.contains('hidden')) {
         btn.innerHTML = '▲';
     } else {
         btn.innerHTML = '▼';
     }
+}
+
+function toggleAdventureMode() {
+    if (window.AdventureManager) {
+        AdventureManager.toggle();
+    }
+}
+
+function selectGameMode(mode) {
+    const btn = document.getElementById('gameModeBtn');
+    const dropdown = document.getElementById('gameModeDropdown');
+
+    if (mode === 'adventure') {
+        btn.innerHTML = "Adventure ▼";
+
+        // Cleanup Campaign UI if present
+        document.getElementById('campaignSelectContainer').classList.add('hidden');
+        document.querySelector('.sidebar-controls').classList.remove('hidden');
+
+        // If coming from Campaign Mode, we must RESET to ensure fresh Adventure
+        if (window.CampaignManager && window.CampaignManager.active) {
+            CampaignManager.cancelCampaign();
+            // cancelCampaign calls reset(), so AdventureManager.active becomes false
+        }
+
+        // Only toggle if not already active (or forced fresh start implies we must start it)
+        if (!window.AdventureManager || !window.AdventureManager.active) {
+            toggleAdventureMode();
+        }
+    } else if (mode === 'campaign') {
+        btn.innerHTML = "Campaign ▼";
+
+        // Use cancelCampaign to cleanly stop any existing campaign or adventure state if needed?
+        // Actually, if we are in Adventure mode, we might want to just pause or stop it?
+        // If AdventureManager is active (Free Roam), we should probably stop it (toggle off) 
+        // before starting Campaign setup.
+
+        if (window.AdventureManager && window.AdventureManager.active) {
+            toggleAdventureMode();
+            // We don't reset here, because Campaign Manager init will handle its own start config
+        }
+        console.log("Campaign Mode selected");
+
+        // 1. Show Sidebar
+        const sidebar = document.getElementById('adventureSidebar');
+        if (sidebar) sidebar.classList.remove('hidden');
+
+        // 2. Initialize Campaign Manager
+        if (window.CampaignManager) {
+            CampaignManager.init();
+            // Hide standard controls
+            document.querySelector('.sidebar-controls').classList.add('hidden');
+            document.getElementById('campaignSelectContainer').classList.remove('hidden');
+        }
+
+        document.getElementById('gameModeBtn').classList.add('active');
+    } else {
+        btn.innerHTML = "Free Mode ▼";
+
+        // Cleanup Campaign UI
+        document.getElementById('campaignSelectContainer').classList.add('hidden');
+        document.querySelector('.sidebar-controls').classList.remove('hidden');
+
+        // Explicitly hide sidebar (fixes bug where it stays open if Adventure wasn't active)
+        const sidebar = document.getElementById('adventureSidebar');
+        if (sidebar) sidebar.classList.add('hidden');
+
+        // Stop Campaign if active
+        if (window.CampaignManager && window.CampaignManager.active) {
+            CampaignManager.cancelCampaign();
+        }
+
+        // Stop Adventure if active
+        if (window.AdventureManager && window.AdventureManager.active) {
+            toggleAdventureMode();
+        }
+    }
+
+    // Close dropdown
+    if (dropdown) dropdown.classList.remove('show');
 }
 
 
@@ -1991,6 +2070,26 @@ const AdventureManager = {
         }
     },
 
+    reset() {
+        this.active = false;
+        this.party.cell = 0; // 0 indicates "Not Started" / "Fresh" for start() logic
+
+        // Reset Visuals
+        if (this.pathElement) this.pathElement.style.display = 'none';
+        if (this.previewPathElement) this.previewPathElement.style.display = 'none';
+        if (this.partyElement) this.partyElement.style.display = 'none';
+
+        // Clear Log
+        const logContainer = document.getElementById('adventureLog');
+        if (logContainer) logContainer.innerHTML = '';
+
+        // Reset sidebar state if UI is open
+        const btn = document.getElementById('toggleAdventure');
+        if (btn) btn.classList.remove('active');
+        const sidebar = document.getElementById('adventureSidebar');
+        if (sidebar) sidebar.classList.add('hidden');
+    },
+
     start(overrideConfig = null) {
         // Clear Adventure Log
         const logContainer = document.getElementById('adventureLog');
@@ -3219,6 +3318,7 @@ class BaseCampaign {
 
     onEnd() {
         this.active = false;
+        this.clearHighlights();
         console.log(`Campaign '${this.name}' Ended.`);
     }
 
@@ -3435,10 +3535,8 @@ const CampaignManager = {
         }
         this.active = false;
 
-        // 2. Stop Adventure Manager (cleans up game state, stops loop)
-        if (AdventureManager.active) {
-            AdventureManager.toggle();
-        }
+        // 2. Reset Adventure Manager (Ensures fresh start next time)
+        AdventureManager.reset();
 
         // 3. Force Sidebar back open (restore Campaign Menu state)
         const sidebar = document.getElementById('adventureSidebar');
@@ -3483,7 +3581,8 @@ const CampaignManager = {
 
         selectGameMode('free');
         AdventureManager.isGameOver = false;
-        AdventureManager.toggle();
+        AdventureManager.reset();
+
         document.getElementById('campaignDescription').textContent = "";
     }
 };

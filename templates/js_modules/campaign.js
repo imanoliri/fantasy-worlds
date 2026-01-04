@@ -19,6 +19,7 @@ class BaseCampaign {
 
     onEnd() {
         this.active = false;
+        this.clearHighlights();
         console.log(`Campaign '${this.name}' Ended.`);
     }
 
@@ -235,10 +236,8 @@ const CampaignManager = {
         }
         this.active = false;
 
-        // 2. Stop Adventure Manager (cleans up game state, stops loop)
-        if (AdventureManager.active) {
-            AdventureManager.toggle();
-        }
+        // 2. Reset Adventure Manager (Ensures fresh start next time)
+        AdventureManager.reset();
 
         // 3. Force Sidebar back open (restore Campaign Menu state)
         const sidebar = document.getElementById('adventureSidebar');
@@ -283,7 +282,8 @@ const CampaignManager = {
 
         selectGameMode('free');
         AdventureManager.isGameOver = false;
-        AdventureManager.toggle();
+        AdventureManager.reset();
+
         document.getElementById('campaignDescription').textContent = "";
     }
 };
