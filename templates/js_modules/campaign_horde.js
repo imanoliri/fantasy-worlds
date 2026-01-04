@@ -112,7 +112,7 @@ class HordeCampaign extends BaseCampaign {
 
                 buttons.push({
                     label: `Pillage City (Strength: ${strength})`,
-                    action: () => this.startCityBattle(burg, strength),
+                    onClick: `CampaignManager.currentCampaignInstance.showBattlePopup(${burg.id}, ${strength})`,
                     class: "btn-attack",
                     style: "background: #c0392b; color: white;"
                 });
@@ -120,25 +120,63 @@ class HordeCampaign extends BaseCampaign {
         }
     }
 
-    startCityBattle(burg, strength) {
-        AdventureManager.closeBurgPopup();
+    showBattlePopup(burgId, enemyStrength) {
+        if (!AdventureManager.popupElement) AdventureManager.openPopup('');
 
-        // Simple Battle Resolution reused from BattleMission logic
-        const playerSoldiers = AdventureManager.party.soldiers;
+        // Ensure overlay
+        let overlay = document.getElementById('modalOverlay');
+        if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.id = 'modalOverlay';
+            overlay.className = 'modal-overlay';
+            document.body.appendChild(overlay);
+        }
+        overlay.style.display = 'block';
 
-        // Visual confirmation or direct battle? 
-        // Let's use a confirm since it's a major action, but standard battles are often modal.
-        // We'll emulate the Battle Mission popup flow but simplify it here or just resolve immediate?
-        // Let's resolve immediate for now with a result alert to keep it simple as per plan.
+        const mySoldiers = AdventureManager.party.soldiers;
 
-        this.resolveCityBattle(burg, playerSoldiers, strength);
+        // Win Probability Logic
+        const ratio = mySoldiers / enemyStrength;
+        const k = 2;
+        const winProb = (Math.pow(ratio, k) / (Math.pow(ratio, k) + 1));
+        const winPercent = (winProb * 100).toFixed(1);
+
+        const content = `
+             <h2>⚔️ Battle Imminent ⚔️</h2>
+             <div class="content-wrapper" style="display: flex; gap: 20px; align-items: center; justify-content: center;">
+                 <div style="text-align: center;">
+                    <h3>Your Army</h3>
+                    <div style="font-size: 24px; color: #2ecc71; font-weight: bold;">${mySoldiers} 🛡️</div>
+                 </div>
+                 <div style="font-size: 20px; font-weight: bold;">VS</div>
+                 <div style="text-align: center;">
+                    <h3>City Garrison</h3>
+                    <div style="font-size: 24px; color: #e74c3c; font-weight: bold;">${enemyStrength} ⚔️</div>
+                 </div>
+             </div>
+             
+             <div style="text-align: center; margin: 15px 0;">
+                <div>Win Probability: <strong>${winPercent}%</strong></div>
+             </div>
+             
+             <div class="actions">
+                 <button class="btn-recruit" style="background-color: #c0392b;" onclick="CampaignManager.currentCampaignInstance.resolveCityBattle(${burgId}, ${enemyStrength})">ATTACK!</button>
+                 <button class="btn-leave" onclick="AdventureManager.closePopup()">Retreat</button>
+             </div>
+        `;
+        AdventureManager.openPopup(content);
     }
 
-    resolveCityBattle(burg, playerSoldiers, enemySoldiers) {
-        // Battle Math: Ratio^2 / (Ratio^2 + 1)
-        // Ratio = Player / Enemy
+    resolveCityBattle(burgId, enemySoldiers) {
+        // Find burg again since we passed ID
+        const burg = burgsData.find(b => b.id === burgId);
+        if (!burg) return;
+
+        const playerSoldiers = AdventureManager.party.soldiers;
+
         if (playerSoldiers <= 0) {
             AdventureManager.showFeedback("You have no soldiers to fight with!");
+            AdventureManager.closePopup();
             return;
         }
 
@@ -147,6 +185,8 @@ class HordeCampaign extends BaseCampaign {
 
         const isWin = Math.random() < winProbability;
 
+        AdventureManager.closePopup(); // Close battle popup
+
         if (isWin) {
             // Victory
             // Losses: Low (5-15%)
@@ -154,18 +194,28 @@ class HordeCampaign extends BaseCampaign {
             const losses = Math.floor(playerSoldiers * lossPct);
             AdventureManager.party.soldiers = Math.max(0, playerSoldiers - losses);
 
-            // Rewards
-            const goldReward = Math.floor(enemySoldiers * (0.5 + Math.random())); // Gold based on army size
-            const foodReward = Math.floor(enemySoldiers * 0.2);
+            // Rewards (Aligned with BattleMission + Food = Gold)
+            const goldReward = Math.floor(enemySoldiers / 10) * 3;
+            const soldierReward = Math.floor(enemySoldiers / 10) * 3;
+            const foodReward = goldReward;
 
             AdventureManager.party.gold += goldReward;
+            AdventureManager.party.soldiers += soldierReward;
             AdventureManager.party.food += foodReward;
 
             // Mark as pillaged if capital (or just pillaged city in general)
-            // Objective only cares about capitals, but we track all to block re-pillaging
             this.pillagedCapitals.add(burg.id);
 
-            AdventureManager.showFeedback(`Victory! Pillaged ${burg.name}. Lost ${losses} soldiers. Gained ${goldReward} gold, ${foodReward} food.`);
+            AdventureManager.showFeedback(`Victory! Pillaged ${burg.name}. Lost ${losses} soldiers. Gained ${goldReward} gold, ${foodReward} food, ${soldierReward} soldiers.`);
+
+            // Floating Text (Win)
+            const cell = graphData[AdventureManager.party.cell];
+            if (cell) {
+                AdventureManager.showFloatingText(`VICTORY!`, cell.p[0], cell.p[1] - 80, "#2ecc71");
+                AdventureManager.showFloatingText(`+${goldReward} 💰`, cell.p[0], cell.p[1] - 60, "#f1c40f");
+                AdventureManager.showFloatingText(`+${foodReward} 🍎`, cell.p[0], cell.p[1] - 40, "#e67e22");
+                AdventureManager.showFloatingText(`+${soldierReward} ⚔️`, cell.p[0], cell.p[1] - 20, "#9b59b6");
+            }
 
             // Update Objectives
             this.updateObjectiveText();
@@ -182,9 +232,11 @@ class HordeCampaign extends BaseCampaign {
 
             AdventureManager.showFeedback(`Defeat! Failed to pillage ${burg.name}. Retreating with ${losses} casualties.`);
 
-            // Check Game Over
-            if (AdventureManager.party.soldiers <= 0) {
-                AdventureManager.handleGameOver();
+            // Floating Text (Loss)
+            const cell = graphData[AdventureManager.party.cell];
+            if (cell) {
+                AdventureManager.showFloatingText(`DEFEAT!`, cell.p[0], cell.p[1] - 40, "#e74c3c");
+                if (losses > 0) AdventureManager.showFloatingText(`-${losses} ⚔️`, cell.p[0], cell.p[1] - 20, "#e74c3c");
             }
         }
 
