@@ -27,6 +27,18 @@ const AdventureManager = {
         Explore: true
     },
 
+    // Default Configuration
+    defaultPartyConfig: {
+        cell: -1, // -1 means Random
+        resources: {
+            soldiers: 10,
+            food: 50,
+            gold: 10,
+            tools: 10,
+            onShip: false
+        }
+    },
+
     accessibleCells: [], // Cache for valid land cells
     portDockingCells: {}, // Map of Port Cell ID -> Valid Water Cell ID
 
@@ -240,36 +252,47 @@ const AdventureManager = {
         }
     },
 
-    start() {
+    start(overrideConfig = null) {
         // Clear Adventure Log
         const logContainer = document.getElementById('adventureLog');
         logContainer.innerHTML = '';
 
-        // Pick random start cell from ACCESSIBLE cells
-        let startCell = -1;
+        // Merge Defaults
+        const config = {
+            cell: this.defaultPartyConfig.cell,
+            resources: { ...this.defaultPartyConfig.resources }
+        };
 
-        if (this.accessibleCells.length > 0) {
-            const randomId = this.accessibleCells[Math.floor(Math.random() * this.accessibleCells.length)];
-            startCell = randomId;
-        } else {
-            // Fallback if something went wrong or no ports exist
-            const validCells = graphData.filter(c => c.b !== marineBiomeId);
-            if (validCells.length > 0) {
-                const random = validCells[Math.floor(Math.random() * validCells.length)];
-                startCell = random.i;
+        if (overrideConfig) {
+            if (overrideConfig.cell !== undefined) config.cell = overrideConfig.cell;
+            if (overrideConfig.resources) {
+                config.resources = { ...config.resources, ...overrideConfig.resources };
+            }
+        }
+
+        // Determine Start Cell
+        let startCell = config.cell;
+        if (startCell === -1) {
+            // Default Random Logic
+            if (this.accessibleCells.length > 0) {
+                const randomId = this.accessibleCells[Math.floor(Math.random() * this.accessibleCells.length)];
+                startCell = randomId;
+            } else {
+                // Fallback
+                const validCells = graphData.filter(c => c.b !== marineBiomeId);
+                if (validCells.length > 0) {
+                    const random = validCells[Math.floor(Math.random() * validCells.length)];
+                    startCell = random.i;
+                }
             }
         }
 
         if (startCell !== -1) {
+            // Apply Config to Party Status
             this.party.cell = startCell;
-            this.party.soldiers = 10;
-            this.party.food = 50;
-            this.party.gold = 10;
-            this.party.tools = 10;
-            this.party.tools = 10;
-            this.party.onShip = false;
+            this.party = { ...this.party, ...config.resources };
 
-            // Emit Event (Campaigns may override start location/stats here)
+            // Emit Event
             this.events.emit('start', this.party);
 
             this.partyElement.style.display = "block";

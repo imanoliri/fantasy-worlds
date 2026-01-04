@@ -1766,6 +1766,18 @@ const AdventureManager = {
         Explore: true
     },
 
+    // Default Configuration
+    defaultPartyConfig: {
+        cell: -1, // -1 means Random
+        resources: {
+            soldiers: 10,
+            food: 50,
+            gold: 10,
+            tools: 10,
+            onShip: false
+        }
+    },
+
     accessibleCells: [], // Cache for valid land cells
     portDockingCells: {}, // Map of Port Cell ID -> Valid Water Cell ID
 
@@ -1979,36 +1991,47 @@ const AdventureManager = {
         }
     },
 
-    start() {
+    start(overrideConfig = null) {
         // Clear Adventure Log
         const logContainer = document.getElementById('adventureLog');
         logContainer.innerHTML = '';
 
-        // Pick random start cell from ACCESSIBLE cells
-        let startCell = -1;
+        // Merge Defaults
+        const config = {
+            cell: this.defaultPartyConfig.cell,
+            resources: { ...this.defaultPartyConfig.resources }
+        };
 
-        if (this.accessibleCells.length > 0) {
-            const randomId = this.accessibleCells[Math.floor(Math.random() * this.accessibleCells.length)];
-            startCell = randomId;
-        } else {
-            // Fallback if something went wrong or no ports exist
-            const validCells = graphData.filter(c => c.b !== marineBiomeId);
-            if (validCells.length > 0) {
-                const random = validCells[Math.floor(Math.random() * validCells.length)];
-                startCell = random.i;
+        if (overrideConfig) {
+            if (overrideConfig.cell !== undefined) config.cell = overrideConfig.cell;
+            if (overrideConfig.resources) {
+                config.resources = { ...config.resources, ...overrideConfig.resources };
+            }
+        }
+
+        // Determine Start Cell
+        let startCell = config.cell;
+        if (startCell === -1) {
+            // Default Random Logic
+            if (this.accessibleCells.length > 0) {
+                const randomId = this.accessibleCells[Math.floor(Math.random() * this.accessibleCells.length)];
+                startCell = randomId;
+            } else {
+                // Fallback
+                const validCells = graphData.filter(c => c.b !== marineBiomeId);
+                if (validCells.length > 0) {
+                    const random = validCells[Math.floor(Math.random() * validCells.length)];
+                    startCell = random.i;
+                }
             }
         }
 
         if (startCell !== -1) {
+            // Apply Config to Party Status
             this.party.cell = startCell;
-            this.party.soldiers = 10;
-            this.party.food = 50;
-            this.party.gold = 10;
-            this.party.tools = 10;
-            this.party.tools = 10;
-            this.party.onShip = false;
+            this.party = { ...this.party, ...config.resources };
 
-            // Emit Event (Campaigns may override start location/stats here)
+            // Emit Event
             this.events.emit('start', this.party);
 
             this.partyElement.style.display = "block";
@@ -3199,22 +3222,20 @@ class BaseCampaign {
         console.log(`Campaign '${this.name}' Ended.`);
     }
 
+    // Configuration Hooks
+    getPartyStartConfig() {
+        return this.partyStartConfig || {};
+    }
+
     // Event Handlers
     onAdventureStart() {
-        if (this.startConfig) {
-            // Apply Resources Override
-            if (this.startConfig.resources) {
-                AdventureManager.party = { ...AdventureManager.party, ...this.startConfig.resources };
-            }
-            // Apply Start Cell Override
-            if (this.startConfig.cell !== undefined) {
-                AdventureManager.party.cell = this.startConfig.cell;
-            }
+        if (this.partyStartConfig) {
             AdventureManager.updateStats();
         }
     }
     onMissionStart(data) { }
     onMissionComplete(data) { }
+    onBeforeMissionSpawn(data) { }
     onBurgPopupOpened(context) { }
     onUpdateStats(party) {
         if (!this.active) return;
@@ -3379,9 +3400,12 @@ const CampaignManager = {
         AdventureManager.events.on('missionStart', (d) => this.currentCampaignInstance.onMissionStart(d));
         AdventureManager.events.on('missionComplete', (d) => this.currentCampaignInstance.onMissionComplete(d));
         AdventureManager.events.on('burgPopupOpened', (d) => this.currentCampaignInstance.onBurgPopupOpened(d));
+        AdventureManager.events.on('beforeMissionSpawn', (d) => this.currentCampaignInstance.onBeforeMissionSpawn(d));
 
         this.currentCampaignInstance.onStart(); // Call *before* Adventure start to register listeners
-        AdventureManager.start();
+
+        // AdventureManager starts with current campaign's config
+        AdventureManager.start(this.currentCampaignInstance.getPartyStartConfig());
         AdventureManager.showFeedback(`Campaign Started: ${this.currentCampaignInstance.name}`);
 
         document.getElementById('campaignStartBtn').classList.add('hidden');
@@ -3488,7 +3512,7 @@ class SiegeDefenseCampaign extends BaseCampaign {
             return p.food >= 150 && this.siegedBurgCell !== -1 && p.cell === this.siegedBurgCell;
         });
 
-        this.startConfig = {
+        this.partyStartConfig = {
             resources: { soldiers: 20, tools: 20, food: 15, gold: 0 }
         };
     }
@@ -3497,26 +3521,53 @@ class SiegeDefenseCampaign extends BaseCampaign {
         super.onStart();
     }
 
-    onAdventureStart() {
-        super.onAdventureStart();
+    getPartyStartConfig() {
+        // Force Spawn
+        MissionSiege.onSpawn();
 
-        // Enforce Start Location (Campaign specific logic overrides generic startConfig.cell if needed)
-        let startCell = this.startConfig.cell;
-
-        // PRIORITIZE: Start at the location of the Siege
-        const siegedBurg = burgsData.find(b => b.id === MissionSiege.data.burgId);
-        if (siegedBurg) {
-            startCell = siegedBurg.cell_id;
-            console.log(`SiegeDefenseCampaign: Starting at sieged burg ${siegedBurg.name} (Cell ${startCell})`);
+        let startCell = -1;
+        // Check where it spawned
+        if (MissionSiege.data && MissionSiege.data.burgId) {
+            const siegedBurg = burgsData.find(b => b.id === MissionSiege.data.burgId);
+            if (siegedBurg) {
+                startCell = siegedBurg.cell_id;
+                console.log(`SiegeDefenseCampaign: Pre-calculated start at ${siegedBurg.name}`);
+            }
         }
 
-        AdventureManager.party.cell = startCell;
-        setTimeout(() => AdventureManager.render(), 100);
+        const config = {
+            resources: this.partyStartConfig.resources,
+            cell: startCell
+        };
+
+        return config;
+    }
+
+    onBeforeMissionSpawn(data) {
+        // Prevent AdventureManager from spawning a random siege, because we already forced one in getStartConfig
+        if (data.type === 'siege') {
+            data.cancelled = true;
+            console.log("SiegeDefenseCampaign: Prevented default Siege spawn (using pre-calculated one).");
+        }
+    }
+
+    onAdventureStart() {
+        super.onAdventureStart();
+        // Note: Party Cell is already set by AdventureManager.start(config) now.
 
         AdventureManager.updateStats();
 
         // Initial Capture of Siege if it already exists
-        this.onMissionStart({ type: 'siege', ...MissionSiege.data });
+        // Since we called MissionSiege.onSpawn(), it likely already emitted 'missionStart'.
+        // BUT listeners might not have been registered then because we register them in CampaignManager.startCampaign BEFORE calling onStart/getStartConfig?
+        // Wait, CampaignManager registers listeners BEFORE calling getStartConfig.
+        // So when we called MissionSiege.onSpawn() in getStartConfig, the 'missionStart' event WAS fired.
+        // And we are listening to it. So onMissionStart should have been called.
+
+        // Just in case, RE-APPLY to ensure local state is in sync
+        if (MissionSiege.data) {
+            this.onMissionStart({ type: 'siege', ...MissionSiege.data });
+        }
     }
 
     onMissionStart(data) {

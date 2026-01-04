@@ -19,7 +19,7 @@ class SiegeDefenseCampaign extends BaseCampaign {
             return p.food >= 150 && this.siegedBurgCell !== -1 && p.cell === this.siegedBurgCell;
         });
 
-        this.startConfig = {
+        this.partyStartConfig = {
             resources: { soldiers: 20, tools: 20, food: 15, gold: 0 }
         };
     }
@@ -28,26 +28,53 @@ class SiegeDefenseCampaign extends BaseCampaign {
         super.onStart();
     }
 
-    onAdventureStart() {
-        super.onAdventureStart();
+    getPartyStartConfig() {
+        // Force Spawn
+        MissionSiege.onSpawn();
 
-        // Enforce Start Location (Campaign specific logic overrides generic startConfig.cell if needed)
-        let startCell = this.startConfig.cell;
-
-        // PRIORITIZE: Start at the location of the Siege
-        const siegedBurg = burgsData.find(b => b.id === MissionSiege.data.burgId);
-        if (siegedBurg) {
-            startCell = siegedBurg.cell_id;
-            console.log(`SiegeDefenseCampaign: Starting at sieged burg ${siegedBurg.name} (Cell ${startCell})`);
+        let startCell = -1;
+        // Check where it spawned
+        if (MissionSiege.data && MissionSiege.data.burgId) {
+            const siegedBurg = burgsData.find(b => b.id === MissionSiege.data.burgId);
+            if (siegedBurg) {
+                startCell = siegedBurg.cell_id;
+                console.log(`SiegeDefenseCampaign: Pre-calculated start at ${siegedBurg.name}`);
+            }
         }
 
-        AdventureManager.party.cell = startCell;
-        setTimeout(() => AdventureManager.render(), 100);
+        const config = {
+            resources: this.partyStartConfig.resources,
+            cell: startCell
+        };
+
+        return config;
+    }
+
+    onBeforeMissionSpawn(data) {
+        // Prevent AdventureManager from spawning a random siege, because we already forced one in getStartConfig
+        if (data.type === 'siege') {
+            data.cancelled = true;
+            console.log("SiegeDefenseCampaign: Prevented default Siege spawn (using pre-calculated one).");
+        }
+    }
+
+    onAdventureStart() {
+        super.onAdventureStart();
+        // Note: Party Cell is already set by AdventureManager.start(config) now.
 
         AdventureManager.updateStats();
 
         // Initial Capture of Siege if it already exists
-        this.onMissionStart({ type: 'siege', ...MissionSiege.data });
+        // Since we called MissionSiege.onSpawn(), it likely already emitted 'missionStart'.
+        // BUT listeners might not have been registered then because we register them in CampaignManager.startCampaign BEFORE calling onStart/getStartConfig?
+        // Wait, CampaignManager registers listeners BEFORE calling getStartConfig.
+        // So when we called MissionSiege.onSpawn() in getStartConfig, the 'missionStart' event WAS fired.
+        // And we are listening to it. So onMissionStart should have been called.
+
+        // Just in case, RE-APPLY to ensure local state is in sync
+        if (MissionSiege.data) {
+            this.onMissionStart({ type: 'siege', ...MissionSiege.data });
+        }
     }
 
     onMissionStart(data) {

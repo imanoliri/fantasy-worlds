@@ -22,22 +22,20 @@ class BaseCampaign {
         console.log(`Campaign '${this.name}' Ended.`);
     }
 
+    // Configuration Hooks
+    getPartyStartConfig() {
+        return this.partyStartConfig || {};
+    }
+
     // Event Handlers
     onAdventureStart() {
-        if (this.startConfig) {
-            // Apply Resources Override
-            if (this.startConfig.resources) {
-                AdventureManager.party = { ...AdventureManager.party, ...this.startConfig.resources };
-            }
-            // Apply Start Cell Override
-            if (this.startConfig.cell !== undefined) {
-                AdventureManager.party.cell = this.startConfig.cell;
-            }
+        if (this.partyStartConfig) {
             AdventureManager.updateStats();
         }
     }
     onMissionStart(data) { }
     onMissionComplete(data) { }
+    onBeforeMissionSpawn(data) { }
     onBurgPopupOpened(context) { }
     onUpdateStats(party) {
         if (!this.active) return;
@@ -202,9 +200,12 @@ const CampaignManager = {
         AdventureManager.events.on('missionStart', (d) => this.currentCampaignInstance.onMissionStart(d));
         AdventureManager.events.on('missionComplete', (d) => this.currentCampaignInstance.onMissionComplete(d));
         AdventureManager.events.on('burgPopupOpened', (d) => this.currentCampaignInstance.onBurgPopupOpened(d));
+        AdventureManager.events.on('beforeMissionSpawn', (d) => this.currentCampaignInstance.onBeforeMissionSpawn(d));
 
         this.currentCampaignInstance.onStart(); // Call *before* Adventure start to register listeners
-        AdventureManager.start();
+
+        // AdventureManager starts with current campaign's config
+        AdventureManager.start(this.currentCampaignInstance.getPartyStartConfig());
         AdventureManager.showFeedback(`Campaign Started: ${this.currentCampaignInstance.name}`);
 
         document.getElementById('campaignStartBtn').classList.add('hidden');
