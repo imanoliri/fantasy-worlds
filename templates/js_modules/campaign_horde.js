@@ -121,6 +121,10 @@ class HordeCampaign extends BaseCampaign {
 
     isHostile(burg) {
         if (!burg) return false;
+
+        // Capital Override: Capitals are ALWAYS hostile targets to pillage
+        if (burg.is_capital) return true;
+
         const type = burg.type ? burg.type.toLowerCase() : "";
 
         // Hostile if NOT "Hunter" (or Hunting) AND NOT "Highland" (or Highlands)
