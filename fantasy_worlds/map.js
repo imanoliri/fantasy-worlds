@@ -3708,7 +3708,6 @@ class DiplomatCampaign extends BaseCampaign {
         AdventureManager.events.on('beforeMissionSpawn', this._blockDiplomacyHandler);
 
 
-        const initCampaignData = () => {
             const initCampaignData = () => {
                 console.log("DiplomatCampaign: burgsData length:", burgsData.length);
                 const capitals = burgsData.filter(b => b.is_capital);
@@ -3718,7 +3717,6 @@ class DiplomatCampaign extends BaseCampaign {
 
                 // Highlight all unvisited capitals
                 capitals.forEach(c => this.highlightCell(c.cell_id, "#FFD700")); // Gold highlight
-            };
         };
 
         initCampaignData();

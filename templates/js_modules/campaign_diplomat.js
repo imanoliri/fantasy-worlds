@@ -27,16 +27,14 @@ class DiplomatCampaign extends BaseCampaign {
 
 
         const initCampaignData = () => {
-            const initCampaignData = () => {
-                console.log("DiplomatCampaign: burgsData length:", burgsData.length);
-                const capitals = burgsData.filter(b => b.is_capital);
-                console.log("DiplomatCampaign: Found capitals:", capitals.length);
-                this.totalCapitals = capitals.length;
-                this.updateObjectiveText();
+            console.log("DiplomatCampaign: burgsData length:", burgsData.length);
+            const capitals = burgsData.filter(b => b.is_capital);
+            console.log("DiplomatCampaign: Found capitals:", capitals.length);
+            this.totalCapitals = capitals.length;
+            this.updateObjectiveText();
 
-                // Highlight all unvisited capitals
-                capitals.forEach(c => this.highlightCell(c.cell_id, "#FFD700")); // Gold highlight
-            };
+            // Highlight all unvisited capitals
+            capitals.forEach(c => this.highlightCell(c.cell_id, "#FFD700")); // Gold highlight
         };
 
         initCampaignData();
