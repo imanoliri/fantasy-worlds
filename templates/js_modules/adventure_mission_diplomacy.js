@@ -1,7 +1,10 @@
-const MissionDiplomacy = {
-    targets: [], // Array of cell IDs (capitals)
-    solvedCount: 0,
-    group: null, // SVG group for rings
+class DiplomaticMission extends AdventureMission {
+    constructor() {
+        super('diplomacy', 'Diplomacy');
+        this.targets = []; // Array of cell IDs (capitals)
+        this.solvedCount = 0;
+        this.group = null; // SVG group for rings
+    }
 
     init() {
         if (this.group) return;
@@ -12,40 +15,16 @@ const MissionDiplomacy = {
 
         const svg = document.getElementById('mapSvg');
         if (svg) svg.appendChild(diplomacyGroup);
-    },
+    }
 
-    spawn() {
-        if (!AdventureManager.active) return;
-
-        // Event Hook for cancellation
-        const eventData = { type: 'diplomacy', cancelled: false };
-        if (AdventureManager.events) {
-            AdventureManager.events.emit('beforeMissionSpawn', eventData);
-        }
-
-        if (eventData.cancelled) {
-            console.log("MissionDiplomacy: Spawn cancelled by event listener.");
-            return;
-        }
-
+    onSpawn() {
         this.startTour();
-    },
+    }
 
     startTour() {
-        // Event Hook check again? Usually spawn calls startTour.
-        // But startTour handles the logic strictly. 
-        // If startTour is called manually (re-tour), we should check too.
-
-        const eventData = { type: 'diplomacy', cancelled: false };
-        if (AdventureManager.events) {
-            AdventureManager.events.emit('beforeMissionStart', eventData);
-            // Using different event or same? 'beforeMissionSpawn' usually implies creation.
-            // 'startTour' is the internal logic.
-            // Let's use 'beforeMissionStart' for granular control if needed, 
-            // or rely on spawn being the gatekeeper.
-            // But 'resolve' calls 'startTour' internally for next round!
-            // So we MUST check here too if we want to block subsequent tours.
-        }
+        // Event Hook check for granular control (e.g. re-tour)
+        const eventData = { type: 'diplomacy', cancelled: false, mission: this };
+        AdventureManager.events.emit('beforeMissionStart', eventData);
 
         if (eventData.cancelled) return;
 
@@ -61,7 +40,7 @@ const MissionDiplomacy = {
         const targetNames = capitals.slice(0, 3).map(b => b.name).join(", ");
         AdventureManager.showFeedback(`Diplomatic Tour Started! Visit 3 Capitals with Blue Rings: ${targetNames}.`);
         this.updateVisuals();
-    },
+    }
 
     updateVisuals() {
         if (!this.group) return;
@@ -89,12 +68,12 @@ const MissionDiplomacy = {
         } else {
             this.group.style.display = 'none';
         }
-    },
+    }
 
     toggle(active) {
         if (!this.group) return;
         this.group.style.display = active ? 'inline' : 'none';
-    },
+    }
 
     resolve(burgId) {
         if (!this.targets.includes(burgId)) return;
@@ -138,6 +117,6 @@ const MissionDiplomacy = {
             }
         }
     }
-};
+}
 
-window.MissionDiplomacy = MissionDiplomacy;
+window.MissionDiplomacy = new DiplomaticMission();

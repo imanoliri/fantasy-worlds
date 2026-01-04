@@ -1,7 +1,8 @@
-const MissionBattle = {
-    data: null, // { cell: int, soldiers: int }
-    element: null,
-    countElement: null,
+class BattleMission extends AdventureMission {
+    constructor() {
+        super('battle', 'Battle');
+        this.countElement = null;
+    }
 
     init() {
         if (this.element) return;
@@ -58,20 +59,18 @@ const MissionBattle = {
 
         const svg = document.getElementById('mapSvg');
         if (svg) svg.appendChild(enemyGroup);
+    }
 
-        // Mission: Battle
-    },
+    onSpawn() {
+        // Need to check other missions to avoid overlap
+        // getValidSpawnCells doesn't know about other mission data by default, 
+        // but we can pass occupied cells if we want strict non-overlap.
+        // The original code checked MissionTreasure.data.cell.
 
-    spawn() {
         const occupied = [AdventureManager.party.cell];
-        if (MissionTreasure.data) occupied.push(MissionTreasure.data.cell);
+        if (window.MissionTreasure && MissionTreasure.data) occupied.push(MissionTreasure.data.cell);
 
-        let validCells = [];
-        if (AdventureManager.accessibleCells && AdventureManager.accessibleCells.length > 0) {
-            validCells = AdventureManager.accessibleCells.map(id => graphData[id]).filter(c => !occupied.includes(c.i));
-        } else {
-            validCells = graphData.filter(c => c.b !== marineBiomeId && !occupied.includes(c.i));
-        }
+        const validCells = this.getValidSpawnCells(occupied);
 
         if (validCells.length > 0) {
             const randomCell = validCells[Math.floor(Math.random() * validCells.length)];
@@ -79,7 +78,7 @@ const MissionBattle = {
             this.data = { cell: randomCell.i, soldiers: amount };
             this.updateVisuals();
         }
-    },
+    }
 
     updateVisuals() {
         if (!this.element) return;
@@ -96,20 +95,15 @@ const MissionBattle = {
         } else {
             this.element.style.display = "none";
         }
-    },
-
-    toggle(active) {
-        if (!this.element) return;
-        this.element.style.display = (active && this.data) ? "block" : "none";
-    },
+    }
 
     getTargetCell() {
         return this.data ? this.data.cell : null;
-    },
+    }
 
     onArrival() {
         this.showPopup();
-    },
+    }
 
     showPopup() {
         if (!AdventureManager.popupElement) AdventureManager.openPopup('');
@@ -158,7 +152,7 @@ const MissionBattle = {
              </div>
         `;
         AdventureManager.openPopup(content);
-    },
+    }
 
     resolve() {
         if (!this.data) return;
@@ -223,6 +217,6 @@ const MissionBattle = {
             }
         }
     }
-};
+}
 
-window.MissionBattle = MissionBattle;
+window.MissionBattle = new BattleMission();

@@ -1,7 +1,8 @@
-const MissionTreasure = {
-    data: null, // { cell: int, amount: int }
-    element: null,
-    countElement: null,
+class TreasureMission extends AdventureMission {
+    constructor() {
+        super('treasure', 'Treasure');
+        this.countElement = null;
+    }
 
     init() {
         if (this.element) return;
@@ -59,15 +60,10 @@ const MissionTreasure = {
 
         const svg = document.getElementById('mapSvg');
         if (svg) svg.appendChild(treasureGroup);
-    },
+    }
 
-    spawn() {
-        let validCells = [];
-        if (AdventureManager.accessibleCells && AdventureManager.accessibleCells.length > 0) {
-            validCells = AdventureManager.accessibleCells.map(id => graphData[id]).filter(c => c.i !== AdventureManager.party.cell);
-        } else {
-            validCells = graphData.filter(c => c.b !== marineBiomeId && c.i !== AdventureManager.party.cell);
-        }
+    onSpawn() {
+        const validCells = this.getValidSpawnCells();
 
         if (validCells.length > 0) {
             const randomCell = validCells[Math.floor(Math.random() * validCells.length)];
@@ -75,7 +71,7 @@ const MissionTreasure = {
             this.data = { cell: randomCell.i, amount: amount };
             this.updateVisuals();
         }
-    },
+    }
 
     updateVisuals() {
         if (!this.element) return;
@@ -92,20 +88,15 @@ const MissionTreasure = {
         } else {
             this.element.style.display = "none";
         }
-    },
-
-    toggle(active) {
-        if (!this.element) return;
-        this.element.style.display = (active && this.data) ? "block" : "none";
-    },
+    }
 
     getTargetCell() {
         return this.data ? this.data.cell : null;
-    },
+    }
 
     onArrival() {
         this.showPopup();
-    },
+    }
 
     showPopup() {
         if (!AdventureManager.popupElement) AdventureManager.openPopup(''); // Initialize if needed
@@ -141,7 +132,7 @@ const MissionTreasure = {
         `;
 
         AdventureManager.openPopup(content);
-    },
+    }
 
     mine() {
         if (!this.data) return;
@@ -163,11 +154,13 @@ const MissionTreasure = {
             this.spawn(); // Respawn
             AdventureManager.updateStats();
 
+            // Emit Complete Event from Base Class? No, base doesn't have complete logic.
+            // Using standard emit.
             AdventureManager.events.emit('missionComplete', { type: 'treasure', amount: this.data.amount });
         } else {
             AdventureManager.showFeedback("Not enough tools!");
         }
     }
-};
+}
 
-window.MissionTreasure = MissionTreasure;
+window.MissionTreasure = new TreasureMission();

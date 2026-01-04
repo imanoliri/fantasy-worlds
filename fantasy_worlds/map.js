@@ -493,10 +493,71 @@ function sortTable(n, header, tableId) {
 }
 
 
-const MissionTreasure = {
-    data: null, // { cell: int, amount: int }
-    element: null,
-    countElement: null,
+class AdventureMission {
+    constructor(type, name) {
+        this.type = type; // e.g., 'diplomacy', 'battle'
+        this.name = name;
+        this.data = null;
+        this.element = null;
+    }
+
+    init() {
+        // To be implemented by subclasses
+        console.log(`Initializing ${this.name}...`);
+    }
+
+    spawn() {
+        if (!AdventureManager.active) return;
+
+        // Centralized Event Hook for cancellation
+        const eventData = { type: this.type, cancelled: false, mission: this };
+
+        if (AdventureManager.events) {
+            AdventureManager.events.emit('beforeMissionSpawn', eventData);
+        }
+
+        if (eventData.cancelled) {
+            console.log(`Mission ${this.name}: Spawn cancelled by event listener.`);
+            return;
+        }
+
+        this.onSpawn();
+    }
+
+    // Abstract method for actual spawn logic
+    onSpawn() {
+        console.warn(`${this.name}: onSpawn not implemented.`);
+    }
+
+    // Helper to check standard constraints
+    getValidSpawnCells(occupiedCells = []) {
+        let validCells = [];
+        if (AdventureManager.accessibleCells && AdventureManager.accessibleCells.length > 0) {
+            validCells = AdventureManager.accessibleCells.map(id => graphData[id]).filter(c => !occupiedCells.includes(c.i));
+        } else {
+            // Fallback if accessibleCells not calculated yet or empty
+            const marineBiomeId = window.marineBiomeId || 0; // Ensure it exists
+            validCells = graphData.filter(c => c.b !== marineBiomeId && !occupiedCells.includes(c.i));
+        }
+        return validCells;
+    }
+
+    updateVisuals() {
+        // Abstract
+    }
+
+    toggle(active) {
+        if (!this.element) return;
+        this.element.style.display = (active && this.data) ? "block" : "none";
+    }
+}
+
+
+class TreasureMission extends AdventureMission {
+    constructor() {
+        super('treasure', 'Treasure');
+        this.countElement = null;
+    }
 
     init() {
         if (this.element) return;
@@ -554,15 +615,10 @@ const MissionTreasure = {
 
         const svg = document.getElementById('mapSvg');
         if (svg) svg.appendChild(treasureGroup);
-    },
+    }
 
-    spawn() {
-        let validCells = [];
-        if (AdventureManager.accessibleCells && AdventureManager.accessibleCells.length > 0) {
-            validCells = AdventureManager.accessibleCells.map(id => graphData[id]).filter(c => c.i !== AdventureManager.party.cell);
-        } else {
-            validCells = graphData.filter(c => c.b !== marineBiomeId && c.i !== AdventureManager.party.cell);
-        }
+    onSpawn() {
+        const validCells = this.getValidSpawnCells();
 
         if (validCells.length > 0) {
             const randomCell = validCells[Math.floor(Math.random() * validCells.length)];
@@ -570,7 +626,7 @@ const MissionTreasure = {
             this.data = { cell: randomCell.i, amount: amount };
             this.updateVisuals();
         }
-    },
+    }
 
     updateVisuals() {
         if (!this.element) return;
@@ -587,20 +643,15 @@ const MissionTreasure = {
         } else {
             this.element.style.display = "none";
         }
-    },
-
-    toggle(active) {
-        if (!this.element) return;
-        this.element.style.display = (active && this.data) ? "block" : "none";
-    },
+    }
 
     getTargetCell() {
         return this.data ? this.data.cell : null;
-    },
+    }
 
     onArrival() {
         this.showPopup();
-    },
+    }
 
     showPopup() {
         if (!AdventureManager.popupElement) AdventureManager.openPopup(''); // Initialize if needed
@@ -636,7 +687,7 @@ const MissionTreasure = {
         `;
 
         AdventureManager.openPopup(content);
-    },
+    }
 
     mine() {
         if (!this.data) return;
@@ -658,20 +709,23 @@ const MissionTreasure = {
             this.spawn(); // Respawn
             AdventureManager.updateStats();
 
+            // Emit Complete Event from Base Class? No, base doesn't have complete logic.
+            // Using standard emit.
             AdventureManager.events.emit('missionComplete', { type: 'treasure', amount: this.data.amount });
         } else {
             AdventureManager.showFeedback("Not enough tools!");
         }
     }
-};
+}
 
-window.MissionTreasure = MissionTreasure;
+window.MissionTreasure = new TreasureMission();
 
 
-const MissionBattle = {
-    data: null, // { cell: int, soldiers: int }
-    element: null,
-    countElement: null,
+class BattleMission extends AdventureMission {
+    constructor() {
+        super('battle', 'Battle');
+        this.countElement = null;
+    }
 
     init() {
         if (this.element) return;
@@ -728,20 +782,18 @@ const MissionBattle = {
 
         const svg = document.getElementById('mapSvg');
         if (svg) svg.appendChild(enemyGroup);
+    }
 
-        // Mission: Battle
-    },
+    onSpawn() {
+        // Need to check other missions to avoid overlap
+        // getValidSpawnCells doesn't know about other mission data by default, 
+        // but we can pass occupied cells if we want strict non-overlap.
+        // The original code checked MissionTreasure.data.cell.
 
-    spawn() {
         const occupied = [AdventureManager.party.cell];
-        if (MissionTreasure.data) occupied.push(MissionTreasure.data.cell);
+        if (window.MissionTreasure && MissionTreasure.data) occupied.push(MissionTreasure.data.cell);
 
-        let validCells = [];
-        if (AdventureManager.accessibleCells && AdventureManager.accessibleCells.length > 0) {
-            validCells = AdventureManager.accessibleCells.map(id => graphData[id]).filter(c => !occupied.includes(c.i));
-        } else {
-            validCells = graphData.filter(c => c.b !== marineBiomeId && !occupied.includes(c.i));
-        }
+        const validCells = this.getValidSpawnCells(occupied);
 
         if (validCells.length > 0) {
             const randomCell = validCells[Math.floor(Math.random() * validCells.length)];
@@ -749,7 +801,7 @@ const MissionBattle = {
             this.data = { cell: randomCell.i, soldiers: amount };
             this.updateVisuals();
         }
-    },
+    }
 
     updateVisuals() {
         if (!this.element) return;
@@ -766,20 +818,15 @@ const MissionBattle = {
         } else {
             this.element.style.display = "none";
         }
-    },
-
-    toggle(active) {
-        if (!this.element) return;
-        this.element.style.display = (active && this.data) ? "block" : "none";
-    },
+    }
 
     getTargetCell() {
         return this.data ? this.data.cell : null;
-    },
+    }
 
     onArrival() {
         this.showPopup();
-    },
+    }
 
     showPopup() {
         if (!AdventureManager.popupElement) AdventureManager.openPopup('');
@@ -828,7 +875,7 @@ const MissionBattle = {
              </div>
         `;
         AdventureManager.openPopup(content);
-    },
+    }
 
     resolve() {
         if (!this.data) return;
@@ -893,15 +940,16 @@ const MissionBattle = {
             }
         }
     }
-};
+}
 
-window.MissionBattle = MissionBattle;
+window.MissionBattle = new BattleMission();
 
 
-const MissionHunt = {
-    data: null, // { cell: int, strength: int }
-    element: null,
-    countElement: null,
+class HuntMission extends AdventureMission {
+    constructor() {
+        super('hunt', 'Hunt');
+        this.countElement = null;
+    }
 
     init() {
         if (this.element) return;
@@ -924,7 +972,7 @@ const MissionHunt = {
         beastCircle.setAttribute("stroke-width", "2");
 
         const beastText = document.createElementNS("http://www.w3.org/2000/svg", "text");
-        beastText.textContent = "🐺"; // Boar emoji
+        beastText.textContent = "🐺"; // Boar/Wolf emoji
         beastText.setAttribute("text-anchor", "middle");
         beastText.setAttribute("dy", "5");
         beastText.setAttribute("font-size", "16px");
@@ -943,31 +991,26 @@ const MissionHunt = {
 
         const svg = document.getElementById('mapSvg');
         if (svg) svg.appendChild(beastGroup);
+    }
 
-        // Mission: Beast Hunt
-    },
-
-    spawn() {
+    onSpawn() {
+        // Collect occupied cells
         const occupied = [AdventureManager.party.cell];
-        if (MissionTreasure.data) occupied.push(MissionTreasure.data.cell);
-        if (MissionBattle.data) occupied.push(MissionBattle.data.cell);
+        if (window.MissionTreasure && MissionTreasure.data) occupied.push(MissionTreasure.data.cell);
+        if (window.MissionBattle && MissionBattle.data) occupied.push(MissionBattle.data.cell);
 
-        let validCells = [];
-        if (AdventureManager.accessibleCells && AdventureManager.accessibleCells.length > 0) {
-            validCells = AdventureManager.accessibleCells.map(id => graphData[id]).filter(c => !occupied.includes(c.i));
-        } else {
-            validCells = graphData.filter(c => c.b !== marineBiomeId && !occupied.includes(c.i));
-        }
+        const validCells = this.getValidSpawnCells(occupied);
 
         if (validCells.length > 0) {
             const randomCell = validCells[Math.floor(Math.random() * validCells.length)];
             const strength = Math.floor(Math.random() * (30 - 5 + 1)) + 5; // 5 to 30
             this.data = { cell: randomCell.i, strength: strength };
             this.updateVisuals();
-            // Emit Start Event
-            if (AdventureManager.events) AdventureManager.events.emit('missionStart', { type: 'hunt', ...this.data });
+            // Emit specific start event if needed, but base class handles 'beforeMissionSpawn'.
+            // The original code emitted 'missionStart' manually here.
+            AdventureManager.events.emit('missionStart', { type: 'hunt', ...this.data });
         }
-    },
+    }
 
     updateVisuals() {
         if (!this.element) return;
@@ -984,20 +1027,15 @@ const MissionHunt = {
         } else {
             this.element.style.display = "none";
         }
-    },
-
-    toggle(active) {
-        if (!this.element) return;
-        this.element.style.display = (active && this.data) ? "block" : "none";
-    },
+    }
 
     getTargetCell() {
         return this.data ? this.data.cell : null;
-    },
+    }
 
     onArrival() {
         this.showPopup();
-    },
+    }
 
     showPopup() {
         if (!AdventureManager.popupElement) AdventureManager.openPopup('');
@@ -1042,7 +1080,7 @@ const MissionHunt = {
              </div>
         `;
         AdventureManager.openPopup(content);
-    },
+    }
 
     resolve() {
         if (!this.data) return;
@@ -1063,7 +1101,7 @@ const MissionHunt = {
             AdventureManager.showFeedback(`SLAIN! Gained ${goldReward} Gold & ${foodReward} Food.`);
 
             // Emit Complete Event
-            if (AdventureManager.events) AdventureManager.events.emit('missionComplete', { type: 'hunt', result: 'win', ...this.data });
+            AdventureManager.events.emit('missionComplete', { type: 'hunt', result: 'win', ...this.data });
 
             // Floating Text (Win)
             const cell = graphData[AdventureManager.party.cell];
@@ -1109,17 +1147,18 @@ const MissionHunt = {
             }
         }
     }
-};
+}
 
-window.MissionHunt = MissionHunt;
+window.MissionHunt = new HuntMission();
 
 
-const MissionSiege = {
-    data: null, // { burgId: int, armyCell: int, soldiers: int }
-    lastSiegedBurgId: -1, // Track the last sieged burg to prevent immediate repeats
-    element: null, // Group for Bomb icon
-    countElement: null,
-    ringGroup: null, // Group for siege ring
+class SiegeMission extends AdventureMission {
+    constructor() {
+        super('siege', 'Siege');
+        this.countElement = null;
+        this.ringGroup = null;
+        this.lastSiegedBurgId = -1;
+    }
 
     init() {
         if (this.element) return;
@@ -1184,10 +1223,8 @@ const MissionSiege = {
         }
 
         // Register Event Listener for Burg Popup
-        if (AdventureManager.events) {
-            AdventureManager.events.on('burgPopupOpened', this.handleburgPopupOpened.bind(this));
-        }
-    },
+        AdventureManager.events.on('burgPopupOpened', this.handleburgPopupOpened.bind(this));
+    }
 
     handleburgPopupOpened(context) {
         if (!this.data || !AdventureManager.active) return;
@@ -1212,7 +1249,7 @@ const MissionSiege = {
                 disabled: false
             });
         }
-    },
+    }
 
     getSiegeInsertIndex(buttons) {
         const priorityBefore = ['leave_ship', 'rent_ship', 'buy_food', 'standard_diplomacy', 'diplomat_mission'];
@@ -1226,10 +1263,9 @@ const MissionSiege = {
         // If not found, try before 'recruit' or 'tools'
         const afterIdx = buttons.findIndex(b => ['recruit_soldiers', 'buy_tools'].includes(b.id));
         return afterIdx >= 0 ? afterIdx : 0;
-    },
+    }
 
-    spawn() {
-        if (!AdventureManager.active) return;
+    onSpawn() {
         const capitals = burgsData.filter(b => b.is_capital);
         if (capitals.length === 0) return;
 
@@ -1237,7 +1273,6 @@ const MissionSiege = {
         let candidateCapitals = capitals;
         if (this.lastSiegedBurgId !== -1) {
             candidateCapitals = capitals.filter(b => b.id !== this.lastSiegedBurgId);
-            // If only 1 capital exists, use the original list
             if (candidateCapitals.length === 0) {
                 candidateCapitals = capitals;
             }
@@ -1252,7 +1287,7 @@ const MissionSiege = {
 
         // Find neighbor land cell for army
         const neighbors = graphData[capitalCell].c;
-        const validNeighbors = neighbors.filter(n => graphData[n].b !== marineBiomeId);
+        const validNeighbors = neighbors.filter(n => graphData[n].b !== window.marineBiomeId);
 
         if (validNeighbors.length > 0) {
             const armyCell = validNeighbors[Math.floor(Math.random() * validNeighbors.length)];
@@ -1266,10 +1301,9 @@ const MissionSiege = {
             this.updateVisuals();
             AdventureManager.showFeedback(`Siege started at ${capital.name}!`);
 
-            // Emit Start Event
-            if (AdventureManager.events) AdventureManager.events.emit('missionStart', { type: 'siege', ...this.data });
+            AdventureManager.events.emit('missionStart', { type: 'siege', ...this.data });
         }
-    },
+    }
 
     updateVisuals() {
         if (!this.element) return;
@@ -1295,10 +1329,10 @@ const MissionSiege = {
                     const ring = document.createElementNS("http://www.w3.org/2000/svg", "circle");
                     ring.setAttribute("cx", burg.x);
                     ring.setAttribute("cy", burg.y);
-                    ring.setAttribute("r", parseFloat(burg.r) + 12); // Bigger radius
+                    ring.setAttribute("r", parseFloat(burg.r) + 12);
                     ring.setAttribute("fill", "none");
                     ring.setAttribute("stroke", "#000"); // Black
-                    ring.setAttribute("stroke-width", "4"); // Thicker
+                    ring.setAttribute("stroke-width", "4");
                     ring.setAttribute("pointer-events", "none");
                     this.ringGroup.appendChild(ring);
                     this.ringGroup.style.display = 'inline';
@@ -1308,21 +1342,21 @@ const MissionSiege = {
             this.element.style.display = "none";
             if (this.ringGroup) this.ringGroup.style.display = 'none';
         }
-    },
+    }
 
     toggle(active) {
         if (!this.element) return;
         this.element.style.display = (active && this.data) ? "block" : "none";
         if (this.ringGroup) this.ringGroup.style.display = (active && this.data) ? "inline" : "none";
-    },
+    }
 
     getTargetCell() {
         return this.data ? this.data.armyCell : null;
-    },
+    }
 
     onArrival() {
         this.showPopup();
-    },
+    }
 
     showPopup() {
         if (!AdventureManager.popupElement) AdventureManager.openPopup('');
@@ -1368,7 +1402,7 @@ const MissionSiege = {
              </div>
         `;
         AdventureManager.openPopup(content);
-    },
+    }
 
     resolve() {
         if (!this.data) return;
@@ -1382,15 +1416,14 @@ const MissionSiege = {
         if (Math.random() < winProb) {
             // WIN
             const goldReward = 35; // High reward
-            const soldierReward = 10; // Freed prisoners?
-
+            const soldierReward = 10;
             AdventureManager.party.gold += goldReward;
             AdventureManager.party.soldiers += soldierReward;
 
             AdventureManager.showFeedback(`SIEGE BROKEN! Hero of the city! +${goldReward} Gold.`);
 
             // Emit Complete Event (Win)
-            if (AdventureManager.events) AdventureManager.events.emit('missionComplete', { type: 'siege', result: 'win', ...this.data });
+            AdventureManager.events.emit('missionComplete', { type: 'siege', result: 'win', ...this.data });
 
             // Floating Text (Win)
             const cell = graphData[AdventureManager.party.cell];
@@ -1431,7 +1464,7 @@ const MissionSiege = {
                 AdventureManager.showFeedback(`DEFEAT! But siege is broken at high cost!`);
 
                 // Emit Complete Event (Sacrifice)
-                if (AdventureManager.events) AdventureManager.events.emit('missionComplete', { type: 'siege', result: 'sacrifice', ...this.data });
+                dventureManager.events.emit('missionComplete', { type: 'siege', result: 'sacrifice', ...this.data });
 
                 this.data = null;
                 this.updateVisuals();
@@ -1443,15 +1476,18 @@ const MissionSiege = {
             }
         }
     }
-};
+}
 
-window.MissionSiege = MissionSiege;
+window.MissionSiege = new SiegeMission();
 
 
-const MissionDiplomacy = {
-    targets: [], // Array of cell IDs (capitals)
-    solvedCount: 0,
-    group: null, // SVG group for rings
+class DiplomaticMission extends AdventureMission {
+    constructor() {
+        super('diplomacy', 'Diplomacy');
+        this.targets = []; // Array of cell IDs (capitals)
+        this.solvedCount = 0;
+        this.group = null; // SVG group for rings
+    }
 
     init() {
         if (this.group) return;
@@ -1462,40 +1498,16 @@ const MissionDiplomacy = {
 
         const svg = document.getElementById('mapSvg');
         if (svg) svg.appendChild(diplomacyGroup);
-    },
+    }
 
-    spawn() {
-        if (!AdventureManager.active) return;
-
-        // Event Hook for cancellation
-        const eventData = { type: 'diplomacy', cancelled: false };
-        if (AdventureManager.events) {
-            AdventureManager.events.emit('beforeMissionSpawn', eventData);
-        }
-
-        if (eventData.cancelled) {
-            console.log("MissionDiplomacy: Spawn cancelled by event listener.");
-            return;
-        }
-
+    onSpawn() {
         this.startTour();
-    },
+    }
 
     startTour() {
-        // Event Hook check again? Usually spawn calls startTour.
-        // But startTour handles the logic strictly. 
-        // If startTour is called manually (re-tour), we should check too.
-
-        const eventData = { type: 'diplomacy', cancelled: false };
-        if (AdventureManager.events) {
-            AdventureManager.events.emit('beforeMissionStart', eventData);
-            // Using different event or same? 'beforeMissionSpawn' usually implies creation.
-            // 'startTour' is the internal logic.
-            // Let's use 'beforeMissionStart' for granular control if needed, 
-            // or rely on spawn being the gatekeeper.
-            // But 'resolve' calls 'startTour' internally for next round!
-            // So we MUST check here too if we want to block subsequent tours.
-        }
+        // Event Hook check for granular control (e.g. re-tour)
+        const eventData = { type: 'diplomacy', cancelled: false, mission: this };
+        AdventureManager.events.emit('beforeMissionStart', eventData);
 
         if (eventData.cancelled) return;
 
@@ -1511,7 +1523,7 @@ const MissionDiplomacy = {
         const targetNames = capitals.slice(0, 3).map(b => b.name).join(", ");
         AdventureManager.showFeedback(`Diplomatic Tour Started! Visit 3 Capitals with Blue Rings: ${targetNames}.`);
         this.updateVisuals();
-    },
+    }
 
     updateVisuals() {
         if (!this.group) return;
@@ -1539,12 +1551,12 @@ const MissionDiplomacy = {
         } else {
             this.group.style.display = 'none';
         }
-    },
+    }
 
     toggle(active) {
         if (!this.group) return;
         this.group.style.display = active ? 'inline' : 'none';
-    },
+    }
 
     resolve(burgId) {
         if (!this.targets.includes(burgId)) return;
@@ -1588,14 +1600,17 @@ const MissionDiplomacy = {
             }
         }
     }
-};
+}
 
-window.MissionDiplomacy = MissionDiplomacy;
+window.MissionDiplomacy = new DiplomaticMission();
 
 
-const MissionExplore = {
-    locations: [], // Array of { cell: int, id: int }
-    elements: [], // Array of SVG elements
+class ExploreMission extends AdventureMission {
+    constructor() {
+        super('explore', 'Explore');
+        this.locations = [];
+        this.elements = [];
+    }
 
     init() {
         if (this.elements.length > 0) return;
@@ -1632,46 +1647,41 @@ const MissionExplore = {
             this.elements.push(locGroup);
         }
 
-        // Mission: Exploration {
         const svg = document.getElementById('mapSvg');
         if (svg) svg.appendChild(locationsGroup);
-        this.locations = [null, null, null, null];
-        for (let i = 0; i < 4; i++) {
-            this.spawnLocation(i);
-        }
-        this.updateVisuals();
-    },
+    }
 
-    spawn() {
+    onSpawn() {
         this.locations = [null, null, null, null];
         for (let i = 0; i < 4; i++) {
             this.spawnLocation(i);
         }
         this.updateVisuals();
-    },
+    }
 
     spawnLocation(index) {
         // Collect occupied cells to avoid spawning on top
         const occupiedObj = {};
         occupiedObj[AdventureManager.party.cell] = true;
-        if (MissionTreasure.data) occupiedObj[MissionTreasure.data.cell] = true;
-        if (MissionBattle.data) occupiedObj[MissionBattle.data.cell] = true;
-        if (MissionHunt.data) occupiedObj[MissionHunt.data.cell] = true;
-        if (MissionSiege.data) occupiedObj[MissionSiege.data.armyCell] = true;
+        if (window.MissionTreasure && MissionTreasure.data) occupiedObj[MissionTreasure.data.cell] = true;
+        if (window.MissionBattle && MissionBattle.data) occupiedObj[MissionBattle.data.cell] = true;
+        if (window.MissionHunt && MissionHunt.data) occupiedObj[MissionHunt.data.cell] = true;
+        if (window.MissionSiege && MissionSiege.data) occupiedObj[MissionSiege.data.armyCell] = true;
         this.locations.forEach(l => { if (l) occupiedObj[l.cell] = true; });
 
         let validCells = [];
+        // Manual valid cell filtering because explicit exclusion list is complex and multi-object
         if (AdventureManager.accessibleCells && AdventureManager.accessibleCells.length > 0) {
             validCells = AdventureManager.accessibleCells.map(id => graphData[id]).filter(c => !occupiedObj[c.i]);
         } else {
-            validCells = graphData.filter(c => c.b !== marineBiomeId && !occupiedObj[c.i]);
+            validCells = graphData.filter(c => c.b !== window.marineBiomeId && !occupiedObj[c.i]);
         }
 
         if (validCells.length > 0) {
             const randomCell = validCells[Math.floor(Math.random() * validCells.length)];
             this.locations[index] = { cell: randomCell.i, id: index };
         }
-    },
+    }
 
     updateVisuals() {
         if (this.elements.length === 0) return;
@@ -1697,7 +1707,7 @@ const MissionExplore = {
                 if (el) el.style.display = 'none';
             });
         }
-    },
+    }
 
     toggle(active) {
         if (this.elements.length === 0) return;
@@ -1708,11 +1718,11 @@ const MissionExplore = {
         } else {
             this.updateVisuals();
         }
-    },
+    }
 
     getTargetCell(index) {
         return this.locations[index] ? this.locations[index].cell : null;
-    },
+    }
 
     onArrival(index) {
         // Found a location!
@@ -1732,9 +1742,9 @@ const MissionExplore = {
 
         AdventureManager.events.emit('missionComplete', { type: 'explore' });
     }
-};
+}
 
-window.MissionExplore = MissionExplore;
+window.MissionExplore = new ExploreMission();
 
 
 
@@ -1772,7 +1782,6 @@ const AdventureManager = {
     init() {
         if (this.partyElement) return;
 
-        // Initialize Event System
         // Initialize Event System
         this.events = {
             listeners: {},

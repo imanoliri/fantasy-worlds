@@ -3,6 +3,7 @@
     "ui.js",
     "map_render.js",
     "tables.js",
+    "adventure_mission.js",
     "adventure_mission_treasure.js",
     "adventure_mission_battle.js",
     "adventure_mission_hunt.js",
