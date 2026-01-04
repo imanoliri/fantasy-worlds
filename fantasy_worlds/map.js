@@ -1466,10 +1466,39 @@ const MissionDiplomacy = {
 
     spawn() {
         if (!AdventureManager.active) return;
+
+        // Event Hook for cancellation
+        const eventData = { type: 'diplomacy', cancelled: false };
+        if (AdventureManager.events) {
+            AdventureManager.events.emit('beforeMissionSpawn', eventData);
+        }
+
+        if (eventData.cancelled) {
+            console.log("MissionDiplomacy: Spawn cancelled by event listener.");
+            return;
+        }
+
         this.startTour();
     },
 
     startTour() {
+        // Event Hook check again? Usually spawn calls startTour.
+        // But startTour handles the logic strictly. 
+        // If startTour is called manually (re-tour), we should check too.
+
+        const eventData = { type: 'diplomacy', cancelled: false };
+        if (AdventureManager.events) {
+            AdventureManager.events.emit('beforeMissionStart', eventData);
+            // Using different event or same? 'beforeMissionSpawn' usually implies creation.
+            // 'startTour' is the internal logic.
+            // Let's use 'beforeMissionStart' for granular control if needed, 
+            // or rely on spawn being the gatekeeper.
+            // But 'resolve' calls 'startTour' internally for next round!
+            // So we MUST check here too if we want to block subsequent tours.
+        }
+
+        if (eventData.cancelled) return;
+
         const capitals = burgsData.filter(b => b.is_capital);
         // Shuffle using Fisher-Yates
         for (let i = capitals.length - 1; i > 0; i--) {
@@ -1744,11 +1773,16 @@ const AdventureManager = {
         if (this.partyElement) return;
 
         // Initialize Event System
+        // Initialize Event System
         this.events = {
             listeners: {},
             on(event, callback) {
                 if (!this.listeners[event]) this.listeners[event] = [];
                 this.listeners[event].push(callback);
+            },
+            off(event, callback) {
+                if (!this.listeners[event]) return;
+                this.listeners[event] = this.listeners[event].filter(cb => cb !== callback);
             },
             emit(event, data) {
                 if (this.listeners[event]) {
@@ -3437,9 +3471,6 @@ const CampaignManager = {
 window.CampaignManager = CampaignManager;
 
 
-// ---------------------------------------------------------
-// Specific Campaign: The Siege Defense
-// ---------------------------------------------------------
 class SiegeDefenseCampaign extends BaseCampaign {
     constructor() {
         super("siege_defense_v1", "The Siege Defense", "A dark army surrounds the capital. You must gather resources, build an army, and break the siege before the city falls.");
@@ -3565,9 +3596,6 @@ if (window.CampaignManager) {
 }
 
 
-// ---------------------------------------------------------
-// Specific Campaign: The Grand Explorer
-// ---------------------------------------------------------
 class ExplorerCampaign extends BaseCampaign {
     constructor() {
         super("explorer_v1", "The Grand Explorer", "Travel the world, hunt beasts, find treasures, and reach the designated city.");
@@ -3684,9 +3712,6 @@ if (window.CampaignManager) {
 }
 
 
-// ---------------------------------------------------------
-// Specific Campaign: The Diplomat
-// ---------------------------------------------------------
 class DiplomatCampaign extends BaseCampaign {
     constructor() {
         super("diplomat_v1", "The Diplomat", "Travel to every capital and complete a diplomatic mission.");
@@ -3703,6 +3728,27 @@ class DiplomatCampaign extends BaseCampaign {
 
     onStart() {
         super.onStart();
+
+        // 1. Disable Standard Diplomatic Missions via Event Listener
+        this._blockDiplomacyHandler = (e) => {
+            if (e.type === 'diplomacy') {
+                e.cancelled = true;
+                // console.log("DiplomatCampaign blocked diplomacy mission.");
+            }
+        };
+
+        if (window.AdventureManager && AdventureManager.events) {
+            // Block generic spawn
+            AdventureManager.events.on('beforeMissionSpawn', this._blockDiplomacyHandler);
+            // Block manual startTour if needed
+            AdventureManager.events.on('beforeMissionStart', this._blockDiplomacyHandler);
+
+            // Force disable if currently active (cleanup existing)
+            if (window.MissionDiplomacy) {
+                MissionDiplomacy.toggle(false);
+                // We don't need to clear targets if spawn is blocked forever more.
+            }
+        }
 
         const initCampaignData = () => {
             if (window.burgsData) {
@@ -3754,6 +3800,16 @@ class DiplomatCampaign extends BaseCampaign {
                         AdventureManager.showFeedback("Error: Could not load campaign data (Burgs).");
                     }
                 });
+        }
+    }
+
+    onEnd() {
+        super.onEnd();
+
+        // Remove Listeners
+        if (window.AdventureManager && AdventureManager.events && this._blockDiplomacyHandler) {
+            AdventureManager.events.off('beforeMissionSpawn', this._blockDiplomacyHandler);
+            AdventureManager.events.off('beforeMissionStart', this._blockDiplomacyHandler);
         }
     }
 

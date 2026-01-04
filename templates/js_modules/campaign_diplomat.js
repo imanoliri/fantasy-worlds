@@ -15,6 +15,27 @@ class DiplomatCampaign extends BaseCampaign {
     onStart() {
         super.onStart();
 
+        // 1. Disable Standard Diplomatic Missions via Event Listener
+        this._blockDiplomacyHandler = (e) => {
+            if (e.type === 'diplomacy') {
+                e.cancelled = true;
+                // console.log("DiplomatCampaign blocked diplomacy mission.");
+            }
+        };
+
+        if (window.AdventureManager && AdventureManager.events) {
+            // Block generic spawn
+            AdventureManager.events.on('beforeMissionSpawn', this._blockDiplomacyHandler);
+            // Block manual startTour if needed
+            AdventureManager.events.on('beforeMissionStart', this._blockDiplomacyHandler);
+
+            // Force disable if currently active (cleanup existing)
+            if (window.MissionDiplomacy) {
+                MissionDiplomacy.toggle(false);
+                // We don't need to clear targets if spawn is blocked forever more.
+            }
+        }
+
         const initCampaignData = () => {
             if (window.burgsData) {
                 console.log("DiplomatCampaign: burgsData length:", burgsData.length);
@@ -65,6 +86,16 @@ class DiplomatCampaign extends BaseCampaign {
                         AdventureManager.showFeedback("Error: Could not load campaign data (Burgs).");
                     }
                 });
+        }
+    }
+
+    onEnd() {
+        super.onEnd();
+
+        // Remove Listeners
+        if (window.AdventureManager && AdventureManager.events && this._blockDiplomacyHandler) {
+            AdventureManager.events.off('beforeMissionSpawn', this._blockDiplomacyHandler);
+            AdventureManager.events.off('beforeMissionStart', this._blockDiplomacyHandler);
         }
     }
 

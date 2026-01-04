@@ -16,10 +16,39 @@ const MissionDiplomacy = {
 
     spawn() {
         if (!AdventureManager.active) return;
+
+        // Event Hook for cancellation
+        const eventData = { type: 'diplomacy', cancelled: false };
+        if (AdventureManager.events) {
+            AdventureManager.events.emit('beforeMissionSpawn', eventData);
+        }
+
+        if (eventData.cancelled) {
+            console.log("MissionDiplomacy: Spawn cancelled by event listener.");
+            return;
+        }
+
         this.startTour();
     },
 
     startTour() {
+        // Event Hook check again? Usually spawn calls startTour.
+        // But startTour handles the logic strictly. 
+        // If startTour is called manually (re-tour), we should check too.
+
+        const eventData = { type: 'diplomacy', cancelled: false };
+        if (AdventureManager.events) {
+            AdventureManager.events.emit('beforeMissionStart', eventData);
+            // Using different event or same? 'beforeMissionSpawn' usually implies creation.
+            // 'startTour' is the internal logic.
+            // Let's use 'beforeMissionStart' for granular control if needed, 
+            // or rely on spawn being the gatekeeper.
+            // But 'resolve' calls 'startTour' internally for next round!
+            // So we MUST check here too if we want to block subsequent tours.
+        }
+
+        if (eventData.cancelled) return;
+
         const capitals = burgsData.filter(b => b.is_capital);
         // Shuffle using Fisher-Yates
         for (let i = capitals.length - 1; i > 0; i--) {
