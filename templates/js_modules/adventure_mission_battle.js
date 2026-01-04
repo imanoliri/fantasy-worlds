@@ -58,7 +58,7 @@ class BattleMission extends AdventureMission {
         this.countElement = enemyCount;
 
         const svg = document.getElementById('mapSvg');
-        if (svg) svg.appendChild(enemyGroup);
+        svg.appendChild(enemyGroup);
     }
 
     onSpawn() {

@@ -43,7 +43,7 @@ class HuntMission extends AdventureMission {
         this.countElement = beastCount;
 
         const svg = document.getElementById('mapSvg');
-        if (svg) svg.appendChild(beastGroup);
+        svg.appendChild(beastGroup);
     }
 
     onSpawn() {

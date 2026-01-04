@@ -14,7 +14,7 @@ class DiplomaticMission extends AdventureMission {
         this.group = diplomacyGroup;
 
         const svg = document.getElementById('mapSvg');
-        if (svg) svg.appendChild(diplomacyGroup);
+        svg.appendChild(diplomacyGroup);
     }
 
     onSpawn() {

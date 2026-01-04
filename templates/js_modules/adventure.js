@@ -243,7 +243,7 @@ const AdventureManager = {
     start() {
         // Clear Adventure Log
         const logContainer = document.getElementById('adventureLog');
-        if (logContainer) logContainer.innerHTML = '';
+        logContainer.innerHTML = '';
 
         // Pick random start cell from ACCESSIBLE cells
         let startCell = -1;
@@ -270,18 +270,18 @@ const AdventureManager = {
             this.partyElement.style.display = "block";
 
             // Spawn Missions based on Options
-            if (this.options.Treasure) MissionTreasure.spawn();
-            if (this.options.Battle) MissionBattle.spawn();
-            if (this.options.Hunt) MissionHunt.spawn();
-            if (this.options.Diplomacy) MissionDiplomacy.spawn();
-            if (this.options.Siege) MissionSiege.spawn();
-            if (this.options.Explore) MissionExplore.spawn();
+            MissionTreasure.spawn();
+            MissionBattle.spawn();
+            MissionHunt.spawn();
+            MissionDiplomacy.spawn();
+            MissionSiege.spawn();
+            MissionExplore.spawn();
 
             this.updateStats();
             this.render();
 
             // Emit Event (Campaigns may override start location here)
-            if (this.events) this.events.emit('start', this.party);
+            this.events.emit('start', this.party);
 
             // Trigger Start Ping (Use actual party cell in case it was moved)
             const startNode = graphData[this.party.cell];

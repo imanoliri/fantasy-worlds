@@ -59,7 +59,7 @@ class TreasureMission extends AdventureMission {
         this.countElement = treasureCount;
 
         const svg = document.getElementById('mapSvg');
-        if (svg) svg.appendChild(treasureGroup);
+        svg.appendChild(treasureGroup);
     }
 
     onSpawn() {

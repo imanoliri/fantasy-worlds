@@ -38,7 +38,6 @@ class BaseCampaign {
 
     renderObjectives() {
         const list = document.getElementById('objectivesList');
-        if (!list) return;
         list.innerHTML = "";
         this.objectives.forEach(obj => {
             const li = document.createElement('li');
@@ -77,17 +76,15 @@ class BaseCampaign {
 
     // Visual Helpers
     highlightCell(cellId, color = "#00ffff") {
-        if (!window.graphData || !graphData[cellId]) return;
+        if (!graphData[cellId]) return;
 
         let x, y;
 
         // Try to find exact Burg coordinates first for better centering
-        if (window.burgsData) {
-            const burg = burgsData.find(b => b.cell_id === cellId);
-            if (burg) {
-                x = burg.x;
-                y = burg.y;
-            }
+        const burg = burgsData.find(b => b.cell_id === cellId);
+        if (burg) {
+            x = burg.x;
+            y = burg.y;
         }
 
         // Fallback to cell center
@@ -103,7 +100,7 @@ class BaseCampaign {
             container = document.createElementNS("http://www.w3.org/2000/svg", "g");
             container.setAttribute("id", "campaignHighlights");
             const svg = document.getElementById('mapSvg');
-            if (svg) svg.appendChild(container);
+            svg.appendChild(container);
         }
 
         const ring = document.createElementNS("http://www.w3.org/2000/svg", "circle");
@@ -149,8 +146,6 @@ const CampaignManager = {
 
     populateSidebar() {
         const dropdown = document.getElementById('campaignDropdown');
-        if (!dropdown) return;
-
         dropdown.innerHTML = '<option value="" disabled selected>Select a Campaign...</option>';
 
         this.availableCampaigns.forEach((CampClass, index) => {

@@ -63,10 +63,8 @@ class SiegeMission extends AdventureMission {
         this.element = siegeGroup;
         this.countElement = siegeCount;
 
-        if (svg) {
-            svg.appendChild(siegeRingGroup);
-            svg.appendChild(siegeGroup);
-        }
+        svg.appendChild(siegeRingGroup);
+        svg.appendChild(siegeGroup);
 
         // Register Event Listener for Burg Popup
         AdventureManager.events.on('burgPopupOpened', this.handleburgPopupOpened.bind(this));

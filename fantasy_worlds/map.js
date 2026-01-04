@@ -612,7 +612,7 @@ class TreasureMission extends AdventureMission {
         this.countElement = treasureCount;
 
         const svg = document.getElementById('mapSvg');
-        if (svg) svg.appendChild(treasureGroup);
+        svg.appendChild(treasureGroup);
     }
 
     onSpawn() {
@@ -779,7 +779,7 @@ class BattleMission extends AdventureMission {
         this.countElement = enemyCount;
 
         const svg = document.getElementById('mapSvg');
-        if (svg) svg.appendChild(enemyGroup);
+        svg.appendChild(enemyGroup);
     }
 
     onSpawn() {
@@ -789,7 +789,7 @@ class BattleMission extends AdventureMission {
         // The original code checked MissionTreasure.data.cell.
 
         const occupied = [AdventureManager.party.cell];
-        if (MissionTreasure.data) occupied.push(MissionTreasure.data.cell);
+        occupied.push(MissionTreasure.data.cell);
 
         const validCells = this.getValidSpawnCells(occupied);
 
@@ -988,7 +988,7 @@ class HuntMission extends AdventureMission {
         this.countElement = beastCount;
 
         const svg = document.getElementById('mapSvg');
-        if (svg) svg.appendChild(beastGroup);
+        svg.appendChild(beastGroup);
     }
 
     onSpawn() {
@@ -1215,10 +1215,8 @@ class SiegeMission extends AdventureMission {
         this.element = siegeGroup;
         this.countElement = siegeCount;
 
-        if (svg) {
-            svg.appendChild(siegeRingGroup);
-            svg.appendChild(siegeGroup);
-        }
+        svg.appendChild(siegeRingGroup);
+        svg.appendChild(siegeGroup);
 
         // Register Event Listener for Burg Popup
         AdventureManager.events.on('burgPopupOpened', this.handleburgPopupOpened.bind(this));
@@ -1495,7 +1493,7 @@ class DiplomaticMission extends AdventureMission {
         this.group = diplomacyGroup;
 
         const svg = document.getElementById('mapSvg');
-        if (svg) svg.appendChild(diplomacyGroup);
+        svg.appendChild(diplomacyGroup);
     }
 
     onSpawn() {
@@ -1646,7 +1644,7 @@ class ExploreMission extends AdventureMission {
         }
 
         const svg = document.getElementById('mapSvg');
-        if (svg) svg.appendChild(locationsGroup);
+        svg.appendChild(locationsGroup);
     }
 
     onSpawn() {
@@ -1659,21 +1657,15 @@ class ExploreMission extends AdventureMission {
 
     spawnLocation(index) {
         // Collect occupied cells to avoid spawning on top
-        const occupiedObj = {};
-        occupiedObj[AdventureManager.party.cell] = true;
-        if (MissionTreasure.data) occupiedObj[MissionTreasure.data.cell] = true;
-        if (MissionBattle.data) occupiedObj[MissionBattle.data.cell] = true;
-        if (MissionHunt.data) occupiedObj[MissionHunt.data.cell] = true;
-        if (MissionSiege.data) occupiedObj[MissionSiege.data.armyCell] = true;
+        const occupiedObj = [];
+        occupiedObj.push(AdventureManager.party.cell);
+        if (MissionTreasure.data) occupiedObj.push(MissionTreasure.data.cell);
+        if (MissionBattle.data) occupiedObj.push(MissionBattle.data.cell);
+        if (MissionHunt.data) occupiedObj.push(MissionHunt.data.cell);
+        if (MissionSiege.data) occupiedObj.push(MissionSiege.data.armyCell);
         this.locations.forEach(l => { if (l) occupiedObj[l.cell] = true; });
 
-        let validCells = [];
-        // Manual valid cell filtering because explicit exclusion list is complex and multi-object
-        if (AdventureManager.accessibleCells && AdventureManager.accessibleCells.length > 0) {
-            validCells = AdventureManager.accessibleCells.map(id => graphData[id]).filter(c => !occupiedObj[c.i]);
-        } else {
-            validCells = graphData.filter(c => c.b !== marineBiomeId && !occupiedObj[c.i]);
-        }
+        let validCells = this.getValidSpawnCells(occupiedObj);
 
         if (validCells.length > 0) {
             const randomCell = validCells[Math.floor(Math.random() * validCells.length)];
@@ -1990,7 +1982,7 @@ const AdventureManager = {
     start() {
         // Clear Adventure Log
         const logContainer = document.getElementById('adventureLog');
-        if (logContainer) logContainer.innerHTML = '';
+        logContainer.innerHTML = '';
 
         // Pick random start cell from ACCESSIBLE cells
         let startCell = -1;
@@ -2017,18 +2009,18 @@ const AdventureManager = {
             this.partyElement.style.display = "block";
 
             // Spawn Missions based on Options
-            if (this.options.Treasure) MissionTreasure.spawn();
-            if (this.options.Battle) MissionBattle.spawn();
-            if (this.options.Hunt) MissionHunt.spawn();
-            if (this.options.Diplomacy) MissionDiplomacy.spawn();
-            if (this.options.Siege) MissionSiege.spawn();
-            if (this.options.Explore) MissionExplore.spawn();
+            MissionTreasure.spawn();
+            MissionBattle.spawn();
+            MissionHunt.spawn();
+            MissionDiplomacy.spawn();
+            MissionSiege.spawn();
+            MissionExplore.spawn();
 
             this.updateStats();
             this.render();
 
             // Emit Event (Campaigns may override start location here)
-            if (this.events) this.events.emit('start', this.party);
+            this.events.emit('start', this.party);
 
             // Trigger Start Ping (Use actual party cell in case it was moved)
             const startNode = graphData[this.party.cell];
@@ -3221,7 +3213,6 @@ class BaseCampaign {
 
     renderObjectives() {
         const list = document.getElementById('objectivesList');
-        if (!list) return;
         list.innerHTML = "";
         this.objectives.forEach(obj => {
             const li = document.createElement('li');
@@ -3260,17 +3251,15 @@ class BaseCampaign {
 
     // Visual Helpers
     highlightCell(cellId, color = "#00ffff") {
-        if (!window.graphData || !graphData[cellId]) return;
+        if (!graphData[cellId]) return;
 
         let x, y;
 
         // Try to find exact Burg coordinates first for better centering
-        if (window.burgsData) {
-            const burg = burgsData.find(b => b.cell_id === cellId);
-            if (burg) {
-                x = burg.x;
-                y = burg.y;
-            }
+        const burg = burgsData.find(b => b.cell_id === cellId);
+        if (burg) {
+            x = burg.x;
+            y = burg.y;
         }
 
         // Fallback to cell center
@@ -3286,7 +3275,7 @@ class BaseCampaign {
             container = document.createElementNS("http://www.w3.org/2000/svg", "g");
             container.setAttribute("id", "campaignHighlights");
             const svg = document.getElementById('mapSvg');
-            if (svg) svg.appendChild(container);
+            svg.appendChild(container);
         }
 
         const ring = document.createElementNS("http://www.w3.org/2000/svg", "circle");
@@ -3332,8 +3321,6 @@ const CampaignManager = {
 
     populateSidebar() {
         const dropdown = document.getElementById('campaignDropdown');
-        if (!dropdown) return;
-
         dropdown.innerHTML = '<option value="" disabled selected>Select a Campaign...</option>';
 
         this.availableCampaigns.forEach((CampClass, index) => {
