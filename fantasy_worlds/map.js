@@ -789,7 +789,7 @@ class BattleMission extends AdventureMission {
         // The original code checked MissionTreasure.data.cell.
 
         const occupied = [AdventureManager.party.cell];
-        occupied.push(MissionTreasure.data.cell);
+        if (MissionTreasure.data) occupied.push(MissionTreasure.data.cell);
 
         const validCells = this.getValidSpawnCells(occupied);
 
@@ -1460,7 +1460,7 @@ class SiegeMission extends AdventureMission {
                 AdventureManager.showFeedback(`DEFEAT! But siege is broken at high cost!`);
 
                 // Emit Complete Event (Sacrifice)
-                dventureManager.events.emit('missionComplete', { type: 'siege', result: 'sacrifice', ...this.data });
+                AdventureManager.events.emit('missionComplete', { type: 'siege', result: 'sacrifice', ...this.data });
 
                 this.data = null;
                 this.updateVisuals();

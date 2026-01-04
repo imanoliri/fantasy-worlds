@@ -308,7 +308,7 @@ class SiegeMission extends AdventureMission {
                 AdventureManager.showFeedback(`DEFEAT! But siege is broken at high cost!`);
 
                 // Emit Complete Event (Sacrifice)
-                dventureManager.events.emit('missionComplete', { type: 'siege', result: 'sacrifice', ...this.data });
+                AdventureManager.events.emit('missionComplete', { type: 'siege', result: 'sacrifice', ...this.data });
 
                 this.data = null;
                 this.updateVisuals();
