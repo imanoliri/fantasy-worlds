@@ -1769,26 +1769,26 @@ const AdventureManager = {
     accessibleCells: [], // Cache for valid land cells
     portDockingCells: {}, // Map of Port Cell ID -> Valid Water Cell ID
 
+    // Initialize Event System (Top-level to ensure availability)
+    events: {
+        listeners: {},
+        on(event, callback) {
+            if (!this.listeners[event]) this.listeners[event] = [];
+            this.listeners[event].push(callback);
+        },
+        off(event, callback) {
+            if (!this.listeners[event]) return;
+            this.listeners[event] = this.listeners[event].filter(cb => cb !== callback);
+        },
+        emit(event, data) {
+            if (this.listeners[event]) {
+                this.listeners[event].forEach(cb => cb(data));
+            }
+        }
+    },
+
     init() {
         if (this.partyElement) return;
-
-        // Initialize Event System
-        this.events = {
-            listeners: {},
-            on(event, callback) {
-                if (!this.listeners[event]) this.listeners[event] = [];
-                this.listeners[event].push(callback);
-            },
-            off(event, callback) {
-                if (!this.listeners[event]) return;
-                this.listeners[event] = this.listeners[event].filter(cb => cb !== callback);
-            },
-            emit(event, data) {
-                if (this.listeners[event]) {
-                    this.listeners[event].forEach(cb => cb(data));
-                }
-            }
-        };
 
         // Identify Accessible Land (Islands with at least one port)
         this.identifyAccessibleLand();
@@ -3708,15 +3708,15 @@ class DiplomatCampaign extends BaseCampaign {
         AdventureManager.events.on('beforeMissionSpawn', this._blockDiplomacyHandler);
 
 
-            const initCampaignData = () => {
-                console.log("DiplomatCampaign: burgsData length:", burgsData.length);
-                const capitals = burgsData.filter(b => b.is_capital);
-                console.log("DiplomatCampaign: Found capitals:", capitals.length);
-                this.totalCapitals = capitals.length;
-                this.updateObjectiveText();
+        const initCampaignData = () => {
+            console.log("DiplomatCampaign: burgsData length:", burgsData.length);
+            const capitals = burgsData.filter(b => b.is_capital);
+            console.log("DiplomatCampaign: Found capitals:", capitals.length);
+            this.totalCapitals = capitals.length;
+            this.updateObjectiveText();
 
-                // Highlight all unvisited capitals
-                capitals.forEach(c => this.highlightCell(c.cell_id, "#FFD700")); // Gold highlight
+            // Highlight all unvisited capitals
+            capitals.forEach(c => this.highlightCell(c.cell_id, "#FFD700")); // Gold highlight
         };
 
         initCampaignData();
