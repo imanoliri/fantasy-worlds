@@ -56,10 +56,10 @@ class ExploreMission extends AdventureMission {
         // Collect occupied cells to avoid spawning on top
         const occupiedObj = {};
         occupiedObj[AdventureManager.party.cell] = true;
-        if (window.MissionTreasure && MissionTreasure.data) occupiedObj[MissionTreasure.data.cell] = true;
-        if (window.MissionBattle && MissionBattle.data) occupiedObj[MissionBattle.data.cell] = true;
-        if (window.MissionHunt && MissionHunt.data) occupiedObj[MissionHunt.data.cell] = true;
-        if (window.MissionSiege && MissionSiege.data) occupiedObj[MissionSiege.data.armyCell] = true;
+        if (MissionTreasure.data) occupiedObj[MissionTreasure.data.cell] = true;
+        if (MissionBattle.data) occupiedObj[MissionBattle.data.cell] = true;
+        if (MissionHunt.data) occupiedObj[MissionHunt.data.cell] = true;
+        if (MissionSiege.data) occupiedObj[MissionSiege.data.armyCell] = true;
         this.locations.forEach(l => { if (l) occupiedObj[l.cell] = true; });
 
         let validCells = [];
@@ -67,7 +67,7 @@ class ExploreMission extends AdventureMission {
         if (AdventureManager.accessibleCells && AdventureManager.accessibleCells.length > 0) {
             validCells = AdventureManager.accessibleCells.map(id => graphData[id]).filter(c => !occupiedObj[c.i]);
         } else {
-            validCells = graphData.filter(c => c.b !== window.marineBiomeId && !occupiedObj[c.i]);
+            validCells = graphData.filter(c => c.b !== marineBiomeId && !occupiedObj[c.i]);
         }
 
         if (validCells.length > 0) {

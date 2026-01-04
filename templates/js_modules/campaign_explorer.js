@@ -21,7 +21,7 @@ class ExplorerCampaign extends BaseCampaign {
     onStart() {
         super.onStart();
         // Pick a random city that IS NOT the starting one
-        if (window.burgsData && burgsData.length > 0) {
+        if (burgsData.length > 0) {
             let valid = false;
             let attempts = 0;
             while (!valid && attempts < 100) {
@@ -109,6 +109,4 @@ class ExplorerCampaign extends BaseCampaign {
 }
 
 // Register Campaign
-if (window.CampaignManager) {
-    CampaignManager.availableCampaigns.push(ExplorerCampaign);
-}
+CampaignManager.availableCampaigns.push(ExplorerCampaign);

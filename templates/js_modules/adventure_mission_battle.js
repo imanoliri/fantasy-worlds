@@ -68,7 +68,7 @@ class BattleMission extends AdventureMission {
         // The original code checked MissionTreasure.data.cell.
 
         const occupied = [AdventureManager.party.cell];
-        if (window.MissionTreasure && MissionTreasure.data) occupied.push(MissionTreasure.data.cell);
+        if (MissionTreasure.data) occupied.push(MissionTreasure.data.cell);
 
         const validCells = this.getValidSpawnCells(occupied);
 

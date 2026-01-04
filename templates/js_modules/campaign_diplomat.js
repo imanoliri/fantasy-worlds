@@ -19,25 +19,15 @@ class DiplomatCampaign extends BaseCampaign {
         this._blockDiplomacyHandler = (e) => {
             if (e.type === 'diplomacy') {
                 e.cancelled = true;
-                // console.log("DiplomatCampaign blocked diplomacy mission.");
+                console.log("DiplomatCampaign blocked diplomacy mission.");
             }
         };
 
-        if (window.AdventureManager && AdventureManager.events) {
-            // Block generic spawn
-            AdventureManager.events.on('beforeMissionSpawn', this._blockDiplomacyHandler);
-            // Block manual startTour if needed
-            AdventureManager.events.on('beforeMissionStart', this._blockDiplomacyHandler);
+        AdventureManager.events.on('beforeMissionSpawn', this._blockDiplomacyHandler);
 
-            // Force disable if currently active (cleanup existing)
-            if (window.MissionDiplomacy) {
-                MissionDiplomacy.toggle(false);
-                // We don't need to clear targets if spawn is blocked forever more.
-            }
-        }
 
         const initCampaignData = () => {
-            if (window.burgsData) {
+            const initCampaignData = () => {
                 console.log("DiplomatCampaign: burgsData length:", burgsData.length);
                 const capitals = burgsData.filter(b => b.is_capital);
                 console.log("DiplomatCampaign: Found capitals:", capitals.length);
@@ -46,57 +36,17 @@ class DiplomatCampaign extends BaseCampaign {
 
                 // Highlight all unvisited capitals
                 capitals.forEach(c => this.highlightCell(c.cell_id, "#FFD700")); // Gold highlight
-            } else {
-                console.error("DiplomatCampaign: burgsData not found after attempt!");
-            }
+            };
         };
 
-        if (window.burgsData) {
-            initCampaignData();
-        } else {
-            console.warn("DiplomatCampaign: burgsData missing. Attempting to fetch from JSON...");
-            // Infer JSON filename from current URL
-            // e.g. Bouzonia_map.html -> Bouzonia_burgs.json
-            const path = window.location.pathname;
-            const filename = path.substring(path.lastIndexOf('/') + 1);
-            const jsonFilename = filename.replace('_map.html', '_burgs.json');
-
-            // Construct fetch URL - assuming json is in same directory
-            const url = jsonFilename;
-
-            fetch(url)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    console.log("DiplomatCampaign: Fetched burgs data:", data.length);
-                    // Map raw JSON data to match expected structure (cell -> cell_id)
-                    window.burgsData = data.map(b => ({
-                        ...b,
-                        cell_id: b.cell // Map 'cell' from JSON to 'cell_id' expected by code
-                    }));
-                    initCampaignData();
-                })
-                .catch(e => {
-                    console.error("DiplomatCampaign: Failed to fetch burgs data:", e);
-                    if (window.AdventureManager) {
-                        AdventureManager.showFeedback("Error: Could not load campaign data (Burgs).");
-                    }
-                });
-        }
+        initCampaignData();
     }
 
     onEnd() {
         super.onEnd();
 
-        // Remove Listeners
-        if (window.AdventureManager && AdventureManager.events && this._blockDiplomacyHandler) {
-            AdventureManager.events.off('beforeMissionSpawn', this._blockDiplomacyHandler);
-            AdventureManager.events.off('beforeMissionStart', this._blockDiplomacyHandler);
-        }
+        AdventureManager.events.off('beforeMissionSpawn', this._blockDiplomacyHandler);
+
     }
 
     updateObjectiveText() {
@@ -150,6 +100,8 @@ class DiplomatCampaign extends BaseCampaign {
                 const prevState = prevBurg.state;
                 const currState = context.burg.state;
 
+                // Check Diplomacy
+                // data is in 'diplomacyMatrix' (global from map.js)
                 // Check Diplomacy
                 // data is in 'diplomacyMatrix' (global from map.js)
                 if (window.diplomacyMatrix && diplomacyMatrix[prevState]) {
@@ -220,6 +172,4 @@ class DiplomatCampaign extends BaseCampaign {
 }
 
 // Register Campaign
-if (window.CampaignManager) {
-    CampaignManager.availableCampaigns.push(DiplomatCampaign);
-}
+CampaignManager.availableCampaigns.push(DiplomatCampaign);

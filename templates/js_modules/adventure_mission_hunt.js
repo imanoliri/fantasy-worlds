@@ -49,8 +49,8 @@ class HuntMission extends AdventureMission {
     onSpawn() {
         // Collect occupied cells
         const occupied = [AdventureManager.party.cell];
-        if (window.MissionTreasure && MissionTreasure.data) occupied.push(MissionTreasure.data.cell);
-        if (window.MissionBattle && MissionBattle.data) occupied.push(MissionBattle.data.cell);
+        if (MissionTreasure.data) occupied.push(MissionTreasure.data.cell);
+        if (MissionBattle.data) occupied.push(MissionBattle.data.cell);
 
         const validCells = this.getValidSpawnCells(occupied);
 

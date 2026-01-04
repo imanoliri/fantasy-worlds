@@ -38,39 +38,32 @@ class SiegeDefenseCampaign extends BaseCampaign {
         let startCell = this.startConfig.cell;
 
         // PRIORITIZE: Start at the location of the Siege
-        if (window.MissionSiege && MissionSiege.data && window.burgsData) {
-            const siegedBurg = burgsData.find(b => b.id === MissionSiege.data.burgId);
-            if (siegedBurg) {
-                startCell = siegedBurg.cell_id;
-                console.log(`SiegeDefenseCampaign: Starting at sieged burg ${siegedBurg.name} (Cell ${startCell})`);
-            }
+        const siegedBurg = burgsData.find(b => b.id === MissionSiege.data.burgId);
+        if (siegedBurg) {
+            startCell = siegedBurg.cell_id;
+            console.log(`SiegeDefenseCampaign: Starting at sieged burg ${siegedBurg.name} (Cell ${startCell})`);
         }
 
-        if (startCell) {
-            AdventureManager.party.cell = startCell;
-            setTimeout(() => AdventureManager.render(), 100);
-        }
+        AdventureManager.party.cell = startCell;
+        setTimeout(() => AdventureManager.render(), 100);
+
         AdventureManager.updateStats();
 
         // Initial Capture of Siege if it already exists
-        if (window.MissionSiege && MissionSiege.data) {
-            this.onMissionStart({ type: 'siege', ...MissionSiege.data });
-        }
+        this.onMissionStart({ type: 'siege', ...MissionSiege.data });
     }
 
     onMissionStart(data) {
         // Enforce Rules (Modifers)
         if (data.type === 'siege') {
             const FORCED_STRENGTH = 60;
-            if (window.MissionSiege && MissionSiege.data && MissionSiege.data.soldiers !== FORCED_STRENGTH) {
-                MissionSiege.data.soldiers = FORCED_STRENGTH;
-                MissionSiege.updateVisuals();
-                console.log(`SiegeDefenseCampaign: Enforced Siege Strength to ${FORCED_STRENGTH}`);
-            }
+            MissionSiege.data.soldiers = FORCED_STRENGTH;
+            MissionSiege.updateVisuals();
+            console.log(`SiegeDefenseCampaign: Enforced Siege Strength to ${FORCED_STRENGTH}`);
             console.log(`SiegeDefenseCampaign: Tracking Siege on Burg ID ${data.burgId}`);
 
             // Update Objective Target Info
-            if (window.burgsData && this.siegedBurgId === -1) {
+            if (this.siegedBurgId === -1) {
                 const burg = burgsData.find(b => b.id === data.burgId);
                 if (burg) {
                     this.siegedBurgId = burg.id;
@@ -89,11 +82,9 @@ class SiegeDefenseCampaign extends BaseCampaign {
 
         if (data.type === 'hunt') {
             const FORCED_STRENGTH = 25;
-            if (window.MissionHunt && MissionHunt.data && MissionHunt.data.strength !== FORCED_STRENGTH) {
-                MissionHunt.data.strength = FORCED_STRENGTH;
-                MissionHunt.updateVisuals();
-                console.log(`SiegeDefenseCampaign: Enforced Hunt Strength to ${FORCED_STRENGTH}`);
-            }
+            MissionHunt.data.strength = FORCED_STRENGTH;
+            MissionHunt.updateVisuals();
+            console.log(`SiegeDefenseCampaign: Enforced Hunt Strength to ${FORCED_STRENGTH}`);
         }
     }
 
@@ -118,6 +109,4 @@ class SiegeDefenseCampaign extends BaseCampaign {
 }
 
 // Register Campaign
-if (window.CampaignManager) {
-    CampaignManager.availableCampaigns.push(SiegeDefenseCampaign);
-}
+CampaignManager.availableCampaigns.push(SiegeDefenseCampaign);

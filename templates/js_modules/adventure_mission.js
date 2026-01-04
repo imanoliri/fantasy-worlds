@@ -17,9 +17,7 @@ class AdventureMission {
         // Centralized Event Hook for cancellation
         const eventData = { type: this.type, cancelled: false, mission: this };
 
-        if (AdventureManager.events) {
-            AdventureManager.events.emit('beforeMissionSpawn', eventData);
-        }
+        AdventureManager.events.emit('beforeMissionSpawn', eventData);
 
         if (eventData.cancelled) {
             console.log(`Mission ${this.name}: Spawn cancelled by event listener.`);

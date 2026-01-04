@@ -512,9 +512,7 @@ class AdventureMission {
         // Centralized Event Hook for cancellation
         const eventData = { type: this.type, cancelled: false, mission: this };
 
-        if (AdventureManager.events) {
-            AdventureManager.events.emit('beforeMissionSpawn', eventData);
-        }
+        AdventureManager.events.emit('beforeMissionSpawn', eventData);
 
         if (eventData.cancelled) {
             console.log(`Mission ${this.name}: Spawn cancelled by event listener.`);
@@ -791,7 +789,7 @@ class BattleMission extends AdventureMission {
         // The original code checked MissionTreasure.data.cell.
 
         const occupied = [AdventureManager.party.cell];
-        if (window.MissionTreasure && MissionTreasure.data) occupied.push(MissionTreasure.data.cell);
+        if (MissionTreasure.data) occupied.push(MissionTreasure.data.cell);
 
         const validCells = this.getValidSpawnCells(occupied);
 
@@ -996,8 +994,8 @@ class HuntMission extends AdventureMission {
     onSpawn() {
         // Collect occupied cells
         const occupied = [AdventureManager.party.cell];
-        if (window.MissionTreasure && MissionTreasure.data) occupied.push(MissionTreasure.data.cell);
-        if (window.MissionBattle && MissionBattle.data) occupied.push(MissionBattle.data.cell);
+        if (MissionTreasure.data) occupied.push(MissionTreasure.data.cell);
+        if (MissionBattle.data) occupied.push(MissionBattle.data.cell);
 
         const validCells = this.getValidSpawnCells(occupied);
 
@@ -1663,10 +1661,10 @@ class ExploreMission extends AdventureMission {
         // Collect occupied cells to avoid spawning on top
         const occupiedObj = {};
         occupiedObj[AdventureManager.party.cell] = true;
-        if (window.MissionTreasure && MissionTreasure.data) occupiedObj[MissionTreasure.data.cell] = true;
-        if (window.MissionBattle && MissionBattle.data) occupiedObj[MissionBattle.data.cell] = true;
-        if (window.MissionHunt && MissionHunt.data) occupiedObj[MissionHunt.data.cell] = true;
-        if (window.MissionSiege && MissionSiege.data) occupiedObj[MissionSiege.data.armyCell] = true;
+        if (MissionTreasure.data) occupiedObj[MissionTreasure.data.cell] = true;
+        if (MissionBattle.data) occupiedObj[MissionBattle.data.cell] = true;
+        if (MissionHunt.data) occupiedObj[MissionHunt.data.cell] = true;
+        if (MissionSiege.data) occupiedObj[MissionSiege.data.armyCell] = true;
         this.locations.forEach(l => { if (l) occupiedObj[l.cell] = true; });
 
         let validCells = [];
@@ -1674,7 +1672,7 @@ class ExploreMission extends AdventureMission {
         if (AdventureManager.accessibleCells && AdventureManager.accessibleCells.length > 0) {
             validCells = AdventureManager.accessibleCells.map(id => graphData[id]).filter(c => !occupiedObj[c.i]);
         } else {
-            validCells = graphData.filter(c => c.b !== window.marineBiomeId && !occupiedObj[c.i]);
+            validCells = graphData.filter(c => c.b !== marineBiomeId && !occupiedObj[c.i]);
         }
 
         if (validCells.length > 0) {
@@ -2523,9 +2521,7 @@ const AdventureManager = {
 
 
         // 2. Emit Event to allow Listeners (Siege, Campaigns) to modify buttons
-        if (this.events && typeof this.events.emit === 'function') {
-            this.events.emit('burgPopupOpened', context);
-        }
+        this.events.emit('burgPopupOpened', context);
 
         // 3. Render Buttons
         let actionsHtml = context.buttons.map(btn => {
@@ -2941,7 +2937,7 @@ document.body.addEventListener('click', (e) => {
     const target = e.target;
 
     // Adventure Mode Map Clicks
-    if (window.AdventureManager?.active && target.closest('#mapSvg')) {
+    if (AdventureManager.active && target.closest('#mapSvg')) {
         return AdventureManager.handleClick(target);
     }
 
@@ -2997,7 +2993,7 @@ document.body.addEventListener('change', ({ target }) => {
         if (action === 'toggleLayer') toggleLayer(target.getAttribute('data-layer-class'));
         if (action === 'filterTable') filterTable();
 
-        if (target.hasAttribute('data-mission-toggle') && window.AdventureManager) {
+        if (target.hasAttribute('data-mission-toggle') && AdventureManager) {
             AdventureManager.toggleMissionOption(target.getAttribute('data-mission-toggle'), target.checked);
         }
     } else if (target.tagName === 'SELECT') {
@@ -3009,7 +3005,7 @@ document.body.addEventListener('change', ({ target }) => {
 
 // --- Map Context Menu ---
 svg.addEventListener('contextmenu', (e) => {
-    if (window.AdventureManager?.active) {
+    if (AdventureManager.active) {
         e.preventDefault();
         AdventureManager.handleRightClick(e.target);
     }
@@ -3372,23 +3368,19 @@ const CampaignManager = {
         if (!this.currentCampaignInstance) return;
 
         this.active = true;
-        if (window.AdventureManager) {
-            AdventureManager.init();
-            AdventureManager.active = true;
+        this.active = true;
+        AdventureManager.init();
+        AdventureManager.active = true;
 
-            // Wire up Events to the Instance
-            if (AdventureManager.events) {
-                AdventureManager.events.on('start', () => this.currentCampaignInstance.onAdventureStart());
-                AdventureManager.events.on('updateStats', () => this.currentCampaignInstance.onUpdateStats(AdventureManager.party));
-                AdventureManager.events.on('missionStart', (d) => this.currentCampaignInstance.onMissionStart(d));
-                AdventureManager.events.on('missionComplete', (d) => this.currentCampaignInstance.onMissionComplete(d));
-                AdventureManager.events.on('burgPopupOpened', (d) => this.currentCampaignInstance.onBurgPopupOpened(d));
-            }
+        AdventureManager.events.on('start', () => this.currentCampaignInstance.onAdventureStart());
+        AdventureManager.events.on('updateStats', () => this.currentCampaignInstance.onUpdateStats(AdventureManager.party));
+        AdventureManager.events.on('missionStart', (d) => this.currentCampaignInstance.onMissionStart(d));
+        AdventureManager.events.on('missionComplete', (d) => this.currentCampaignInstance.onMissionComplete(d));
+        AdventureManager.events.on('burgPopupOpened', (d) => this.currentCampaignInstance.onBurgPopupOpened(d));
 
-            this.currentCampaignInstance.onStart(); // Call *before* Adventure start to register listeners
-            AdventureManager.start();
-            AdventureManager.showFeedback(`Campaign Started: ${this.currentCampaignInstance.name}`);
-        }
+        this.currentCampaignInstance.onStart(); // Call *before* Adventure start to register listeners
+        AdventureManager.start();
+        AdventureManager.showFeedback(`Campaign Started: ${this.currentCampaignInstance.name}`);
 
         document.getElementById('campaignStartBtn').classList.add('hidden');
         document.getElementById('campaignCancelBtn').classList.remove('hidden'); // Show Cancel
@@ -3405,7 +3397,7 @@ const CampaignManager = {
         const modal = document.getElementById('campaignVictoryModal');
         if (modal) {
             modal.style.display = 'flex';
-            if (window.AdventureManager) AdventureManager.isGameOver = true;
+            AdventureManager.isGameOver = true;
         }
     },
 
@@ -3418,7 +3410,7 @@ const CampaignManager = {
         this.active = false;
 
         // 2. Stop Adventure Manager (cleans up game state, stops loop)
-        if (window.AdventureManager && AdventureManager.active) {
+        if (AdventureManager.active) {
             AdventureManager.toggle();
         }
 
@@ -3447,9 +3439,7 @@ const CampaignManager = {
         const modal = document.getElementById('campaignVictoryModal');
         if (modal) modal.style.display = 'none';
 
-        if (window.AdventureManager && typeof AdventureManager.closePopup === 'function') {
-            AdventureManager.closePopup();
-        }
+        AdventureManager.closePopup();
 
         // Cleanup Instance
         if (this.currentCampaignInstance) {
@@ -3465,14 +3455,9 @@ const CampaignManager = {
         document.getElementById('campaignCancelBtn').classList.add('hidden');
         document.getElementById('campaignObjectives').classList.add('hidden');
 
-        if (typeof selectGameMode === 'function') {
-            selectGameMode('free');
-        } else {
-            if (window.AdventureManager) {
-                AdventureManager.isGameOver = false;
-                AdventureManager.toggle();
-            }
-        }
+        selectGameMode('free');
+        AdventureManager.isGameOver = false;
+        AdventureManager.toggle();
         document.getElementById('campaignDescription').textContent = "";
     }
 };
@@ -3520,39 +3505,32 @@ class SiegeDefenseCampaign extends BaseCampaign {
         let startCell = this.startConfig.cell;
 
         // PRIORITIZE: Start at the location of the Siege
-        if (window.MissionSiege && MissionSiege.data && window.burgsData) {
-            const siegedBurg = burgsData.find(b => b.id === MissionSiege.data.burgId);
-            if (siegedBurg) {
-                startCell = siegedBurg.cell_id;
-                console.log(`SiegeDefenseCampaign: Starting at sieged burg ${siegedBurg.name} (Cell ${startCell})`);
-            }
+        const siegedBurg = burgsData.find(b => b.id === MissionSiege.data.burgId);
+        if (siegedBurg) {
+            startCell = siegedBurg.cell_id;
+            console.log(`SiegeDefenseCampaign: Starting at sieged burg ${siegedBurg.name} (Cell ${startCell})`);
         }
 
-        if (startCell) {
-            AdventureManager.party.cell = startCell;
-            setTimeout(() => AdventureManager.render(), 100);
-        }
+        AdventureManager.party.cell = startCell;
+        setTimeout(() => AdventureManager.render(), 100);
+
         AdventureManager.updateStats();
 
         // Initial Capture of Siege if it already exists
-        if (window.MissionSiege && MissionSiege.data) {
-            this.onMissionStart({ type: 'siege', ...MissionSiege.data });
-        }
+        this.onMissionStart({ type: 'siege', ...MissionSiege.data });
     }
 
     onMissionStart(data) {
         // Enforce Rules (Modifers)
         if (data.type === 'siege') {
             const FORCED_STRENGTH = 60;
-            if (window.MissionSiege && MissionSiege.data && MissionSiege.data.soldiers !== FORCED_STRENGTH) {
-                MissionSiege.data.soldiers = FORCED_STRENGTH;
-                MissionSiege.updateVisuals();
-                console.log(`SiegeDefenseCampaign: Enforced Siege Strength to ${FORCED_STRENGTH}`);
-            }
+            MissionSiege.data.soldiers = FORCED_STRENGTH;
+            MissionSiege.updateVisuals();
+            console.log(`SiegeDefenseCampaign: Enforced Siege Strength to ${FORCED_STRENGTH}`);
             console.log(`SiegeDefenseCampaign: Tracking Siege on Burg ID ${data.burgId}`);
 
             // Update Objective Target Info
-            if (window.burgsData && this.siegedBurgId === -1) {
+            if (this.siegedBurgId === -1) {
                 const burg = burgsData.find(b => b.id === data.burgId);
                 if (burg) {
                     this.siegedBurgId = burg.id;
@@ -3571,11 +3549,9 @@ class SiegeDefenseCampaign extends BaseCampaign {
 
         if (data.type === 'hunt') {
             const FORCED_STRENGTH = 25;
-            if (window.MissionHunt && MissionHunt.data && MissionHunt.data.strength !== FORCED_STRENGTH) {
-                MissionHunt.data.strength = FORCED_STRENGTH;
-                MissionHunt.updateVisuals();
-                console.log(`SiegeDefenseCampaign: Enforced Hunt Strength to ${FORCED_STRENGTH}`);
-            }
+            MissionHunt.data.strength = FORCED_STRENGTH;
+            MissionHunt.updateVisuals();
+            console.log(`SiegeDefenseCampaign: Enforced Hunt Strength to ${FORCED_STRENGTH}`);
         }
     }
 
@@ -3600,9 +3576,7 @@ class SiegeDefenseCampaign extends BaseCampaign {
 }
 
 // Register Campaign
-if (window.CampaignManager) {
-    CampaignManager.availableCampaigns.push(SiegeDefenseCampaign);
-}
+CampaignManager.availableCampaigns.push(SiegeDefenseCampaign);
 
 
 class ExplorerCampaign extends BaseCampaign {
@@ -3628,7 +3602,7 @@ class ExplorerCampaign extends BaseCampaign {
     onStart() {
         super.onStart();
         // Pick a random city that IS NOT the starting one
-        if (window.burgsData && burgsData.length > 0) {
+        if (burgsData.length > 0) {
             let valid = false;
             let attempts = 0;
             while (!valid && attempts < 100) {
@@ -3716,9 +3690,7 @@ class ExplorerCampaign extends BaseCampaign {
 }
 
 // Register Campaign
-if (window.CampaignManager) {
-    CampaignManager.availableCampaigns.push(ExplorerCampaign);
-}
+CampaignManager.availableCampaigns.push(ExplorerCampaign);
 
 
 class DiplomatCampaign extends BaseCampaign {
@@ -3742,25 +3714,15 @@ class DiplomatCampaign extends BaseCampaign {
         this._blockDiplomacyHandler = (e) => {
             if (e.type === 'diplomacy') {
                 e.cancelled = true;
-                // console.log("DiplomatCampaign blocked diplomacy mission.");
+                console.log("DiplomatCampaign blocked diplomacy mission.");
             }
         };
 
-        if (window.AdventureManager && AdventureManager.events) {
-            // Block generic spawn
-            AdventureManager.events.on('beforeMissionSpawn', this._blockDiplomacyHandler);
-            // Block manual startTour if needed
-            AdventureManager.events.on('beforeMissionStart', this._blockDiplomacyHandler);
+        AdventureManager.events.on('beforeMissionSpawn', this._blockDiplomacyHandler);
 
-            // Force disable if currently active (cleanup existing)
-            if (window.MissionDiplomacy) {
-                MissionDiplomacy.toggle(false);
-                // We don't need to clear targets if spawn is blocked forever more.
-            }
-        }
 
         const initCampaignData = () => {
-            if (window.burgsData) {
+            const initCampaignData = () => {
                 console.log("DiplomatCampaign: burgsData length:", burgsData.length);
                 const capitals = burgsData.filter(b => b.is_capital);
                 console.log("DiplomatCampaign: Found capitals:", capitals.length);
@@ -3769,57 +3731,17 @@ class DiplomatCampaign extends BaseCampaign {
 
                 // Highlight all unvisited capitals
                 capitals.forEach(c => this.highlightCell(c.cell_id, "#FFD700")); // Gold highlight
-            } else {
-                console.error("DiplomatCampaign: burgsData not found after attempt!");
-            }
+            };
         };
 
-        if (window.burgsData) {
-            initCampaignData();
-        } else {
-            console.warn("DiplomatCampaign: burgsData missing. Attempting to fetch from JSON...");
-            // Infer JSON filename from current URL
-            // e.g. Bouzonia_map.html -> Bouzonia_burgs.json
-            const path = window.location.pathname;
-            const filename = path.substring(path.lastIndexOf('/') + 1);
-            const jsonFilename = filename.replace('_map.html', '_burgs.json');
-
-            // Construct fetch URL - assuming json is in same directory
-            const url = jsonFilename;
-
-            fetch(url)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    console.log("DiplomatCampaign: Fetched burgs data:", data.length);
-                    // Map raw JSON data to match expected structure (cell -> cell_id)
-                    window.burgsData = data.map(b => ({
-                        ...b,
-                        cell_id: b.cell // Map 'cell' from JSON to 'cell_id' expected by code
-                    }));
-                    initCampaignData();
-                })
-                .catch(e => {
-                    console.error("DiplomatCampaign: Failed to fetch burgs data:", e);
-                    if (window.AdventureManager) {
-                        AdventureManager.showFeedback("Error: Could not load campaign data (Burgs).");
-                    }
-                });
-        }
+        initCampaignData();
     }
 
     onEnd() {
         super.onEnd();
 
-        // Remove Listeners
-        if (window.AdventureManager && AdventureManager.events && this._blockDiplomacyHandler) {
-            AdventureManager.events.off('beforeMissionSpawn', this._blockDiplomacyHandler);
-            AdventureManager.events.off('beforeMissionStart', this._blockDiplomacyHandler);
-        }
+        AdventureManager.events.off('beforeMissionSpawn', this._blockDiplomacyHandler);
+
     }
 
     updateObjectiveText() {
@@ -3873,6 +3795,8 @@ class DiplomatCampaign extends BaseCampaign {
                 const prevState = prevBurg.state;
                 const currState = context.burg.state;
 
+                // Check Diplomacy
+                // data is in 'diplomacyMatrix' (global from map.js)
                 // Check Diplomacy
                 // data is in 'diplomacyMatrix' (global from map.js)
                 if (window.diplomacyMatrix && diplomacyMatrix[prevState]) {
@@ -3943,15 +3867,14 @@ class DiplomatCampaign extends BaseCampaign {
 }
 
 // Register Campaign
-if (window.CampaignManager) {
-    CampaignManager.availableCampaigns.push(DiplomatCampaign);
-}
+CampaignManager.availableCampaigns.push(DiplomatCampaign);
 
 
 // Global Sets for Multi-Selection
 window.selectedBurgIds = new Set();
 window.selectedStateNames = new Set();
 window.selectedTradeRoutes = new Set(); // Stores strings "fromId-toId"
+let diplomacySelectedStateId = null;
 
 function updateVisuals() {
     // 1. Clear ALL previous highlights
@@ -3967,7 +3890,7 @@ function updateVisuals() {
     });
 
     // 2. Highlight Selected Burgs and their Relations
-    window.selectedBurgIds.forEach(id => {
+    selectedBurgIds.forEach(id => {
         const row = document.querySelector(`tr[data-id="${id}"]`);
 
         // Select all circles (dot, ring, selection ring) to apply selection style
@@ -3998,7 +3921,7 @@ function updateVisuals() {
     });
 
     // 3. Highlight Selected States and their Relations
-    window.selectedStateNames.forEach(stateName => {
+    selectedStateNames.forEach(stateName => {
         // Highlight State Row
         const stateRow = highlightRowByName('stateTable', stateName, 'selected');
 
@@ -4032,7 +3955,7 @@ function updateVisuals() {
     });
 
     // 4. Highlight Selected Trade Routes
-    window.selectedTradeRoutes.forEach(key => {
+    selectedTradeRoutes.forEach(key => {
         const [fromId, toId] = key.split('-');
 
         // Highlight Key Trade Rows
@@ -4132,10 +4055,10 @@ function selectBurg(id) {
     // Force String ID for consistency between Map (string) and Table (number)
     const strId = id.toString();
 
-    if (window.selectedBurgIds.has(strId)) {
-        window.selectedBurgIds.delete(strId);
+    if (selectedBurgIds.has(strId)) {
+        selectedBurgIds.delete(strId);
     } else {
-        window.selectedBurgIds.add(strId);
+        selectedBurgIds.add(strId);
         // Scroll to it only on Add
         const row = document.querySelector(`tr[data-id="${strId}"]`);
         if (row) row.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -4148,10 +4071,10 @@ function highlightBurg(id) {
 }
 
 function highlightState(stateName, color) {
-    if (window.selectedStateNames.has(stateName)) {
-        window.selectedStateNames.delete(stateName);
+    if (selectedStateNames.has(stateName)) {
+        selectedStateNames.delete(stateName);
     } else {
-        window.selectedStateNames.add(stateName);
+        selectedStateNames.add(stateName);
         // Scroll
         const row = highlightRowByName('stateTable', stateName, 'selected'); // Dry run to find row
         if (row) row.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -4161,24 +4084,24 @@ function highlightState(stateName, color) {
 
 function highlightTradeRoute(el, fromId, toId) {
     const key = `${fromId}-${toId}`;
-    if (window.selectedTradeRoutes.has(key)) {
-        window.selectedTradeRoutes.delete(key);
+    if (selectedTradeRoutes.has(key)) {
+        selectedTradeRoutes.delete(key);
     } else {
-        window.selectedTradeRoutes.add(key);
+        selectedTradeRoutes.add(key);
         if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
     updateVisuals();
 }
 
 function clearHighlights() {
-    window.selectedBurgIds.clear();
-    window.selectedStateNames.clear();
-    window.selectedTradeRoutes.clear();
+    selectedBurgIds.clear();
+    selectedStateNames.clear();
+    selectedTradeRoutes.clear();
 
     const btn = document.getElementById('mapModeBtn');
     if (btn && btn.getAttribute('data-current-mode') === 'state') {
         updateDiplomacyColors(null);
-        window.diplomacySelectedStateId = null;
+        diplomacySelectedStateId = null;
     }
 
     updateVisuals();
@@ -4192,14 +4115,14 @@ function selectState(stateId) {
         // User said "when you are on the state map", so we assume mode is already 'state'.
         if (currentMode === 'state') {
             const id = parseInt(stateId);
-            if (window.diplomacySelectedStateId === id) {
+            if (diplomacySelectedStateId === id) {
                 // Toggle Off
                 updateDiplomacyColors(null);
-                window.diplomacySelectedStateId = null;
+                diplomacySelectedStateId = null;
             } else {
                 // Toggle On
                 updateDiplomacyColors(id);
-                window.diplomacySelectedStateId = id;
+                diplomacySelectedStateId = id;
             }
         }
     }

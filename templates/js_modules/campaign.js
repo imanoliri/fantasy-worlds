@@ -185,23 +185,19 @@ const CampaignManager = {
         if (!this.currentCampaignInstance) return;
 
         this.active = true;
-        if (window.AdventureManager) {
-            AdventureManager.init();
-            AdventureManager.active = true;
+        this.active = true;
+        AdventureManager.init();
+        AdventureManager.active = true;
 
-            // Wire up Events to the Instance
-            if (AdventureManager.events) {
-                AdventureManager.events.on('start', () => this.currentCampaignInstance.onAdventureStart());
-                AdventureManager.events.on('updateStats', () => this.currentCampaignInstance.onUpdateStats(AdventureManager.party));
-                AdventureManager.events.on('missionStart', (d) => this.currentCampaignInstance.onMissionStart(d));
-                AdventureManager.events.on('missionComplete', (d) => this.currentCampaignInstance.onMissionComplete(d));
-                AdventureManager.events.on('burgPopupOpened', (d) => this.currentCampaignInstance.onBurgPopupOpened(d));
-            }
+        AdventureManager.events.on('start', () => this.currentCampaignInstance.onAdventureStart());
+        AdventureManager.events.on('updateStats', () => this.currentCampaignInstance.onUpdateStats(AdventureManager.party));
+        AdventureManager.events.on('missionStart', (d) => this.currentCampaignInstance.onMissionStart(d));
+        AdventureManager.events.on('missionComplete', (d) => this.currentCampaignInstance.onMissionComplete(d));
+        AdventureManager.events.on('burgPopupOpened', (d) => this.currentCampaignInstance.onBurgPopupOpened(d));
 
-            this.currentCampaignInstance.onStart(); // Call *before* Adventure start to register listeners
-            AdventureManager.start();
-            AdventureManager.showFeedback(`Campaign Started: ${this.currentCampaignInstance.name}`);
-        }
+        this.currentCampaignInstance.onStart(); // Call *before* Adventure start to register listeners
+        AdventureManager.start();
+        AdventureManager.showFeedback(`Campaign Started: ${this.currentCampaignInstance.name}`);
 
         document.getElementById('campaignStartBtn').classList.add('hidden');
         document.getElementById('campaignCancelBtn').classList.remove('hidden'); // Show Cancel
@@ -218,7 +214,7 @@ const CampaignManager = {
         const modal = document.getElementById('campaignVictoryModal');
         if (modal) {
             modal.style.display = 'flex';
-            if (window.AdventureManager) AdventureManager.isGameOver = true;
+            AdventureManager.isGameOver = true;
         }
     },
 
@@ -231,7 +227,7 @@ const CampaignManager = {
         this.active = false;
 
         // 2. Stop Adventure Manager (cleans up game state, stops loop)
-        if (window.AdventureManager && AdventureManager.active) {
+        if (AdventureManager.active) {
             AdventureManager.toggle();
         }
 
@@ -260,9 +256,7 @@ const CampaignManager = {
         const modal = document.getElementById('campaignVictoryModal');
         if (modal) modal.style.display = 'none';
 
-        if (window.AdventureManager && typeof AdventureManager.closePopup === 'function') {
-            AdventureManager.closePopup();
-        }
+        AdventureManager.closePopup();
 
         // Cleanup Instance
         if (this.currentCampaignInstance) {
@@ -278,14 +272,9 @@ const CampaignManager = {
         document.getElementById('campaignCancelBtn').classList.add('hidden');
         document.getElementById('campaignObjectives').classList.add('hidden');
 
-        if (typeof selectGameMode === 'function') {
-            selectGameMode('free');
-        } else {
-            if (window.AdventureManager) {
-                AdventureManager.isGameOver = false;
-                AdventureManager.toggle();
-            }
-        }
+        selectGameMode('free');
+        AdventureManager.isGameOver = false;
+        AdventureManager.toggle();
         document.getElementById('campaignDescription').textContent = "";
     }
 };

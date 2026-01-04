@@ -774,9 +774,7 @@ const AdventureManager = {
 
 
         // 2. Emit Event to allow Listeners (Siege, Campaigns) to modify buttons
-        if (this.events && typeof this.events.emit === 'function') {
-            this.events.emit('burgPopupOpened', context);
-        }
+        this.events.emit('burgPopupOpened', context);
 
         // 3. Render Buttons
         let actionsHtml = context.buttons.map(btn => {
