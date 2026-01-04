@@ -1,9 +1,10 @@
-const MissionSiege = {
-    data: null, // { burgId: int, armyCell: int, soldiers: int }
-    lastSiegedBurgId: -1, // Track the last sieged burg to prevent immediate repeats
-    element: null, // Group for Bomb icon
-    countElement: null,
-    ringGroup: null, // Group for siege ring
+class SiegeMission extends AdventureMission {
+    constructor() {
+        super('siege', 'Siege');
+        this.countElement = null;
+        this.ringGroup = null;
+        this.lastSiegedBurgId = -1;
+    }
 
     init() {
         if (this.element) return;
@@ -62,14 +63,53 @@ const MissionSiege = {
         this.element = siegeGroup;
         this.countElement = siegeCount;
 
-        if (svg) {
-            svg.appendChild(siegeRingGroup);
-            svg.appendChild(siegeGroup);
-        }
-    },
+        svg.appendChild(siegeRingGroup);
+        svg.appendChild(siegeGroup);
 
-    spawn() {
-        if (!AdventureManager.active) return;
+        // Register Event Listener for Burg Popup
+        AdventureManager.events.on('burgPopupOpened', this.handleburgPopupOpened.bind(this));
+    }
+
+    handleburgPopupOpened(context) {
+        if (!this.data || !AdventureManager.active) return;
+
+        // Check if this burg is the one under siege
+        if (this.data.burgId === context.burg.id) {
+            // Disable all existing buttons
+            context.buttons.forEach(btn => {
+                btn.disabled = true;
+                btn.title = "City is under siege! You must break the siege first.";
+            });
+
+            // Inject "Fight Siege" button
+            const insertIndex = this.getSiegeInsertIndex(context.buttons);
+            context.buttons.splice(insertIndex, 0, {
+                id: 'fight_siege',
+                label: 'Fight Sieging Army (💣)',
+                title: 'Fight Sieging Army',
+                onClick: 'MissionSiege.showPopup()',
+                style: 'background-color: #000;',
+                class: 'btn-recruit',
+                disabled: false
+            });
+        }
+    }
+
+    getSiegeInsertIndex(buttons) {
+        const priorityBefore = ['leave_ship', 'rent_ship', 'buy_food', 'standard_diplomacy', 'diplomat_mission'];
+        let idx = buttons.map(b => b.id).lastIndexOf(id => priorityBefore.includes(id));
+
+        // Polyfill-ish logic if lastIndexOf with predicate isn't standard in this env, use explicit loop efficiently:
+        for (let i = buttons.length - 1; i >= 0; i--) {
+            if (priorityBefore.includes(buttons[i].id)) return i + 1;
+        }
+
+        // If not found, try before 'recruit' or 'tools'
+        const afterIdx = buttons.findIndex(b => ['recruit_soldiers', 'buy_tools'].includes(b.id));
+        return afterIdx >= 0 ? afterIdx : 0;
+    }
+
+    onSpawn() {
         const capitals = burgsData.filter(b => b.is_capital);
         if (capitals.length === 0) return;
 
@@ -77,7 +117,6 @@ const MissionSiege = {
         let candidateCapitals = capitals;
         if (this.lastSiegedBurgId !== -1) {
             candidateCapitals = capitals.filter(b => b.id !== this.lastSiegedBurgId);
-            // If only 1 capital exists, use the original list
             if (candidateCapitals.length === 0) {
                 candidateCapitals = capitals;
             }
@@ -92,7 +131,7 @@ const MissionSiege = {
 
         // Find neighbor land cell for army
         const neighbors = graphData[capitalCell].c;
-        const validNeighbors = neighbors.filter(n => graphData[n].b !== marineBiomeId);
+        const validNeighbors = neighbors.filter(n => graphData[n].b !== window.marineBiomeId);
 
         if (validNeighbors.length > 0) {
             const armyCell = validNeighbors[Math.floor(Math.random() * validNeighbors.length)];
@@ -106,10 +145,9 @@ const MissionSiege = {
             this.updateVisuals();
             AdventureManager.showFeedback(`Siege started at ${capital.name}!`);
 
-            // Emit Start Event
-            if (AdventureManager.events) AdventureManager.events.emit('missionStart', { type: 'siege', ...this.data });
+            AdventureManager.events.emit('missionStart', { type: 'siege', ...this.data });
         }
-    },
+    }
 
     updateVisuals() {
         if (!this.element) return;
@@ -135,10 +173,10 @@ const MissionSiege = {
                     const ring = document.createElementNS("http://www.w3.org/2000/svg", "circle");
                     ring.setAttribute("cx", burg.x);
                     ring.setAttribute("cy", burg.y);
-                    ring.setAttribute("r", parseFloat(burg.r) + 12); // Bigger radius
+                    ring.setAttribute("r", parseFloat(burg.r) + 12);
                     ring.setAttribute("fill", "none");
                     ring.setAttribute("stroke", "#000"); // Black
-                    ring.setAttribute("stroke-width", "4"); // Thicker
+                    ring.setAttribute("stroke-width", "4");
                     ring.setAttribute("pointer-events", "none");
                     this.ringGroup.appendChild(ring);
                     this.ringGroup.style.display = 'inline';
@@ -148,21 +186,21 @@ const MissionSiege = {
             this.element.style.display = "none";
             if (this.ringGroup) this.ringGroup.style.display = 'none';
         }
-    },
+    }
 
     toggle(active) {
         if (!this.element) return;
         this.element.style.display = (active && this.data) ? "block" : "none";
         if (this.ringGroup) this.ringGroup.style.display = (active && this.data) ? "inline" : "none";
-    },
+    }
 
     getTargetCell() {
         return this.data ? this.data.armyCell : null;
-    },
+    }
 
     onArrival() {
         this.showPopup();
-    },
+    }
 
     showPopup() {
         if (!AdventureManager.popupElement) AdventureManager.openPopup('');
@@ -208,7 +246,7 @@ const MissionSiege = {
              </div>
         `;
         AdventureManager.openPopup(content);
-    },
+    }
 
     resolve() {
         if (!this.data) return;
@@ -222,15 +260,14 @@ const MissionSiege = {
         if (Math.random() < winProb) {
             // WIN
             const goldReward = 35; // High reward
-            const soldierReward = 10; // Freed prisoners?
-
+            const soldierReward = 10;
             AdventureManager.party.gold += goldReward;
             AdventureManager.party.soldiers += soldierReward;
 
             AdventureManager.showFeedback(`SIEGE BROKEN! Hero of the city! +${goldReward} Gold.`);
 
             // Emit Complete Event (Win)
-            if (AdventureManager.events) AdventureManager.events.emit('missionComplete', { type: 'siege', result: 'win', ...this.data });
+            AdventureManager.events.emit('missionComplete', { type: 'siege', result: 'win', ...this.data });
 
             // Floating Text (Win)
             const cell = graphData[AdventureManager.party.cell];
@@ -271,7 +308,7 @@ const MissionSiege = {
                 AdventureManager.showFeedback(`DEFEAT! But siege is broken at high cost!`);
 
                 // Emit Complete Event (Sacrifice)
-                if (AdventureManager.events) AdventureManager.events.emit('missionComplete', { type: 'siege', result: 'sacrifice', ...this.data });
+                AdventureManager.events.emit('missionComplete', { type: 'siege', result: 'sacrifice', ...this.data });
 
                 this.data = null;
                 this.updateVisuals();
@@ -283,6 +320,6 @@ const MissionSiege = {
             }
         }
     }
-};
+}
 
-window.MissionSiege = MissionSiege;
+window.MissionSiege = new SiegeMission();

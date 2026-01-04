@@ -5,7 +5,7 @@ document.body.addEventListener('click', (e) => {
     const target = e.target;
 
     // Adventure Mode Map Clicks
-    if (window.AdventureManager?.active && target.closest('#mapSvg')) {
+    if (AdventureManager.active && target.closest('#mapSvg')) {
         return AdventureManager.handleClick(target);
     }
 
@@ -61,7 +61,7 @@ document.body.addEventListener('change', ({ target }) => {
         if (action === 'toggleLayer') toggleLayer(target.getAttribute('data-layer-class'));
         if (action === 'filterTable') filterTable();
 
-        if (target.hasAttribute('data-mission-toggle') && window.AdventureManager) {
+        if (target.hasAttribute('data-mission-toggle') && AdventureManager) {
             AdventureManager.toggleMissionOption(target.getAttribute('data-mission-toggle'), target.checked);
         }
     } else if (target.tagName === 'SELECT') {
@@ -73,7 +73,7 @@ document.body.addEventListener('change', ({ target }) => {
 
 // --- Map Context Menu ---
 svg.addEventListener('contextmenu', (e) => {
-    if (window.AdventureManager?.active) {
+    if (AdventureManager.active) {
         e.preventDefault();
         AdventureManager.handleRightClick(e.target);
     }

@@ -1,7 +1,10 @@
-const MissionDiplomacy = {
-    targets: [], // Array of cell IDs (capitals)
-    solvedCount: 0,
-    group: null, // SVG group for rings
+class DiplomaticMission extends AdventureMission {
+    constructor() {
+        super('diplomacy', 'Diplomacy');
+        this.targets = []; // Array of cell IDs (capitals)
+        this.solvedCount = 0;
+        this.group = null; // SVG group for rings
+    }
 
     init() {
         if (this.group) return;
@@ -11,15 +14,20 @@ const MissionDiplomacy = {
         this.group = diplomacyGroup;
 
         const svg = document.getElementById('mapSvg');
-        if (svg) svg.appendChild(diplomacyGroup);
-    },
+        svg.appendChild(diplomacyGroup);
+    }
 
-    spawn() {
-        if (!AdventureManager.active) return;
+    onSpawn() {
         this.startTour();
-    },
+    }
 
     startTour() {
+        // Event Hook check for granular control (e.g. re-tour)
+        const eventData = { type: 'diplomacy', cancelled: false, mission: this };
+        AdventureManager.events.emit('beforeMissionStart', eventData);
+
+        if (eventData.cancelled) return;
+
         const capitals = burgsData.filter(b => b.is_capital);
         // Shuffle using Fisher-Yates
         for (let i = capitals.length - 1; i > 0; i--) {
@@ -32,7 +40,7 @@ const MissionDiplomacy = {
         const targetNames = capitals.slice(0, 3).map(b => b.name).join(", ");
         AdventureManager.showFeedback(`Diplomatic Tour Started! Visit 3 Capitals with Blue Rings: ${targetNames}.`);
         this.updateVisuals();
-    },
+    }
 
     updateVisuals() {
         if (!this.group) return;
@@ -60,12 +68,12 @@ const MissionDiplomacy = {
         } else {
             this.group.style.display = 'none';
         }
-    },
+    }
 
     toggle(active) {
         if (!this.group) return;
         this.group.style.display = active ? 'inline' : 'none';
-    },
+    }
 
     resolve(burgId) {
         if (!this.targets.includes(burgId)) return;
@@ -109,6 +117,6 @@ const MissionDiplomacy = {
             }
         }
     }
-};
+}
 
-window.MissionDiplomacy = MissionDiplomacy;
+window.MissionDiplomacy = new DiplomaticMission();

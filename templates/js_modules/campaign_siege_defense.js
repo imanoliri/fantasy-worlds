@@ -1,0 +1,136 @@
+class SiegeDefenseCampaign extends BaseCampaign {
+    constructor() {
+        super("siege_defense_v1", "The Siege Defense", "A dark army surrounds the capital. You must gather resources, build an army, and break the siege before the city falls.");
+
+        // Internal State
+        this.siegeDefeated = false;
+        this.siegedBurgId = -1;
+        this.siegedBurgCell = -1;
+        this.siegedBurgName = "the Capital";
+
+        // Define Objectives
+        // Order: Gather Basics -> Soldiers -> Defeat Siege -> Deliver Food
+        this.addObjective("obj1", "Gather 30 Food", "resources", (p) => p.food >= 30);
+        this.addObjective("obj2", "Gather 30 Tools", "resources", (p) => p.tools >= 30);
+        this.addObjective("obj3", "Gather 70 Soldiers", "resources", (p) => p.soldiers >= 70);
+        this.addObjective("obj5", "Defeat the Siege", "defeat_siege", (p) => this.siegeDefeated);
+        this.addObjective("obj4", "Bring 150 Food to the Capital", "delivery", (p) => {
+            // Check if we are AT the sieged city AND have the food
+            return p.food >= 150 && this.siegedBurgCell !== -1 && p.cell === this.siegedBurgCell;
+        });
+
+        this.partyStartConfig = {
+            resources: { soldiers: 20, tools: 20, food: 15, gold: 0 }
+        };
+    }
+
+    onStart() {
+        super.onStart();
+    }
+
+    getPartyStartConfig() {
+        // Force Spawn
+        MissionSiege.onSpawn();
+
+        let startCell = -1;
+        // Check where it spawned
+        if (MissionSiege.data && MissionSiege.data.burgId) {
+            const siegedBurg = burgsData.find(b => b.id === MissionSiege.data.burgId);
+            if (siegedBurg) {
+                startCell = siegedBurg.cell_id;
+                console.log(`SiegeDefenseCampaign: Pre-calculated start at ${siegedBurg.name}`);
+            }
+        }
+
+        const config = {
+            resources: this.partyStartConfig.resources,
+            cell: startCell
+        };
+
+        return config;
+    }
+
+    onBeforeMissionSpawn(data) {
+        // Prevent AdventureManager from spawning a random siege, because we already forced one in getStartConfig
+        if (data.type === 'siege') {
+            data.cancelled = true;
+            console.log("SiegeDefenseCampaign: Prevented default Siege spawn (using pre-calculated one).");
+        }
+    }
+
+    onAdventureStart() {
+        super.onAdventureStart();
+        // Note: Party Cell is already set by AdventureManager.start(config) now.
+
+        AdventureManager.updateStats();
+
+        // Initial Capture of Siege if it already exists
+        // Since we called MissionSiege.onSpawn(), it likely already emitted 'missionStart'.
+        // BUT listeners might not have been registered then because we register them in CampaignManager.startCampaign BEFORE calling onStart/getStartConfig?
+        // Wait, CampaignManager registers listeners BEFORE calling getStartConfig.
+        // So when we called MissionSiege.onSpawn() in getStartConfig, the 'missionStart' event WAS fired.
+        // And we are listening to it. So onMissionStart should have been called.
+
+        // Just in case, RE-APPLY to ensure local state is in sync
+        if (MissionSiege.data) {
+            this.onMissionStart({ type: 'siege', ...MissionSiege.data });
+        }
+    }
+
+    onMissionStart(data) {
+        // Enforce Rules (Modifers)
+        if (data.type === 'siege') {
+            const FORCED_STRENGTH = 60;
+            MissionSiege.data.soldiers = FORCED_STRENGTH;
+            MissionSiege.updateVisuals();
+            console.log(`SiegeDefenseCampaign: Enforced Siege Strength to ${FORCED_STRENGTH}`);
+            console.log(`SiegeDefenseCampaign: Tracking Siege on Burg ID ${data.burgId}`);
+
+            // Update Objective Target Info
+            if (this.siegedBurgId === -1) {
+                const burg = burgsData.find(b => b.id === data.burgId);
+                if (burg) {
+                    this.siegedBurgId = burg.id;
+                    this.siegedBurgCell = burg.cell_id;
+                    this.siegedBurgName = burg.name;
+
+                    // Update Objective Text
+                    const deliveryObj = this.objectives.find(o => o.id === "obj4");
+                    if (deliveryObj) {
+                        deliveryObj.text = `Bring 150 Food to ${this.siegedBurgName}`;
+                        this.renderObjectives();
+                    }
+                }
+            }
+        }
+
+        if (data.type === 'hunt') {
+            const FORCED_STRENGTH = 25;
+            MissionHunt.data.strength = FORCED_STRENGTH;
+            MissionHunt.updateVisuals();
+            console.log(`SiegeDefenseCampaign: Enforced Hunt Strength to ${FORCED_STRENGTH}`);
+        }
+    }
+
+    onMissionComplete(data) {
+        if (data.type === 'siege') {
+            // In this specific campaign, completing ANY siege counts as victory
+            this.siegeDefeated = true;
+            this.checkObjectives(AdventureManager.party);
+
+            // Highlight the city to bring the food to
+            if (this.siegedBurgCell !== -1) {
+                this.highlightCell(this.siegedBurgCell, "#00FF00");
+                AdventureManager.showFeedback(`Siege Lifted! Bring Food to ${this.siegedBurgName}!`);
+            }
+        }
+    }
+
+    onEnd() {
+        super.onEnd();
+        this.clearHighlights();
+    }
+}
+
+// Register Campaign
+CampaignManager.availableCampaigns.push(SiegeDefenseCampaign);

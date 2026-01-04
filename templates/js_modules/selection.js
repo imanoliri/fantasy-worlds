@@ -2,6 +2,7 @@
 window.selectedBurgIds = new Set();
 window.selectedStateNames = new Set();
 window.selectedTradeRoutes = new Set(); // Stores strings "fromId-toId"
+let diplomacySelectedStateId = null;
 
 function updateVisuals() {
     // 1. Clear ALL previous highlights
@@ -17,7 +18,7 @@ function updateVisuals() {
     });
 
     // 2. Highlight Selected Burgs and their Relations
-    window.selectedBurgIds.forEach(id => {
+    selectedBurgIds.forEach(id => {
         const row = document.querySelector(`tr[data-id="${id}"]`);
 
         // Select all circles (dot, ring, selection ring) to apply selection style
@@ -48,7 +49,7 @@ function updateVisuals() {
     });
 
     // 3. Highlight Selected States and their Relations
-    window.selectedStateNames.forEach(stateName => {
+    selectedStateNames.forEach(stateName => {
         // Highlight State Row
         const stateRow = highlightRowByName('stateTable', stateName, 'selected');
 
@@ -82,7 +83,7 @@ function updateVisuals() {
     });
 
     // 4. Highlight Selected Trade Routes
-    window.selectedTradeRoutes.forEach(key => {
+    selectedTradeRoutes.forEach(key => {
         const [fromId, toId] = key.split('-');
 
         // Highlight Key Trade Rows
@@ -182,10 +183,10 @@ function selectBurg(id) {
     // Force String ID for consistency between Map (string) and Table (number)
     const strId = id.toString();
 
-    if (window.selectedBurgIds.has(strId)) {
-        window.selectedBurgIds.delete(strId);
+    if (selectedBurgIds.has(strId)) {
+        selectedBurgIds.delete(strId);
     } else {
-        window.selectedBurgIds.add(strId);
+        selectedBurgIds.add(strId);
         // Scroll to it only on Add
         const row = document.querySelector(`tr[data-id="${strId}"]`);
         if (row) row.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -198,10 +199,10 @@ function highlightBurg(id) {
 }
 
 function highlightState(stateName, color) {
-    if (window.selectedStateNames.has(stateName)) {
-        window.selectedStateNames.delete(stateName);
+    if (selectedStateNames.has(stateName)) {
+        selectedStateNames.delete(stateName);
     } else {
-        window.selectedStateNames.add(stateName);
+        selectedStateNames.add(stateName);
         // Scroll
         const row = highlightRowByName('stateTable', stateName, 'selected'); // Dry run to find row
         if (row) row.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -211,24 +212,24 @@ function highlightState(stateName, color) {
 
 function highlightTradeRoute(el, fromId, toId) {
     const key = `${fromId}-${toId}`;
-    if (window.selectedTradeRoutes.has(key)) {
-        window.selectedTradeRoutes.delete(key);
+    if (selectedTradeRoutes.has(key)) {
+        selectedTradeRoutes.delete(key);
     } else {
-        window.selectedTradeRoutes.add(key);
+        selectedTradeRoutes.add(key);
         if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
     updateVisuals();
 }
 
 function clearHighlights() {
-    window.selectedBurgIds.clear();
-    window.selectedStateNames.clear();
-    window.selectedTradeRoutes.clear();
+    selectedBurgIds.clear();
+    selectedStateNames.clear();
+    selectedTradeRoutes.clear();
 
     const btn = document.getElementById('mapModeBtn');
     if (btn && btn.getAttribute('data-current-mode') === 'state') {
         updateDiplomacyColors(null);
-        window.diplomacySelectedStateId = null;
+        diplomacySelectedStateId = null;
     }
 
     updateVisuals();
@@ -242,14 +243,14 @@ function selectState(stateId) {
         // User said "when you are on the state map", so we assume mode is already 'state'.
         if (currentMode === 'state') {
             const id = parseInt(stateId);
-            if (window.diplomacySelectedStateId === id) {
+            if (diplomacySelectedStateId === id) {
                 // Toggle Off
                 updateDiplomacyColors(null);
-                window.diplomacySelectedStateId = null;
+                diplomacySelectedStateId = null;
             } else {
                 // Toggle On
                 updateDiplomacyColors(id);
-                window.diplomacySelectedStateId = id;
+                diplomacySelectedStateId = id;
             }
         }
     }

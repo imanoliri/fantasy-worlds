@@ -27,25 +27,41 @@ const AdventureManager = {
         Explore: true
     },
 
+    // Default Configuration
+    defaultPartyConfig: {
+        cell: -1, // -1 means Random
+        resources: {
+            soldiers: 10,
+            food: 50,
+            gold: 10,
+            tools: 10,
+            onShip: false
+        }
+    },
+
     accessibleCells: [], // Cache for valid land cells
     portDockingCells: {}, // Map of Port Cell ID -> Valid Water Cell ID
 
+    // Initialize Event System (Top-level to ensure availability)
+    events: {
+        listeners: {},
+        on(event, callback) {
+            if (!this.listeners[event]) this.listeners[event] = [];
+            this.listeners[event].push(callback);
+        },
+        off(event, callback) {
+            if (!this.listeners[event]) return;
+            this.listeners[event] = this.listeners[event].filter(cb => cb !== callback);
+        },
+        emit(event, data) {
+            if (this.listeners[event]) {
+                this.listeners[event].forEach(cb => cb(data));
+            }
+        }
+    },
+
     init() {
         if (this.partyElement) return;
-
-        // Initialize Event System
-        this.events = {
-            listeners: {},
-            on(event, callback) {
-                if (!this.listeners[event]) this.listeners[event] = [];
-                this.listeners[event].push(callback);
-            },
-            emit(event, data) {
-                if (this.listeners[event]) {
-                    this.listeners[event].forEach(cb => cb(data));
-                }
-            }
-        };
 
         // Identify Accessible Land (Islands with at least one port)
         this.identifyAccessibleLand();
@@ -236,48 +252,81 @@ const AdventureManager = {
         }
     },
 
-    start() {
-        // Clear Adventure Log
+    reset() {
+        this.active = false;
+        this.party.cell = 0; // 0 indicates "Not Started" / "Fresh" for start() logic
+
+        // Reset Visuals
+        if (this.pathElement) this.pathElement.style.display = 'none';
+        if (this.previewPathElement) this.previewPathElement.style.display = 'none';
+        if (this.partyElement) this.partyElement.style.display = 'none';
+
+        // Clear Log
         const logContainer = document.getElementById('adventureLog');
         if (logContainer) logContainer.innerHTML = '';
 
-        // Pick random start cell from ACCESSIBLE cells
-        let startCell = -1;
+        // Reset sidebar state if UI is open
+        const btn = document.getElementById('toggleAdventure');
+        if (btn) btn.classList.remove('active');
+        const sidebar = document.getElementById('adventureSidebar');
+        if (sidebar) sidebar.classList.add('hidden');
+    },
 
-        if (this.accessibleCells.length > 0) {
-            const randomId = this.accessibleCells[Math.floor(Math.random() * this.accessibleCells.length)];
-            startCell = randomId;
-        } else {
-            // Fallback if something went wrong or no ports exist
-            const validCells = graphData.filter(c => c.b !== marineBiomeId);
-            if (validCells.length > 0) {
-                const random = validCells[Math.floor(Math.random() * validCells.length)];
-                startCell = random.i;
+    start(overrideConfig = null) {
+        // Clear Adventure Log
+        const logContainer = document.getElementById('adventureLog');
+        logContainer.innerHTML = '';
+
+        // Merge Defaults
+        const config = {
+            cell: this.defaultPartyConfig.cell,
+            resources: { ...this.defaultPartyConfig.resources }
+        };
+
+        if (overrideConfig) {
+            if (overrideConfig.cell !== undefined) config.cell = overrideConfig.cell;
+            if (overrideConfig.resources) {
+                config.resources = { ...config.resources, ...overrideConfig.resources };
+            }
+        }
+
+        // Determine Start Cell
+        let startCell = config.cell;
+        if (startCell === -1) {
+            // Default Random Logic
+            if (this.accessibleCells.length > 0) {
+                const randomId = this.accessibleCells[Math.floor(Math.random() * this.accessibleCells.length)];
+                startCell = randomId;
+            } else {
+                // Fallback
+                const validCells = graphData.filter(c => c.b !== marineBiomeId);
+                if (validCells.length > 0) {
+                    const random = validCells[Math.floor(Math.random() * validCells.length)];
+                    startCell = random.i;
+                }
             }
         }
 
         if (startCell !== -1) {
+            // Apply Config to Party Status
             this.party.cell = startCell;
-            this.party.soldiers = 10;
-            this.party.food = 50;
-            this.party.gold = 10;
-            this.party.tools = 10;
-            this.party.onShip = false;
+            this.party = { ...this.party, ...config.resources };
+
+            // Emit Event
+            this.events.emit('start', this.party);
+
             this.partyElement.style.display = "block";
 
             // Spawn Missions based on Options
-            if (this.options.Treasure) MissionTreasure.spawn();
-            if (this.options.Battle) MissionBattle.spawn();
-            if (this.options.Hunt) MissionHunt.spawn();
-            if (this.options.Diplomacy) MissionDiplomacy.spawn();
-            if (this.options.Siege) MissionSiege.spawn();
-            if (this.options.Explore) MissionExplore.spawn();
+            MissionTreasure.spawn();
+            MissionBattle.spawn();
+            MissionHunt.spawn();
+            MissionDiplomacy.spawn();
+            MissionSiege.spawn();
+            MissionExplore.spawn();
 
             this.updateStats();
             this.render();
-
-            // Emit Event (Campaigns may override start location here)
-            if (this.events) this.events.emit('start', this.party);
 
             // Trigger Start Ping (Use actual party cell in case it was moved)
             const startNode = graphData[this.party.cell];
@@ -684,20 +733,104 @@ const AdventureManager = {
         const soldierCost = Math.max(1, 6 - soldierQuartiers);
         const canRecruit = soldierQuartiers >= 1;
 
-        const diplomatic = MissionDiplomacy.targets.includes(burg.id);
-        const siege = (MissionSiege.data && MissionSiege.data.burgId === burg.id);
-
         const isPort = this.isPort(burg.cell_id);
         const onShip = this.party.onShip;
 
-        let shipHtml = '';
+        // --- Allow Button Modification by Event Listeners ---
+        const context = {
+            burg,
+            party: this.party,
+            buttons: []
+        };
+
+        // Port Actions
         if (isPort && burg.type === "Naval") {
             if (onShip) {
-                shipHtml = `<button class="btn-recruit" style="background-color: #34495e;" onclick="AdventureManager.leaveShip()" title="Return to land travel" ${siege ? 'disabled' : ''}>Leave Ship ⚓</button>`;
+                context.buttons.push({
+                    id: 'leave_ship',
+                    label: 'Leave Ship ⚓',
+                    title: 'Return to land travel',
+                    onClick: 'AdventureManager.leaveShip()',
+                    style: 'background-color: #34495e;',
+                    class: 'btn-recruit',
+                    disabled: false
+                });
             } else {
-                shipHtml = `<button class="btn-buy" style="background-color: #2980b9;" onclick="AdventureManager.rentShip(5)" title="Rent a ship for water travel (5 💰)" ${siege ? 'disabled' : ''}>Rent Ship (5 💰) ⛵</button>`;
+                context.buttons.push({
+                    id: 'rent_ship',
+                    label: 'Rent Ship (5 💰) ⛵',
+                    title: 'Rent a ship for water travel (5 💰)',
+                    onClick: 'AdventureManager.rentShip(5)',
+                    style: 'background-color: #2980b9;',
+                    class: 'btn-buy',
+                    disabled: false
+                });
             }
         }
+
+        // Buy Food
+        context.buttons.push({
+            id: 'buy_food',
+            label: 'Buy 10 Food (1 💰)',
+            title: '1 Gold for 10 Food',
+            onClick: 'AdventureManager.buyFood(10, 1)',
+            class: 'btn-buy',
+            disabled: false
+        });
+
+        // Standard Diplomacy
+        if (MissionDiplomacy.targets.includes(burg.id)) {
+            context.buttons.push({
+                id: 'standard_diplomacy',
+                label: 'Diplomatic Mission (5 💰)',
+                title: 'Solve diplomatic issue',
+                onClick: `MissionDiplomacy.resolve(${burg.id})`,
+                style: 'background-color: #4169E1;',
+                class: 'btn-recruit',
+                disabled: false
+            });
+        }
+
+
+
+        // Recruit
+        if (canRecruit) {
+            context.buttons.push({
+                id: 'recruit_soldiers',
+                label: `Recruit 5 Soldiers (${soldierCost} 💰, 5 🛠️)`,
+                title: `Recruit 5 soldiers for 5 Tools and 5 Gold.`,
+                onClick: `AdventureManager.recruitSoldiers(5, ${soldierCost}, ${burg.cell_id})`,
+                class: 'btn-recruit',
+                disabled: false
+            });
+        }
+
+        // Buy Tools
+        if (canBuyTools) {
+            context.buttons.push({
+                id: 'buy_tools',
+                label: `Buy ${toolsAmount} Tools (1 💰)`,
+                title: `1 Gold for an amount of Tools equal to Craftsmen Quartiers`,
+                onClick: `AdventureManager.buyTools(${toolsAmount}, 1)`,
+                class: 'btn-buy',
+                disabled: false
+            });
+        }
+
+
+        // 2. Emit Event to allow Listeners (Siege, Campaigns) to modify buttons
+        this.events.emit('burgPopupOpened', context);
+
+        // 3. Render Buttons
+        let actionsHtml = context.buttons.map(btn => {
+            const style = btn.style ? `style="${btn.style}"` : '';
+            const cls = btn.class || 'btn-recruit'; // default class
+            const disabled = btn.disabled ? 'disabled' : '';
+            return `<button class="${cls}" ${style} onclick="${btn.onClick}" title="${btn.title}" ${disabled}>${btn.label}</button>`;
+        }).join('\n');
+
+        // Always add Leave button at the end
+        actionsHtml += `\n<button class="btn-leave" onclick="AdventureManager.closePopup()">Leave</button>`;
 
         if (burg.capital) {
             this.popupElement.classList.add('capital-popup');
@@ -720,13 +853,7 @@ const AdventureManager = {
             </div>
             ${this.getModalStatsBarHtml()}
             <div class="actions">
-                ${shipHtml}
-                <button class="btn-buy" onclick="AdventureManager.buyFood(10, 1)" title="1 Gold for 10 Food" ${siege ? 'disabled' : ''}>Buy 10 Food (1 💰)</button>
-                ${diplomatic ? `<button class="btn-recruit" style="background-color: #4169E1;" onclick="MissionDiplomacy.resolve(${burg.id})" title="Solve diplomatic issue" ${siege ? 'disabled' : ''}>Diplomatic Mission (5 💰)</button>` : ''}
-                ${siege ? `<button class="btn-recruit" style="background-color: #000;" onclick="MissionSiege.showPopup()" title="Fight Sieging Army">Fight Sieging Army (💣)</button>` : ''}
-                ${canRecruit ? `<button class="btn-recruit" onclick="AdventureManager.recruitSoldiers(5, ${soldierCost}, ${burg.cell_id})" title="Recruit 5 soldiers for 5 Tools and 5 Gold." ${siege ? 'disabled' : ''}>Recruit 5 Soldiers (${soldierCost} 💰, 5 🛠️)</button>` : ''}
-                ${canBuyTools ? `<button class="btn-buy" onclick="AdventureManager.buyTools(${toolsAmount}, 1)" title="1 Gold for an amount of Tools equal to Craftsmen Quartiers" ${siege ? 'disabled' : ''}>Buy ${toolsAmount} Tools (1 💰)</button>` : ''}
-                <button class="btn-leave" onclick="AdventureManager.closePopup()">Leave</button>
+                ${actionsHtml}
             </div>
         `;
 
