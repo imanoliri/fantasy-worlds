@@ -4083,12 +4083,12 @@ class DiplomatCampaign extends BaseCampaign {
 CampaignManager.availableCampaigns.push(DiplomatCampaign);
 
 
-
+﻿
 class HordeCampaign extends BaseCampaign {
     constructor() {
         super("horde_v1", "The Horde", "Lead a horde to pillage the world. Defeat 10 armies and pillage all capitals.");
         this.armiesDefeated = 0;
-        this.pillagedCapitals = new Set(); // Set of burg IDs
+        this.pillagedBurgs = new Set(); // Set of burg IDs
         this.partyStartConfig = { resources: { soldiers: 40 } };
 
         // Objectives
@@ -4103,6 +4103,7 @@ class HordeCampaign extends BaseCampaign {
         super.onStart();
         console.log("Horde Campaign Started");
         this.updateObjectiveText();
+        this.refreshVisuals();
 
         // Listen for battle wins from standard battles
         if (AdventureManager.events) {
@@ -4115,6 +4116,44 @@ class HordeCampaign extends BaseCampaign {
         if (AdventureManager.events) {
             AdventureManager.events.off('battleWon', this.onBattleWon);
         }
+    }
+
+    refreshVisuals() {
+        this.clearHighlights(); // Clear all existing rings/markers
+
+        // 1. Mark ANY pillaged burg with Red X
+        this.pillagedBurgs.forEach(burgId => {
+            this.drawTextMarker(burgsData.find(b => b.id === burgId)?.cell_id || 0, "❌");
+        });
+
+        // 2. Highlight UNPILLAGED Capitals with Orange Ring
+        const capitals = burgsData.filter(b => b.is_capital);
+        capitals.forEach(burg => {
+            if (!this.pillagedBurgs.has(burg.id)) {
+                // Target: Show Orange Ring
+                this.highlightCell(burg.cell_id, "#e67e22");
+            }
+        });
+    }
+
+    drawTextMarker(cellId, text) {
+        if (!graphData[cellId]) return;
+        let x, y;
+        const burg = burgsData.find(b => b.cell_id === cellId);
+        if (burg) { x = burg.x; y = burg.y; }
+        else { x = graphData[cellId].p[0]; y = graphData[cellId].p[1]; }
+
+        let container = document.getElementById('campaignHighlights');
+        if (!container) return; // Should exist from highlightCell call or generic init
+
+        const textEl = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        textEl.setAttribute("x", x);
+        textEl.setAttribute("y", y + 5); // Slight offset
+        textEl.setAttribute("text-anchor", "middle");
+        textEl.setAttribute("font-size", "20px");
+        textEl.setAttribute("style", "pointer-events: none; user-select: none;"); // Pass clicks through
+        textEl.textContent = text;
+        container.appendChild(textEl);
     }
 
     onBeforeMissionSpawn(data) {
@@ -4151,8 +4190,12 @@ class HordeCampaign extends BaseCampaign {
 
     getCapitalStats() {
         const capitals = burgsData.filter(b => b.is_capital);
-        let total = capitals.length;
-        let pillaged = this.pillagedCapitals.size;
+        const total = capitals.length;
+        // Count how many capitals are in the pillaged set
+        let pillaged = 0;
+        capitals.forEach(c => {
+            if (this.pillagedBurgs.has(c.id)) pillaged++;
+        });
         return { total, pillaged };
     }
 
@@ -4188,7 +4231,7 @@ class HordeCampaign extends BaseCampaign {
             buttons.length = 0;
 
             // Check if already pillaged
-            if (this.pillagedCapitals.has(burg.id)) {
+            if (this.pillagedBurgs.has(burg.id)) {
                 buttons.push({
                     label: "City Pillaged (Ruins)",
                     action: () => { }, // No action
@@ -4296,10 +4339,12 @@ class HordeCampaign extends BaseCampaign {
             AdventureManager.party.soldiers += soldierReward;
             AdventureManager.party.food += foodReward;
 
-            // Mark as pillaged if capital (or just pillaged city in general)
-            this.pillagedCapitals.add(burg.id);
+            // Mark as pillaged (Capital or not)
+            this.pillagedBurgs.add(burg.id);
 
             AdventureManager.showFeedback(`Victory! Pillaged ${burg.name}. Gained ${goldReward} gold, ${foodReward} food, ${soldierReward} soldiers.`);
+
+            this.refreshVisuals(); // Update map markers
 
             // Floating Text (Win)
             const cell = graphData[AdventureManager.party.cell];
