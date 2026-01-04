@@ -37,6 +37,7 @@ class BaseCampaign {
     onMissionStart(data) { }
     onMissionComplete(data) { }
     onBeforeMissionSpawn(data) { }
+    onCalculateMissionRewards(context) { }
     onBeforeBurgPopup(data) { }
     onBurgPopupOpened(context) { }
     onUpdateStats(party) {
@@ -204,6 +205,7 @@ const CampaignManager = {
         AdventureManager.events.on('burgPopupOpened', (d) => this.currentCampaignInstance.onBurgPopupOpened(d));
         AdventureManager.events.on('beforeBurgPopup', (d) => this.currentCampaignInstance.onBeforeBurgPopup(d));
         AdventureManager.events.on('beforeMissionSpawn', (d) => this.currentCampaignInstance.onBeforeMissionSpawn(d));
+        AdventureManager.events.on('calculateMissionRewards', (d) => this.currentCampaignInstance.onCalculateMissionRewards(d));
 
         this.currentCampaignInstance.onStart(); // Call *before* Adventure start to register listeners
 

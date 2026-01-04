@@ -1177,15 +1177,30 @@ class HuntMission extends AdventureMission {
 
         if (mySoldiers > beastStrength) {
             // WIN
-            // Gain 1 gold for each 5 strength of the beast, rounding up.
-            const goldReward = Math.ceil(beastStrength / 5);
-            // Food reward equal to beast strength
-            const foodReward = beastStrength;
+            // Base Rewards
+            const rewards = {
+                gold: Math.ceil(beastStrength / 5),
+                food: beastStrength,
+                soldiers: 0
+            };
 
-            AdventureManager.party.gold += goldReward;
-            AdventureManager.party.food += foodReward;
+            // Allow active campaign to modify rewards
+            AdventureManager.events.emit('calculateMissionRewards', {
+                type: 'hunt',
+                missionData: this.data,
+                rewards: rewards
+            });
 
-            AdventureManager.showFeedback(`SLAIN! Gained ${goldReward} Gold & ${foodReward} Food.`);
+            // Apply Rewards
+            AdventureManager.party.gold += rewards.gold;
+            AdventureManager.party.food += rewards.food;
+            AdventureManager.party.soldiers += rewards.soldiers;
+
+            let feedback = `SLAIN! Gained ${rewards.gold} Gold & ${rewards.food} Food`;
+            if (rewards.soldiers > 0) feedback += ` & ${rewards.soldiers} Soldiers`;
+            feedback += `.`;
+
+            AdventureManager.showFeedback(feedback);
 
             // Emit Complete Event
             AdventureManager.events.emit('missionComplete', { type: 'hunt', result: 'win', ...this.data });
@@ -1193,11 +1208,13 @@ class HuntMission extends AdventureMission {
             // Floating Text (Win)
             const cell = graphData[AdventureManager.party.cell];
             if (cell) {
-                AdventureManager.showFloatingText(`VICTORY!`, cell.p[0], cell.p[1] - 60, "#2ecc71");
-                AdventureManager.showFloatingText(`+${goldReward} 💰`, cell.p[0], cell.p[1] - 40, "#f1c40f");
-                AdventureManager.showFloatingText(`+${foodReward} 🍎`, cell.p[0], cell.p[1] - 20, "#2ecc71");
+                AdventureManager.showFloatingText(`VICTORY!`, cell.p[0], cell.p[1] - 80, "#2ecc71");
+                AdventureManager.showFloatingText(`+${rewards.gold} 💰`, cell.p[0], cell.p[1] - 60, "#f1c40f");
+                AdventureManager.showFloatingText(`+${rewards.food} 🍎`, cell.p[0], cell.p[1] - 40, "#2ecc71");
+                if (rewards.soldiers > 0) {
+                    AdventureManager.showFloatingText(`+${rewards.soldiers} ⚔️`, cell.p[0], cell.p[1] - 20, "#9b59b6");
+                }
             }
-
             AdventureManager.closePopup();
             this.spawn(); // Respawn
             AdventureManager.updateStats();
@@ -3350,6 +3367,7 @@ class BaseCampaign {
     onMissionStart(data) { }
     onMissionComplete(data) { }
     onBeforeMissionSpawn(data) { }
+    onCalculateMissionRewards(context) { }
     onBeforeBurgPopup(data) { }
     onBurgPopupOpened(context) { }
     onUpdateStats(party) {
@@ -3517,6 +3535,7 @@ const CampaignManager = {
         AdventureManager.events.on('burgPopupOpened', (d) => this.currentCampaignInstance.onBurgPopupOpened(d));
         AdventureManager.events.on('beforeBurgPopup', (d) => this.currentCampaignInstance.onBeforeBurgPopup(d));
         AdventureManager.events.on('beforeMissionSpawn', (d) => this.currentCampaignInstance.onBeforeMissionSpawn(d));
+        AdventureManager.events.on('calculateMissionRewards', (d) => this.currentCampaignInstance.onCalculateMissionRewards(d));
 
         this.currentCampaignInstance.onStart(); // Call *before* Adventure start to register listeners
 
@@ -4230,8 +4249,8 @@ class HordeCampaign extends BaseCampaign {
             AdventureManager.party.soldiers = Math.max(0, playerSoldiers - losses);
 
             // Rewards (Aligned with BattleMission + Food = Gold)
-            const goldReward = Math.floor(enemySoldiers / 10) * 2;
-            const soldierReward = Math.floor(enemySoldiers / 10) * 2;
+            const goldReward = Math.floor(enemySoldiers / 10) * 3;
+            const soldierReward = Math.floor(enemySoldiers / 10) * 3;
             const foodReward = goldReward;
 
             AdventureManager.party.gold += goldReward;
@@ -4276,6 +4295,15 @@ class HordeCampaign extends BaseCampaign {
         }
 
         AdventureManager.updateStats();
+    }
+
+    onCalculateMissionRewards(context) {
+        if (context.type === 'hunt') {
+            // Horde gains soldiers from hunting
+            if (context.rewards) {
+                context.rewards.soldiers = context.rewards.gold;
+            }
+        }
     }
 
 }

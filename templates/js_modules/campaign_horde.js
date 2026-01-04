@@ -243,6 +243,15 @@ class HordeCampaign extends BaseCampaign {
         AdventureManager.updateStats();
     }
 
+    onCalculateMissionRewards(context) {
+        if (context.type === 'hunt') {
+            // Horde gains soldiers from hunting
+            if (context.rewards) {
+                context.rewards.soldiers = context.rewards.gold;
+            }
+        }
+    }
+
 }
 
 // Register Campaign
