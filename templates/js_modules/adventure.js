@@ -700,7 +700,11 @@ const AdventureManager = {
         let notificationHtml = '';
         const netFood = parseFloat(burg.net_food);
 
-        if (netFood > 0) {
+        // Allow campaigns to intervene (e.g. block replenishment)
+        const eventData = { burg, preventReplenish: false };
+        this.events.emit('beforeBurgPopup', eventData);
+
+        if (!eventData.preventReplenish && netFood > 0) {
             const surplusCap = Math.floor(netFood);
             if (this.party.food < surplusCap) {
                 const gained = surplusCap - this.party.food;
