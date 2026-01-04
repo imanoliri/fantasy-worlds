@@ -627,6 +627,13 @@ class AdventureMission {
         if (!this.element) return;
         this.element.style.display = (active && this.data) ? "block" : "none";
     }
+
+    reset() {
+        this.data = null;
+        if (this.element) {
+            this.element.style.display = 'none';
+        }
+    }
 }
 
 
@@ -1838,6 +1845,15 @@ class ExploreMission extends AdventureMission {
 
         AdventureManager.events.emit('missionComplete', { type: 'explore' });
     }
+
+    reset() {
+        this.locations = [null, null, null, null];
+        if (this.elements) {
+            this.elements.forEach(el => {
+                if (el) el.style.display = 'none';
+            });
+        }
+    }
 }
 
 window.MissionExplore = new ExploreMission();
@@ -1902,6 +1918,9 @@ const AdventureManager = {
             if (this.listeners[event]) {
                 this.listeners[event].forEach(cb => cb(data));
             }
+        },
+        clear() {
+            this.listeners = {};
         }
     },
 
@@ -2092,6 +2111,14 @@ const AdventureManager = {
             MissionTreasure.toggle(false);
             MissionExplore.toggle(false);
 
+            // Force Reset of Missions to prevent persistence between modes
+            MissionDiplomacy.reset();
+            MissionSiege.reset();
+            MissionBattle.reset();
+            MissionHunt.reset();
+            MissionTreasure.reset();
+            MissionExplore.reset();
+
             if (this.pathElement) this.pathElement.style.display = 'none';
             if (this.previewPathElement) this.previewPathElement.style.display = 'none';
         }
@@ -2109,6 +2136,17 @@ const AdventureManager = {
         // Clear Log
         const logContainer = document.getElementById('adventureLog');
         if (logContainer) logContainer.innerHTML = '';
+
+        // Clear Event Listeners (Fix for lingering CampaignManager hooks)
+        this.events.clear();
+
+        // Force Reset of Missions (Ensure no persistence)
+        MissionDiplomacy.reset();
+        MissionSiege.reset();
+        MissionBattle.reset();
+        MissionHunt.reset();
+        MissionTreasure.reset();
+        MissionExplore.reset();
 
         // Reset sidebar state if UI is open
         const btn = document.getElementById('toggleAdventure');
@@ -4083,6 +4121,13 @@ class HordeCampaign extends BaseCampaign {
         super.onEnd();
         if (AdventureManager.events) {
             AdventureManager.events.off('battleWon', this.onBattleWon);
+        }
+    }
+
+    onBeforeMissionSpawn(data) {
+        if (data.type === 'treasure') {
+            data.cancelled = true;
+            console.log("HordeCampaign blocked treasure mission.");
         }
     }
 

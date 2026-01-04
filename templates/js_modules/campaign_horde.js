@@ -32,6 +32,13 @@ class HordeCampaign extends BaseCampaign {
         }
     }
 
+    onBeforeMissionSpawn(data) {
+        if (data.type === 'treasure') {
+            data.cancelled = true;
+            console.log("HordeCampaign blocked treasure mission.");
+        }
+    }
+
     onBattleWon() {
         this.armiesDefeated++;
         this.updateObjectiveText();

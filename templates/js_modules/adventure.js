@@ -57,6 +57,9 @@ const AdventureManager = {
             if (this.listeners[event]) {
                 this.listeners[event].forEach(cb => cb(data));
             }
+        },
+        clear() {
+            this.listeners = {};
         }
     },
 
@@ -247,6 +250,14 @@ const AdventureManager = {
             MissionTreasure.toggle(false);
             MissionExplore.toggle(false);
 
+            // Force Reset of Missions to prevent persistence between modes
+            MissionDiplomacy.reset();
+            MissionSiege.reset();
+            MissionBattle.reset();
+            MissionHunt.reset();
+            MissionTreasure.reset();
+            MissionExplore.reset();
+
             if (this.pathElement) this.pathElement.style.display = 'none';
             if (this.previewPathElement) this.previewPathElement.style.display = 'none';
         }
@@ -264,6 +275,17 @@ const AdventureManager = {
         // Clear Log
         const logContainer = document.getElementById('adventureLog');
         if (logContainer) logContainer.innerHTML = '';
+
+        // Clear Event Listeners (Fix for lingering CampaignManager hooks)
+        this.events.clear();
+
+        // Force Reset of Missions (Ensure no persistence)
+        MissionDiplomacy.reset();
+        MissionSiege.reset();
+        MissionBattle.reset();
+        MissionHunt.reset();
+        MissionTreasure.reset();
+        MissionExplore.reset();
 
         // Reset sidebar state if UI is open
         const btn = document.getElementById('toggleAdventure');
