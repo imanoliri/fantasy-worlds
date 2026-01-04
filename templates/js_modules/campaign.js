@@ -198,8 +198,8 @@ const CampaignManager = {
                 AdventureManager.events.on('burgPopupOpened', (d) => this.currentCampaignInstance.onBurgPopupOpened(d));
             }
 
+            this.currentCampaignInstance.onStart(); // Call *before* Adventure start to register listeners
             AdventureManager.start();
-            this.currentCampaignInstance.onStart(); // Call *after* Adventure start? Or before? BaseCampaign.onStart sets active=true.
             AdventureManager.showFeedback(`Campaign Started: ${this.currentCampaignInstance.name}`);
         }
 
