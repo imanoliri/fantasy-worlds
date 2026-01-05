@@ -16,5 +16,6 @@
     "campaign_siege_defense.js",
     "campaign_explorer.js",
     "campaign_diplomat.js",
+    "campaign_horde.js",
     "selection.js"
 ]

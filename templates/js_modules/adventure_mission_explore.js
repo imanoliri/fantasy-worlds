@@ -129,6 +129,15 @@ class ExploreMission extends AdventureMission {
 
         AdventureManager.events.emit('missionComplete', { type: 'explore' });
     }
+
+    reset() {
+        this.locations = [null, null, null, null];
+        if (this.elements) {
+            this.elements.forEach(el => {
+                if (el) el.style.display = 'none';
+            });
+        }
+    }
 }
 
 window.MissionExplore = new ExploreMission();

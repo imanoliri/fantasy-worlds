@@ -53,4 +53,11 @@ class AdventureMission {
         if (!this.element) return;
         this.element.style.display = (active && this.data) ? "block" : "none";
     }
+
+    reset() {
+        this.data = null;
+        if (this.element) {
+            this.element.style.display = 'none';
+        }
+    }
 }

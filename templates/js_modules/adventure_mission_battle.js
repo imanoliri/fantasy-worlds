@@ -175,6 +175,11 @@ class BattleMission extends AdventureMission {
 
             AdventureManager.showFeedback(`VICTORY! Gained ${goldReward} Gold & ${soldierReward} Soldiers.`);
 
+            // Emit Event
+            if (AdventureManager.events) {
+                AdventureManager.events.emit('battleWon', { enemySoldiers: this.data.soldiers });
+            }
+
             // Floating Text (Win)
             const cell = graphData[AdventureManager.party.cell];
             if (cell) {
@@ -188,6 +193,11 @@ class BattleMission extends AdventureMission {
             AdventureManager.updateStats();
         } else {
             // LOSE
+            // Emit Event
+            if (AdventureManager.events) {
+                AdventureManager.events.emit('battleLost', { enemySoldiers: this.data.soldiers });
+            }
+
             // Retain half of starting army, round down to nearest 5, min 5
             const retained = Math.max(5, Math.floor((mySoldiers / 2) / 5) * 5);
             const lost = mySoldiers - retained;

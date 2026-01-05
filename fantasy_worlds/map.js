@@ -627,6 +627,13 @@ class AdventureMission {
         if (!this.element) return;
         this.element.style.display = (active && this.data) ? "block" : "none";
     }
+
+    reset() {
+        this.data = null;
+        if (this.element) {
+            this.element.style.display = 'none';
+        }
+    }
 }
 
 
@@ -975,6 +982,11 @@ class BattleMission extends AdventureMission {
 
             AdventureManager.showFeedback(`VICTORY! Gained ${goldReward} Gold & ${soldierReward} Soldiers.`);
 
+            // Emit Event
+            if (AdventureManager.events) {
+                AdventureManager.events.emit('battleWon', { enemySoldiers: this.data.soldiers });
+            }
+
             // Floating Text (Win)
             const cell = graphData[AdventureManager.party.cell];
             if (cell) {
@@ -988,6 +1000,11 @@ class BattleMission extends AdventureMission {
             AdventureManager.updateStats();
         } else {
             // LOSE
+            // Emit Event
+            if (AdventureManager.events) {
+                AdventureManager.events.emit('battleLost', { enemySoldiers: this.data.soldiers });
+            }
+
             // Retain half of starting army, round down to nearest 5, min 5
             const retained = Math.max(5, Math.floor((mySoldiers / 2) / 5) * 5);
             const lost = mySoldiers - retained;
@@ -1167,15 +1184,30 @@ class HuntMission extends AdventureMission {
 
         if (mySoldiers > beastStrength) {
             // WIN
-            // Gain 1 gold for each 5 strength of the beast, rounding up.
-            const goldReward = Math.ceil(beastStrength / 5);
-            // Food reward equal to beast strength
-            const foodReward = beastStrength;
+            // Base Rewards
+            const rewards = {
+                gold: Math.ceil(beastStrength / 5),
+                food: beastStrength,
+                soldiers: 0
+            };
 
-            AdventureManager.party.gold += goldReward;
-            AdventureManager.party.food += foodReward;
+            // Allow active campaign to modify rewards
+            AdventureManager.events.emit('calculateMissionRewards', {
+                type: 'hunt',
+                missionData: this.data,
+                rewards: rewards
+            });
 
-            AdventureManager.showFeedback(`SLAIN! Gained ${goldReward} Gold & ${foodReward} Food.`);
+            // Apply Rewards
+            AdventureManager.party.gold += rewards.gold;
+            AdventureManager.party.food += rewards.food;
+            AdventureManager.party.soldiers += rewards.soldiers;
+
+            let feedback = `SLAIN! Gained ${rewards.gold} Gold & ${rewards.food} Food`;
+            if (rewards.soldiers > 0) feedback += ` & ${rewards.soldiers} Soldiers`;
+            feedback += `.`;
+
+            AdventureManager.showFeedback(feedback);
 
             // Emit Complete Event
             AdventureManager.events.emit('missionComplete', { type: 'hunt', result: 'win', ...this.data });
@@ -1183,11 +1215,13 @@ class HuntMission extends AdventureMission {
             // Floating Text (Win)
             const cell = graphData[AdventureManager.party.cell];
             if (cell) {
-                AdventureManager.showFloatingText(`VICTORY!`, cell.p[0], cell.p[1] - 60, "#2ecc71");
-                AdventureManager.showFloatingText(`+${goldReward} 💰`, cell.p[0], cell.p[1] - 40, "#f1c40f");
-                AdventureManager.showFloatingText(`+${foodReward} 🍎`, cell.p[0], cell.p[1] - 20, "#2ecc71");
+                AdventureManager.showFloatingText(`VICTORY!`, cell.p[0], cell.p[1] - 80, "#2ecc71");
+                AdventureManager.showFloatingText(`+${rewards.gold} 💰`, cell.p[0], cell.p[1] - 60, "#f1c40f");
+                AdventureManager.showFloatingText(`+${rewards.food} 🍎`, cell.p[0], cell.p[1] - 40, "#2ecc71");
+                if (rewards.soldiers > 0) {
+                    AdventureManager.showFloatingText(`+${rewards.soldiers} ⚔️`, cell.p[0], cell.p[1] - 20, "#9b59b6");
+                }
             }
-
             AdventureManager.closePopup();
             this.spawn(); // Respawn
             AdventureManager.updateStats();
@@ -1811,6 +1845,15 @@ class ExploreMission extends AdventureMission {
 
         AdventureManager.events.emit('missionComplete', { type: 'explore' });
     }
+
+    reset() {
+        this.locations = [null, null, null, null];
+        if (this.elements) {
+            this.elements.forEach(el => {
+                if (el) el.style.display = 'none';
+            });
+        }
+    }
 }
 
 window.MissionExplore = new ExploreMission();
@@ -1875,6 +1918,9 @@ const AdventureManager = {
             if (this.listeners[event]) {
                 this.listeners[event].forEach(cb => cb(data));
             }
+        },
+        clear() {
+            this.listeners = {};
         }
     },
 
@@ -2065,6 +2111,14 @@ const AdventureManager = {
             MissionTreasure.toggle(false);
             MissionExplore.toggle(false);
 
+            // Force Reset of Missions to prevent persistence between modes
+            MissionDiplomacy.reset();
+            MissionSiege.reset();
+            MissionBattle.reset();
+            MissionHunt.reset();
+            MissionTreasure.reset();
+            MissionExplore.reset();
+
             if (this.pathElement) this.pathElement.style.display = 'none';
             if (this.previewPathElement) this.previewPathElement.style.display = 'none';
         }
@@ -2082,6 +2136,17 @@ const AdventureManager = {
         // Clear Log
         const logContainer = document.getElementById('adventureLog');
         if (logContainer) logContainer.innerHTML = '';
+
+        // Clear Event Listeners (Fix for lingering CampaignManager hooks)
+        this.events.clear();
+
+        // Force Reset of Missions (Ensure no persistence)
+        MissionDiplomacy.reset();
+        MissionSiege.reset();
+        MissionBattle.reset();
+        MissionHunt.reset();
+        MissionTreasure.reset();
+        MissionExplore.reset();
 
         // Reset sidebar state if UI is open
         const btn = document.getElementById('toggleAdventure');
@@ -2518,7 +2583,11 @@ const AdventureManager = {
         let notificationHtml = '';
         const netFood = parseFloat(burg.net_food);
 
-        if (netFood > 0) {
+        // Allow campaigns to intervene (e.g. block replenishment)
+        const eventData = { burg, preventReplenish: false };
+        this.events.emit('beforeBurgPopup', eventData);
+
+        if (!eventData.preventReplenish && netFood > 0) {
             const surplusCap = Math.floor(netFood);
             if (this.party.food < surplusCap) {
                 const gained = surplusCap - this.party.food;
@@ -3336,6 +3405,8 @@ class BaseCampaign {
     onMissionStart(data) { }
     onMissionComplete(data) { }
     onBeforeMissionSpawn(data) { }
+    onCalculateMissionRewards(context) { }
+    onBeforeBurgPopup(data) { }
     onBurgPopupOpened(context) { }
     onUpdateStats(party) {
         if (!this.active) return;
@@ -3500,7 +3571,9 @@ const CampaignManager = {
         AdventureManager.events.on('missionStart', (d) => this.currentCampaignInstance.onMissionStart(d));
         AdventureManager.events.on('missionComplete', (d) => this.currentCampaignInstance.onMissionComplete(d));
         AdventureManager.events.on('burgPopupOpened', (d) => this.currentCampaignInstance.onBurgPopupOpened(d));
+        AdventureManager.events.on('beforeBurgPopup', (d) => this.currentCampaignInstance.onBeforeBurgPopup(d));
         AdventureManager.events.on('beforeMissionSpawn', (d) => this.currentCampaignInstance.onBeforeMissionSpawn(d));
+        AdventureManager.events.on('calculateMissionRewards', (d) => this.currentCampaignInstance.onCalculateMissionRewards(d));
 
         this.currentCampaignInstance.onStart(); // Call *before* Adventure start to register listeners
 
@@ -3859,17 +3932,6 @@ class DiplomatCampaign extends BaseCampaign {
     onStart() {
         super.onStart();
 
-        // 1. Disable Standard Diplomatic Missions via Event Listener
-        this._blockDiplomacyHandler = (e) => {
-            if (e.type === 'diplomacy') {
-                e.cancelled = true;
-                console.log("DiplomatCampaign blocked diplomacy mission.");
-            }
-        };
-
-        AdventureManager.events.on('beforeMissionSpawn', this._blockDiplomacyHandler);
-
-
         const initCampaignData = () => {
             console.log("DiplomatCampaign: burgsData length:", burgsData.length);
             const capitals = burgsData.filter(b => b.is_capital);
@@ -3886,9 +3948,13 @@ class DiplomatCampaign extends BaseCampaign {
 
     onEnd() {
         super.onEnd();
+    }
 
-        AdventureManager.events.off('beforeMissionSpawn', this._blockDiplomacyHandler);
-
+    onBeforeMissionSpawn(data) {
+        if (data.type === 'diplomacy') {
+            data.cancelled = true;
+            console.log("DiplomatCampaign blocked diplomacy mission.");
+        }
     }
 
     updateObjectiveText() {
@@ -4015,6 +4081,340 @@ class DiplomatCampaign extends BaseCampaign {
 
 // Register Campaign
 CampaignManager.availableCampaigns.push(DiplomatCampaign);
+
+
+﻿
+class HordeCampaign extends BaseCampaign {
+    constructor() {
+        super("horde_v1", "The Horde", "Lead a horde to pillage the world. Defeat 10 armies and pillage all capitals.");
+        this.armiesDefeated = 0;
+        this.pillagedBurgs = new Set(); // Set of burg IDs
+        this.partyStartConfig = { resources: { soldiers: 40 } };
+
+        // Objectives
+        this.addObjective("obj_horde_armies", "Defeat Armies (0/10)", "battle", () => this.armiesDefeated >= 10);
+        this.addObjective("obj_horde_capitals", "Pillage Capitals (0/?)", "domination", () => this.checkCapitalsVictory());
+
+        // Bind methods
+        this.onBattleWon = this.onBattleWon.bind(this);
+    }
+
+    onStart() {
+        super.onStart();
+        console.log("Horde Campaign Started");
+        this.updateObjectiveText();
+        this.refreshVisuals();
+
+        // Listen for battle wins from standard battles
+        if (AdventureManager.events) {
+            AdventureManager.events.on('battleWon', this.onBattleWon);
+        }
+    }
+
+    onEnd() {
+        super.onEnd();
+        if (AdventureManager.events) {
+            AdventureManager.events.off('battleWon', this.onBattleWon);
+        }
+    }
+
+    refreshVisuals() {
+        this.clearHighlights(); // Clear all existing rings/markers
+
+        // 1. Mark ANY pillaged burg with Red X
+        this.pillagedBurgs.forEach(burgId => {
+            this.drawTextMarker(burgsData.find(b => b.id === burgId)?.cell_id || 0, "❌");
+        });
+
+        // 2. Highlight UNPILLAGED Capitals with Orange Ring
+        const capitals = burgsData.filter(b => b.is_capital);
+        capitals.forEach(burg => {
+            if (!this.pillagedBurgs.has(burg.id)) {
+                // Target: Show Orange Ring
+                this.highlightCell(burg.cell_id, "#e67e22");
+            }
+        });
+    }
+
+    drawTextMarker(cellId, text) {
+        if (!graphData[cellId]) return;
+        let x, y;
+        const burg = burgsData.find(b => b.cell_id === cellId);
+        if (burg) { x = burg.x; y = burg.y; }
+        else { x = graphData[cellId].p[0]; y = graphData[cellId].p[1]; }
+
+        let container = document.getElementById('campaignHighlights');
+        if (!container) return; // Should exist from highlightCell call or generic init
+
+        const textEl = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        textEl.setAttribute("x", x);
+        textEl.setAttribute("y", y + 5); // Slight offset
+        textEl.setAttribute("text-anchor", "middle");
+        textEl.setAttribute("font-size", "20px");
+        textEl.setAttribute("style", "pointer-events: none; user-select: none;"); // Pass clicks through
+        textEl.textContent = text;
+        container.appendChild(textEl);
+    }
+
+    onBeforeMissionSpawn(data) {
+        if (data.type === 'treasure') {
+            data.cancelled = true;
+            console.log("HordeCampaign blocked treasure mission.");
+        }
+    }
+
+    onBattleWon() {
+        this.armiesDefeated++;
+        this.updateObjectiveText();
+        this.checkVictory();
+    }
+
+    updateObjectiveText() {
+        // Update Army Objective
+        const armyObj = this.objectives.find(o => o.id === "obj_horde_armies");
+        if (armyObj) {
+            armyObj.text = `Defeat Armies (${this.armiesDefeated}/10)`;
+            if (this.armiesDefeated >= 10) armyObj.completed = true;
+        }
+
+        // Update Capital Objective
+        const capitalObj = this.objectives.find(o => o.id === "obj_horde_capitals");
+        if (capitalObj) {
+            const stats = this.getCapitalStats();
+            capitalObj.text = `Pillage Capitals (${stats.pillaged}/${stats.total})`;
+            if (stats.pillaged >= stats.total && stats.total > 0) capitalObj.completed = true;
+        }
+
+        this.renderObjectives();
+    }
+
+    getCapitalStats() {
+        const capitals = burgsData.filter(b => b.is_capital);
+        const total = capitals.length;
+        // Count how many capitals are in the pillaged set
+        let pillaged = 0;
+        capitals.forEach(c => {
+            if (this.pillagedBurgs.has(c.id)) pillaged++;
+        });
+        return { total, pillaged };
+    }
+
+    checkCapitalsVictory() {
+        const stats = this.getCapitalStats();
+        return stats.total > 0 && stats.pillaged >= stats.total;
+    }
+
+    isHostile(burg) {
+        if (!burg) return false;
+
+        // Capital Override: Capitals are ALWAYS hostile targets to pillage
+        if (burg.is_capital) return true;
+
+        const type = burg.type ? burg.type.toLowerCase() : "";
+
+        // Hostile if NOT "Hunter" (or Hunting) AND NOT "Highland" (or Highlands)
+        // Using includes to cover variations
+        if (type.includes("hunt")) return false;
+        if (type.includes("highland")) return false;
+
+        return true; // Default to hostile for all other types
+    }
+
+    onBeforeBurgPopup(data) {
+        if (this.isHostile(data.burg)) {
+            data.preventReplenish = true;
+        }
+    }
+
+    onBurgPopupOpened(context) {
+        const { burg, party, buttons } = context;
+
+        // Only modify if hostile
+        if (this.isHostile(burg)) {
+            // Preserve Ship Actions (Rent/Leave Ship)
+            const shipButtons = buttons.filter(b => b.label && b.label.includes("Ship"));
+
+            // Clear existing buttons (Standard actions blocked)
+            buttons.length = 0;
+
+
+            // Check if already pillaged
+            if (this.pillagedBurgs.has(burg.id)) {
+                buttons.push({
+                    label: "City Pillaged (Ruins)",
+                    action: () => { }, // No action
+                    disabled: true,
+                    class: "btn-recruit", // Use recruit style but greyed out via inline style
+                    style: "background: #555; cursor: default; opacity: 0.7;"
+                });
+            } else {
+                // Add Fight button
+                // Strength logic: 10 * soldier_quartiers
+                const soldierQ = burg.soldier_quartiers || 0;
+                const strength = Math.max(10, 10 * soldierQ); // Min 10 strength
+
+                buttons.push({
+                    label: `Pillage City (Strength: ${strength})`,
+                    onClick: `CampaignManager.currentCampaignInstance.showBattlePopup(${burg.id}, ${strength})`,
+                    class: "btn-attack",
+                    style: "background: #c0392b; color: white;"
+                });
+            }
+
+            // Add ship buttons back
+            if (shipButtons.length > 0) {
+                if (!this.pillagedBurgs.has(burg.id)) {
+                    shipButtons.forEach(btn => {
+                        btn.disabled = true;
+                        btn.title = "Pillage city to unlock port";
+                        btn.style = "background: #555; cursor: not-allowed; opacity: 0.6;";
+                        btn.onClick = ""; // Prevent execution
+                    });
+                }
+                buttons.unshift(...shipButtons);
+            }
+        }
+    }
+
+    showBattlePopup(burgId, enemyStrength) {
+        if (!AdventureManager.popupElement) AdventureManager.openPopup('');
+
+        // Ensure overlay
+        let overlay = document.getElementById('modalOverlay');
+        if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.id = 'modalOverlay';
+            overlay.className = 'modal-overlay';
+            document.body.appendChild(overlay);
+        }
+        overlay.style.display = 'block';
+
+        const mySoldiers = AdventureManager.party.soldiers;
+
+        // Win Probability Logic
+        const ratio = mySoldiers / enemyStrength;
+        const k = 2;
+        const winProb = (Math.pow(ratio, k) / (Math.pow(ratio, k) + 1));
+        const winPercent = (winProb * 100).toFixed(1);
+
+        const content = `
+             <h2>⚔️ Battle Imminent ⚔️</h2>
+             <div class="content-wrapper" style="display: flex; gap: 20px; align-items: center; justify-content: center;">
+                 <div style="text-align: center;">
+                    <h3>Your Army</h3>
+                    <div style="font-size: 24px; color: #2ecc71; font-weight: bold;">${mySoldiers} 🛡️</div>
+                 </div>
+                 <div style="font-size: 20px; font-weight: bold;">VS</div>
+                 <div style="text-align: center;">
+                    <h3>City Garrison</h3>
+                    <div style="font-size: 24px; color: #e74c3c; font-weight: bold;">${enemyStrength} ⚔️</div>
+                 </div>
+             </div>
+             
+             <div style="text-align: center; margin: 15px 0;">
+                <div>Win Probability: <strong>${winPercent}%</strong></div>
+             </div>
+             
+             <div class="actions">
+                 <button class="btn-recruit" style="background-color: #c0392b;" onclick="CampaignManager.currentCampaignInstance.resolveCityBattle(${burgId}, ${enemyStrength})">ATTACK!</button>
+                 <button class="btn-leave" onclick="AdventureManager.closePopup()">Retreat</button>
+             </div>
+        `;
+        AdventureManager.openPopup(content);
+    }
+
+    resolveCityBattle(burgId, enemySoldiers) {
+        // Find burg again since we passed ID
+        const burg = burgsData.find(b => b.id === burgId);
+        if (!burg) return;
+
+        const playerSoldiers = AdventureManager.party.soldiers;
+
+        if (playerSoldiers <= 0) {
+            AdventureManager.showFeedback("You have no soldiers to fight with!");
+            AdventureManager.closePopup();
+            return;
+        }
+
+        const ratio = playerSoldiers / enemySoldiers;
+        const winProbability = (ratio * ratio) / ((ratio * ratio) + 1);
+
+        const isWin = Math.random() < winProbability;
+
+        AdventureManager.closePopup(); // Close battle popup
+
+        if (isWin) {
+            // Rewards (Aligned with BattleMission plus Food = Gold)
+            const goldReward = Math.floor(enemySoldiers / 10) * 3;
+            const soldierReward = Math.floor(enemySoldiers / 10) * 3;
+
+            // Food Reward: 40% of city's net food
+            let foodReward = 0;
+            // Ensure we have a valid food value
+            const cityFood = burg.net_food || 0;
+            if (cityFood > 0) {
+                foodReward = Math.floor(cityFood * 0.4);
+            }
+
+            AdventureManager.party.gold += goldReward;
+            AdventureManager.party.soldiers += soldierReward;
+            AdventureManager.party.food += foodReward;
+
+            // Mark as pillaged (Capital or not)
+            this.pillagedBurgs.add(burg.id);
+
+            AdventureManager.showFeedback(`Victory! Pillaged ${burg.name}. Gained ${goldReward} gold, ${foodReward} food, ${soldierReward} soldiers.`);
+
+            this.refreshVisuals(); // Update map markers
+
+            // Floating Text (Win)
+            const cell = graphData[AdventureManager.party.cell];
+            if (cell) {
+                AdventureManager.showFloatingText(`VICTORY!`, cell.p[0], cell.p[1] - 80, "#2ecc71");
+                AdventureManager.showFloatingText(`+${goldReward} 💰`, cell.p[0], cell.p[1] - 60, "#f1c40f");
+                AdventureManager.showFloatingText(`+${foodReward} 🍎`, cell.p[0], cell.p[1] - 40, "#e67e22");
+                AdventureManager.showFloatingText(`+${soldierReward} ⚔️`, cell.p[0], cell.p[1] - 20, "#9b59b6");
+            }
+
+            // Update Objectives
+            this.updateObjectiveText();
+            this.checkVictory();
+
+            // Highlight Pillaged? Maybe not needed, standard highlight is fine.
+
+        } else {
+            // Defeat
+            // Losses: High (20-40%)
+            const lossPct = 0.20 + (Math.random() * 0.20);
+            const losses = Math.floor(playerSoldiers * lossPct);
+            AdventureManager.party.soldiers = Math.max(0, playerSoldiers - losses);
+
+            AdventureManager.showFeedback(`Defeat! Failed to pillage ${burg.name}. Retreating with ${losses} casualties.`);
+
+            // Floating Text (Loss)
+            const cell = graphData[AdventureManager.party.cell];
+            if (cell) {
+                AdventureManager.showFloatingText(`DEFEAT!`, cell.p[0], cell.p[1] - 40, "#e74c3c");
+                if (losses > 0) AdventureManager.showFloatingText(`-${losses} ⚔️`, cell.p[0], cell.p[1] - 20, "#e74c3c");
+            }
+        }
+
+        AdventureManager.updateStats();
+    }
+
+    onCalculateMissionRewards(context) {
+        if (context.type === 'hunt') {
+            // Horde gains soldiers from hunting
+            if (context.rewards) {
+                context.rewards.soldiers = context.rewards.gold;
+            }
+        }
+    }
+
+}
+
+// Register Campaign
+CampaignManager.availableCampaigns.push(HordeCampaign);
 
 
 // Global Sets for Multi-Selection
