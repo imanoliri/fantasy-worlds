@@ -146,8 +146,12 @@ class HordeCampaign extends BaseCampaign {
 
         // Only modify if hostile
         if (this.isHostile(burg)) {
+            // Preserve Ship Actions (Rent/Leave Ship)
+            const shipButtons = buttons.filter(b => b.label && b.label.includes("Ship"));
+
             // Clear existing buttons (Standard actions blocked)
             buttons.length = 0;
+
 
             // Check if already pillaged
             if (this.pillagedBurgs.has(burg.id)) {
@@ -170,6 +174,19 @@ class HordeCampaign extends BaseCampaign {
                     class: "btn-attack",
                     style: "background: #c0392b; color: white;"
                 });
+            }
+
+            // Add ship buttons back
+            if (shipButtons.length > 0) {
+                if (!this.pillagedBurgs.has(burg.id)) {
+                    shipButtons.forEach(btn => {
+                        btn.disabled = true;
+                        btn.title = "Pillage city to unlock port";
+                        btn.style = "background: #555; cursor: not-allowed; opacity: 0.6;";
+                        btn.onClick = ""; // Prevent execution
+                    });
+                }
+                buttons.unshift(...shipButtons);
             }
         }
     }
