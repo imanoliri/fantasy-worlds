@@ -5,6 +5,7 @@ class WarCampaign extends BaseCampaign {
 
         // Internal State
         this.conqueredBurgs = new Set();
+        this.enemyStateIds = new Set();
         this.partyStartConfig = { resources: { soldiers: 50, tools: 10, food: 50, gold: 10 } };
 
         // Diplomatic info for start
@@ -24,7 +25,9 @@ class WarCampaign extends BaseCampaign {
         // Reset internal state for fresh run
         this.homeStateId = 0;
         this.homeStateName = "Unknown";
+        this.homeBurgName = "Unknown";
         this.startCell = -1;
+        this.enemyStateIds.clear();
         let spawnBurg = null;
 
         // Random Capital Spawn Logic
@@ -112,6 +115,8 @@ class WarCampaign extends BaseCampaign {
                 const isHostile = rel === "Enemy" || rel === "Rival" || (typeof rel === 'string' && rel.includes('War'));
 
                 if (isHostile) {
+                    this.enemyStateIds.add(targetStateId); // Track enemy state
+
                     let targetName = `State ${targetStateId}`;
                     // Resolve Name & Capital
                     if (typeof statesData !== 'undefined') {
@@ -166,11 +171,37 @@ class WarCampaign extends BaseCampaign {
         this.renderObjectives();
     }
 
+    isHostile(burg) {
+        if (!burg) return false;
+        // Hostile if it belongs to an enemy state
+        return this.enemyStateIds.has(burg.state_id);
+    }
+
+    onBeforeBurgPopup(data) {
+        if (this.isHostile(data.burg)) {
+            data.preventReplenish = true;
+        }
+    }
+
     onBurgPopupOpened(context) {
         const { burg, buttons } = context;
 
         // 1. Check if already conquered
         if (this.conqueredBurgs.has(burg.id)) {
+            // If conquered, it's ours. Standard buttons might be fine (recruit, etc), 
+            // but we usually want to show it's conquered.
+            // Let's clear and show just the status or maybe allow recruit?
+            // User said "Conquered cities will belong to the player", implying normal usage might be allowed?
+            // For now, let's keep the visual tag but allow interaction if it's ours?
+            // Actually, the previous code disabled the button. Let's stick to simple "Conquered" status for now unless requested.
+
+            // Re-evaluating: If it behaves like Horde, pillaged cities are just ruins.
+            // But here we "Conquer" them. "Establish dominion".
+            // Let's keep the "City Conquered" button at the top, but maybe NOT clear other buttons if it's ours now?
+            // Actually, if it behaves like Horde "hostile", then BEFORE conquest it should assume hostile.
+
+            // NOTE: If it is conquered, it is NO LONGER hostile in terms of mechanics, it is ours.
+            // So we don't clear buttons here.
             buttons.unshift({
                 label: "City Conquered (Yours)",
                 action: () => { },
@@ -181,18 +212,47 @@ class WarCampaign extends BaseCampaign {
             return;
         }
 
-        // 2. Add Conquer Button for neutral/hostile cities
-        // Calculate Strength based on defenses
+        // 2. Logic for Enemy/Hostile Cities
+        if (this.isHostile(burg)) {
+            // Horde Behavior: Clear peaceful options
+            buttons.length = 0;
+
+            // Calculate Strength based on defenses
+            const soldierQ = burg.soldier_quartiers || 0;
+            // Base strength 20, + 15 per soldier quartier. Slightly harder than simple pillage.
+            const strength = 20 + (15 * soldierQ);
+
+            buttons.push({
+                label: `Conquer City (Strength: ${strength})`,
+                onClick: `CampaignManager.currentCampaignInstance.showConquestPopup(${burg.id}, ${strength})`,
+                class: "btn-attack",
+                style: "background: #c0392b; color: white;"
+            });
+            return;
+        }
+
+        // 3. Logic for Non-Hostile (Neutral) cities - Default behavior (Trade, Recruit, etc.)
+        // We can optionally add a "Conquer" button here too if we want to allow conquering neutrals?
+        // User objective says "Conquer enemy capitals".
+        // The previous code added "Conquer" to "neutral/hostile" cities.
+        // If we want to allow conquering neutrals, we should add the button but NOT clear the others.
+
+        // For now, sticking to strict "Enemy" definition for the "Hostile" behavior (clearing buttons).
+        // If user wants to conquer neutrals, they still can if we add the button below, but they will also have peaceful options.
+
+        // Add Conquer option for neutrals as well?
         const soldierQ = burg.soldier_quartiers || 0;
-        // Base strength 20, + 15 per soldier quartier. Slightly harder than simple pillage.
         const strength = 20 + (15 * soldierQ);
 
-        buttons.unshift({
-            label: `Conquer City (Strength: ${strength})`,
-            onClick: `CampaignManager.currentCampaignInstance.showConquestPopup(${burg.id}, ${strength})`,
-            class: "btn-attack",
-            style: "background: #c0392b; color: white;"
-        });
+        // Only add conquer button if it's not the home state? Or can we conquer home?
+        if (burg.state_id !== this.homeStateId) {
+            buttons.unshift({
+                label: `Conquer City (Strength: ${strength})`,
+                onClick: `CampaignManager.currentCampaignInstance.showConquestPopup(${burg.id}, ${strength})`,
+                class: "btn-attack",
+                style: "background: #c0392b; color: white;"
+            });
+        }
     }
 
     showConquestPopup(burgId, enemyStrength) {
