@@ -267,6 +267,7 @@ def generate_map(burgs, output_file, trades_data=None, map_name="Interactive Map
             'population_fmt': fmt_num(b['population']),
             'type': b.get('type', 'Unknown'),
             'state_name': b.get('state_name', 'Unknown'),
+            'state_id': b.get('state_id', 0),
             'net_gold': f"{int(net_gold)}",
             'net_food': f"{int(net_food)}",
             'net_gold_val': net_gold,
@@ -312,10 +313,12 @@ def generate_map(burgs, output_file, trades_data=None, map_name="Interactive Map
         tooltip_info += f"Area: {s.get('area', 0):,}"
         
         states_data.append({
+            'id': s.get('i'),
             'color': s.get('color', '#cccccc'),
             'name': s_name,
             'safe_name': s_name.replace("'", "\\'"),
             'capital_name': capital_name,
+            'capital_id': capital_id,
             'type': s.get('type', 'Unknown'),
             'culture_name': culture_name,
             'burgs_count': s.get('burgs', 0),
@@ -354,7 +357,9 @@ def generate_map(burgs, output_file, trades_data=None, map_name="Interactive Map
             'b': c.get('biome', 0),
             'p': c.get('p', [0, 0])
         } for c in (map_data.get('pack', {}).get('cells', []) if map_data else [])]),
-        'marine_id': marine_id
+        'marine_id': marine_id,
+        'states_data': json.dumps(states_data),
+        'states_data_json': json.dumps(states) if states else "[]"
     }
     
     html_output = template.render(context)
