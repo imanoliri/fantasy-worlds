@@ -155,6 +155,7 @@ class WarCampaign extends BaseCampaign {
 
         // Render the newly added objectives
         this.renderObjectives();
+        this.refreshVisuals(); // Draw initial flags/highlights
 
         const homeString = this.homeBurgName !== "Unknown" ? `${this.homeBurgName} (${this.homeStateName})` : this.homeStateName;
         AdventureManager.showFeedback(`Home: ${homeString}.`, 8000);
@@ -163,6 +164,52 @@ class WarCampaign extends BaseCampaign {
     onEnd() {
         super.onEnd();
         this.clearHighlights();
+    }
+
+    refreshVisuals() {
+        this.clearHighlights(); // Clear all existing rings/markers
+
+        // 1. Mark Conquered Burgs with Flag
+        this.conqueredBurgs.forEach(burgId => {
+            this.drawTextMarker(burgsData.find(b => b.id === burgId)?.cell_id || 0, "🚩");
+        });
+
+        // 2. Highlight Enemy Capitals (Objectives)
+        // Redraw red rings for un-conquered enemy capitals
+        this.enemyStateIds.forEach(stateId => {
+            if (typeof statesData !== 'undefined') {
+                const targetState = statesData.find(s => s.id === stateId);
+                if (targetState && window.burgsData && targetState.capital_id) {
+                    // Only if not conquered
+                    if (!this.conqueredBurgs.has(targetState.capital_id)) {
+                        const enemyCapital = burgsData.find(b => b.id === targetState.capital_id);
+                        if (enemyCapital) {
+                            this.highlightCell(enemyCapital.cell_id, "#c0392b"); // Red for enemy
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    drawTextMarker(cellId, text) {
+        if (!graphData[cellId]) return;
+        let x, y;
+        const burg = burgsData.find(b => b.cell_id === cellId);
+        if (burg) { x = burg.x; y = burg.y; }
+        else { x = graphData[cellId].p[0]; y = graphData[cellId].p[1]; }
+
+        let container = document.getElementById('campaignHighlights');
+        if (!container) return;
+
+        const textEl = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        textEl.setAttribute("x", x);
+        textEl.setAttribute("y", y + 5);
+        textEl.setAttribute("text-anchor", "middle");
+        textEl.setAttribute("font-size", "20px");
+        textEl.setAttribute("style", "pointer-events: none; user-select: none; text-shadow: 1px 1px 2px black;");
+        textEl.textContent = text;
+        container.appendChild(textEl);
     }
 
     updateObjectiveText() {
@@ -329,20 +376,31 @@ class WarCampaign extends BaseCampaign {
             AdventureManager.party.soldiers = Math.max(0, playerSoldiers - losses);
 
             // Rewards
+            // Gold
             const goldReward = Math.floor(enemySoldiers / 5);
+            // Food (Looted stores - 30% of net food)
+            let foodReward = 0;
+            const cityFood = burg.net_food || 0;
+            if (cityFood > 0) {
+                foodReward = Math.floor(cityFood * 0.3);
+            }
+
             AdventureManager.party.gold += goldReward;
+            AdventureManager.party.food += foodReward;
 
             // Mark Conquered
             this.conqueredBurgs.add(burg.id);
-            this.highlightCell(burg.cell_id, "#27ae60"); // Green for conquered
+            this.refreshVisuals(); // Update Map Visuals (Flags)
 
-            AdventureManager.showFeedback(`Victory! ${burg.name} is now under your command! Lost ${losses} soldiers.`);
+            AdventureManager.showFeedback(`Victory! ${burg.name} conquered! Gained ${goldReward} gold, ${foodReward} food.`);
 
             // Floating Text
             const cell = graphData[AdventureManager.party.cell];
             if (cell) {
                 AdventureManager.showFloatingText(`CONQUERED!`, cell.p[0], cell.p[1] - 80, "#2ecc71");
-                AdventureManager.showFloatingText(`-${losses} ⚔️`, cell.p[0], cell.p[1] - 40, "#e74c3c");
+                AdventureManager.showFloatingText(`+${goldReward} 💰`, cell.p[0], cell.p[1] - 60, "#f1c40f");
+                if (foodReward > 0) AdventureManager.showFloatingText(`+${foodReward} 🍎`, cell.p[0], cell.p[1] - 40, "#e67e22");
+                AdventureManager.showFloatingText(`-${losses} Casualties`, cell.p[0], cell.p[1], "#e74c3c");
             }
 
             this.updateObjectiveText();
