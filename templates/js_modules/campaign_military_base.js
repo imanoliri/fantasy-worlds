@@ -5,6 +5,28 @@ class MilitaryCampaign extends BaseCampaign {
         this.battleMarker = "⚔️";
         this.conqueredStatusLabel = "Conquered";
         this.BattleClass = Battle; // Default Strategy
+
+        // Bind Handlers
+        this.handleBattleWin = this.handleBattleWin.bind(this);
+        this.handleBattleLoss = this.handleBattleLoss.bind(this);
+    }
+
+    onStart() {
+        super.onStart();
+        // Register Event Listeners
+        if (AdventureManager.events) {
+            AdventureManager.events.on('battleWon', this.handleBattleWin);
+            AdventureManager.events.on('battleLost', this.handleBattleLoss);
+        }
+    }
+
+    onEnd() {
+        super.onEnd();
+        // Cleanup Listeners
+        if (AdventureManager.events) {
+            AdventureManager.events.off('battleWon', this.handleBattleWin);
+            AdventureManager.events.off('battleLost', this.handleBattleLoss);
+        }
     }
 
     // --- Helper Methods ---
@@ -41,6 +63,20 @@ class MilitaryCampaign extends BaseCampaign {
 
     onBattleLoss(burg) {
         // Override in child if needed
+    }
+
+    // --- Event Handlers ---
+
+    handleBattleWin(data) {
+        if (data.campaignId !== this.id) return;
+        this.onBattleWin(data.burg, data.rewards);
+        this.refreshVisuals();
+    }
+
+    handleBattleLoss(data) {
+        if (data.campaignId !== this.id) return;
+        this.onBattleLoss(data.burg);
+        this.refreshVisuals();
     }
 
     // --- Shared Interaction Logic ---

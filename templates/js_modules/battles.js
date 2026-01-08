@@ -82,10 +82,13 @@ class Battle {
         AdventureManager.party.food += rewards.food;
         AdventureManager.party.soldiers = Math.max(0, AdventureManager.party.soldiers - losses);
 
-        // Campaign Hook
-        if (this.campaign && this.campaign.onBattleWin) {
-            this.campaign.onBattleWin(this.burg, rewards);
-            this.campaign.refreshVisuals();
+        // Event Emission (Campaign will listen)
+        if (AdventureManager.events) {
+            AdventureManager.events.emit('battleWon', {
+                burg: this.burg,
+                rewards: rewards,
+                campaignId: this.campaign ? this.campaign.id : null
+            });
         }
 
         // UI Feedback
@@ -100,9 +103,12 @@ class Battle {
         const losses = this.calculateCasualties(false);
         AdventureManager.party.soldiers = Math.max(0, this.playerSoldiers - losses);
 
-        // Campaign Hook
-        if (this.campaign && this.campaign.onBattleLoss) {
-            this.campaign.onBattleLoss(this.burg);
+        // Event Emission (Campaign will listen)
+        if (AdventureManager.events) {
+            AdventureManager.events.emit('battleLost', {
+                burg: this.burg,
+                campaignId: this.campaign ? this.campaign.id : null
+            });
         }
 
         // UI Feedback
