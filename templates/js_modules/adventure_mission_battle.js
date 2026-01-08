@@ -72,29 +72,31 @@ class BattleMission extends AdventureMission {
 
         const validCells = this.getValidSpawnCells(occupied);
 
-        if (validCells.length > 0) {
-            const randomCell = validCells[Math.floor(Math.random() * validCells.length)];
-            const amount = Math.floor(Math.random() * (200 - 20 + 1)) + 20; // 20 to 200
-            this.data = { cell: randomCell.i, soldiers: amount };
-            this.updateVisuals();
-        }
+        if (validCells.length === 0) return;
+
+        const randomCell = validCells[Math.floor(Math.random() * validCells.length)];
+        const amount = Math.floor(Math.random() * (200 - 20 + 1)) + 20; // 20 to 200
+        this.data = { cell: randomCell.i, soldiers: amount };
+        this.updateVisuals();
     }
 
     updateVisuals() {
         if (!this.element) return;
 
-        if (this.data && AdventureManager.active) {
-            const eData = graphData[this.data.cell];
-            if (eData) {
-                this.element.setAttribute("transform", `translate(${eData.p[0]}, ${eData.p[1]})`);
-                this.element.style.display = "block";
-                if (this.countElement) this.countElement.textContent = this.data.soldiers;
-            } else {
-                this.element.style.display = "none";
-            }
-        } else {
+        if (!this.data || !AdventureManager.active) {
             this.element.style.display = "none";
+            return;
         }
+
+        const eData = graphData[this.data.cell];
+        if (!eData) {
+            this.element.style.display = "none";
+            return;
+        }
+
+        this.element.setAttribute("transform", `translate(${eData.p[0]}, ${eData.p[1]})`);
+        this.element.style.display = "block";
+        if (this.countElement) this.countElement.textContent = this.data.soldiers;
     }
 
     getTargetCell() {
@@ -120,12 +122,16 @@ class BattleMission extends AdventureMission {
         const mySoldiers = AdventureManager.party.soldiers;
         const enemySoldiers = this.data.soldiers;
 
+        const battle = new FieldBattle(null, enemySoldiers);
+
         // Use ratio R = Player / Enemy.
         // P(Win) = R^2 / (R^2 + 1)
-        const ratio = mySoldiers / enemySoldiers;
-        const k = 2; // Squared for sharper curve
-        const winProb = (Math.pow(ratio, k) / (Math.pow(ratio, k) + 1));
+        const mySoldiers = AdventureManager.party.soldiers;
+
+        // Use Battle Class logic for consistency
+        const winProb = battle.calculateWinProbability();
         const winPercent = (winProb * 100).toFixed(1);
+        const ratio = mySoldiers / enemySoldiers; // Purely for display
 
         const content = `
              <h2>⚔️ Battle Imminent ⚔️</h2>
@@ -157,75 +163,50 @@ class BattleMission extends AdventureMission {
     resolve() {
         if (!this.data) return;
 
-        const mySoldiers = AdventureManager.party.soldiers;
-        const enemySoldiers = this.data.soldiers;
-        const ratio = mySoldiers / enemySoldiers;
-        const k = 2;
-        const winProb = (Math.pow(ratio, k) / (Math.pow(ratio, k) + 1));
+        const battle = new FieldBattle(null, this.data.soldiers);
 
-        const roll = Math.random();
+        // The Battle class handles everything (Math, Rewards, Casualties, UI, Events)
+        const isWin = battle.resolve();
 
-        if (roll < winProb) {
-            // WIN
-            const goldReward = Math.floor(enemySoldiers / 10) * 2;
-            const soldierReward = Math.floor(enemySoldiers / 10) * 2;
+        AdventureManager.closePopup();
 
-            AdventureManager.party.gold += goldReward;
-            AdventureManager.party.soldiers += soldierReward; // replenish or recruit
-
-            AdventureManager.showFeedback(`VICTORY! Gained ${goldReward} Gold & ${soldierReward} Soldiers.`);
-
-            // Emit Event
-            if (AdventureManager.events) {
-                AdventureManager.events.emit('battleWon', { enemySoldiers: this.data.soldiers });
-            }
-
-            // Floating Text (Win)
-            const cell = graphData[AdventureManager.party.cell];
-            if (cell) {
-                AdventureManager.showFloatingText(`VICTORY!`, cell.p[0], cell.p[1] - 60, "#2ecc71");
-                AdventureManager.showFloatingText(`+${goldReward} 💰`, cell.p[0], cell.p[1] - 40, "#f1c40f");
-                AdventureManager.showFloatingText(`+${soldierReward} ⚔️`, cell.p[0], cell.p[1] - 20, "#9b59b6");
-            }
-
-            AdventureManager.closePopup();
-            this.spawn(); // Respawn
+        if (isWin) {
+            this.spawn(); // Respawn on victory
             AdventureManager.updateStats();
-        } else {
-            // LOSE
-            // Emit Event
-            if (AdventureManager.events) {
-                AdventureManager.events.emit('battleLost', { enemySoldiers: this.data.soldiers });
-            }
-
-            // Retain half of starting army, round down to nearest 5, min 5
-            const retained = Math.max(5, Math.floor((mySoldiers / 2) / 5) * 5);
-            const lost = mySoldiers - retained;
-            AdventureManager.party.soldiers = retained;
-
-            AdventureManager.updateStats();
-            AdventureManager.closePopup();
-
-            // Floating Text (Loss)
-            const cell = graphData[AdventureManager.party.cell];
-            if (cell) {
-                AdventureManager.showFloatingText(`DEFEAT!`, cell.p[0], cell.p[1] - 40, "#e74c3c");
-                if (lost > 0) AdventureManager.showFloatingText(`-${lost} ⚔️`, cell.p[0], cell.p[1] - 20, "#e74c3c");
-            }
-
-            // Damage enemy
-            const damage = mySoldiers;
-            this.data.soldiers = Math.max(0, this.data.soldiers - damage);
-
-            if (this.data.soldiers === 0) {
-                AdventureManager.showFeedback(`DEFEAT! But you wiped out the enemy!`);
-                this.element.style.display = "none";
-                this.data = null;
-                this.spawn();
-            } else {
-                AdventureManager.showFeedback(`DEFEAT! Enemy took ${damage} casualties.`);
-            }
+            return;
         }
+
+        // DEFEAT
+        // FieldBattle emits 'battleLost'.
+        // Logic for "Damage Enemy on Defeat" was in old code.
+        // FieldBattle emit "battleLost" with damageDealt. Use that event?
+        // Or handle it here manually since we have this.data access?
+
+        // Re-implement damage to mission data here since FieldBattle is transient
+        const damage = AdventureManager.party.soldiers; // Soldiers before this battle? No, logic is confusing.
+        // Old logic: const damage = mySoldiers; (At start of battle)
+        // But AdventureManager.party.soldiers is updated inside battle.resolve() -> onDefeat() -> calculateCasualties().
+        // So we need snapshots.
+
+        // Simpler: Just fully respawn or reduce strength.
+        // Let's stick to old logic: Enemy takes damage.
+
+        // We can listen to the event we just emitted? No, synchronous.
+
+        // Let's manually apply damage to this.data
+        const prevSoldiers = battle.playerSoldiers; // Captured in constructor
+        this.data.soldiers = Math.max(0, this.data.soldiers - prevSoldiers);
+
+        if (this.data.soldiers === 0) {
+            AdventureManager.showFeedback(`DEFEAT! But you wiped out the enemy!`);
+            this.element.style.display = "none";
+            this.data = null;
+            this.spawn();
+        } else {
+            AdventureManager.showFeedback(`DEFEAT! Enemy took ${prevSoldiers} casualties.`);
+        }
+
+        AdventureManager.updateStats();
     }
 }
 

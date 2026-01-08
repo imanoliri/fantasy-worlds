@@ -2,8 +2,12 @@
 class Battle {
     constructor(campaign, burgId, enemyStrength) {
         this.campaign = campaign;
-        this.burg = burgsData.find(b => b.id === burgId);
-        this.burgId = burgId;
+        this.burg = null;
+        this.burgId = null;
+        if (burgId) {
+            this.burg = burgsData.find(b => b.id === burgId);
+            this.burgId = burgId;
+        }
         this.enemyStrength = enemyStrength;
         this.playerSoldiers = AdventureManager.party.soldiers;
 
@@ -25,10 +29,10 @@ class Battle {
         if (isWin) {
             this.onVictory();
             return true;
-        } else {
-            this.onDefeat();
-            return false;
         }
+
+        this.onDefeat();
+        return false;
     }
 
     // --- Calculations (Overridable) ---
@@ -60,7 +64,7 @@ class Battle {
         const gold = Math.floor(this.enemyStrength * 0.1);
         const soldiers = Math.floor(this.enemyStrength * 0.1);
         let food = 0;
-        if (this.burg.net_food > 0) {
+        if (this.burg && this.burg.net_food > 0) {
             food = Math.floor(this.burg.net_food * 0.4);
         }
         return { gold, soldiers, food };
@@ -79,11 +83,14 @@ class Battle {
         AdventureManager.party.soldiers = Math.max(0, AdventureManager.party.soldiers - losses);
 
         // Campaign Hook
-        this.campaign.onBattleWin(this.burg, rewards);
-        this.campaign.refreshVisuals();
+        if (this.campaign && this.campaign.onBattleWin) {
+            this.campaign.onBattleWin(this.burg, rewards);
+            this.campaign.refreshVisuals();
+        }
 
         // UI Feedback
-        AdventureManager.showFeedback(`Victory! ${this.burg.name} secured!`);
+        const targetName = this.burg ? this.burg.name : "Enemy Army";
+        AdventureManager.showFeedback(`Victory! ${targetName} defeated!`);
         this.showFloatingStats(true, rewards, losses);
 
         AdventureManager.updateStats();
@@ -94,10 +101,13 @@ class Battle {
         AdventureManager.party.soldiers = Math.max(0, this.playerSoldiers - losses);
 
         // Campaign Hook
-        this.campaign.onBattleLoss(this.burg);
+        if (this.campaign && this.campaign.onBattleLoss) {
+            this.campaign.onBattleLoss(this.burg);
+        }
 
         // UI Feedback
-        AdventureManager.showFeedback(`Defeat! ${this.burg.name} held strong.`);
+        const targetName = this.burg ? this.burg.name : "Enemy Army";
+        AdventureManager.showFeedback(`Defeat! ${targetName} was too strong.`);
         this.showFloatingStats(false, null, losses);
 
         AdventureManager.updateStats();
@@ -115,10 +125,10 @@ class Battle {
             if (rewards.food > 0) AdventureManager.showFloatingText(`+${rewards.food} 🍎`, cx, cy - 40, "#e67e22");
             if (rewards.soldiers > 0) AdventureManager.showFloatingText(`+${rewards.soldiers} ⚔️`, cx, cy - 20, "#9b59b6");
             AdventureManager.showFloatingText(`-${losses} 🩸`, cx, cy, "#e74c3c");
-        } else {
-            AdventureManager.showFloatingText(`DEFEAT!`, cx, cy - 40, "#e74c3c");
-            AdventureManager.showFloatingText(`-${losses} 🩸`, cx, cy - 20, "#e74c3c");
+            return
         }
+        AdventureManager.showFloatingText(`DEFEAT!`, cx, cy - 40, "#e74c3c");
+        AdventureManager.showFloatingText(`-${losses} 🩸`, cx, cy - 20, "#e74c3c");
     }
 }
 
@@ -161,10 +171,10 @@ class RaidBattle extends Battle {
 
             // Standard risk
             return Math.floor(this.playerSoldiers * 0.15);
-        } else {
-            // Failed raid is disastrous
-            return Math.floor(this.playerSoldiers * 0.30);
         }
+
+        // Failed raid is disastrous
+        return Math.floor(this.playerSoldiers * 0.30);
     }
 
     calculateRewards() {
@@ -180,5 +190,49 @@ class RaidBattle extends Battle {
 
     onVictory() {
         super.onVictory();
+    }
+}
+
+class FieldBattle extends Battle {
+    constructor(cellId, enemyStrength) {
+        super(null, null, enemyStrength);
+        this.cellId = cellId;
+    }
+
+    calculateRewards() {
+        // Mission Logic: Gold/Soldiers ~ enemy / 10 * 2 (which is 0.2, basically 20%)
+        const gold = Math.floor(this.enemyStrength * 0.2);
+        const soldiers = Math.floor(this.enemyStrength * 0.2);
+        // No food from field battles usually
+        return { gold, soldiers, food: 0 };
+    }
+
+    calculateCasualties(isVictory) {
+        if (isVictory) {
+            // Standard risk? Or matching Mission Logic?
+            return Math.floor(this.playerSoldiers * 0.10);
+        }
+        // Mission Logic: Retain half of starting army, round down to nearest 5.
+        const retained = Math.max(5, Math.floor((this.playerSoldiers / 2) / 5) * 5);
+        return this.playerSoldiers - retained;
+    }
+
+    onVictory() {
+        // Super handles generic rewards and UI
+        super.onVictory();
+        if (AdventureManager.events) {
+            AdventureManager.events.emit('battleWon', { enemySoldiers: this.enemyStrength });
+        }
+    }
+
+    onDefeat() {
+        super.onDefeat(); // Applies casualties
+
+        if (AdventureManager.events) {
+            AdventureManager.events.emit('battleLost', {
+                enemySoldiers: this.enemyStrength,
+                damageDealt: this.playerSoldiers // Assuming full commitment 
+            });
+        }
     }
 }
