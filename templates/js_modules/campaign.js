@@ -9,17 +9,51 @@ class BaseCampaign {
         this.active = false;
         this.objectives = [];
         this.startConfig = null;
+
+        // Bind Handlers
+        this.onAdventureStart = this.onAdventureStart.bind(this);
+        this.onUpdateStats = this.onUpdateStats.bind(this);
+        this.onMissionStart = this.onMissionStart.bind(this);
+        this.onMissionComplete = this.onMissionComplete.bind(this);
+        this.onBurgPopupOpened = this.onBurgPopupOpened.bind(this);
+        this.onBeforeBurgPopup = this.onBeforeBurgPopup.bind(this);
+        this.onBeforeMissionSpawn = this.onBeforeMissionSpawn.bind(this);
+        this.onCalculateMissionRewards = this.onCalculateMissionRewards.bind(this);
     }
 
     // Lifecycle Hooks
     onStart() {
         this.active = true;
         console.log(`Campaign '${this.name}' Started.`);
+
+        // Register Listeners
+        if (AdventureManager.events) {
+            AdventureManager.events.on('start', this.onAdventureStart);
+            AdventureManager.events.on('updateStats', this.onUpdateStats); // Direct bind assumes signature match or ignored args
+            AdventureManager.events.on('missionStart', this.onMissionStart);
+            AdventureManager.events.on('missionComplete', this.onMissionComplete);
+            AdventureManager.events.on('burgPopupOpened', this.onBurgPopupOpened);
+            AdventureManager.events.on('beforeBurgPopup', this.onBeforeBurgPopup);
+            AdventureManager.events.on('beforeMissionSpawn', this.onBeforeMissionSpawn);
+            AdventureManager.events.on('calculateMissionRewards', this.onCalculateMissionRewards);
+        }
     }
 
     onEnd() {
         this.active = false;
         this.clearHighlights();
+
+        // Cleanup Listeners
+        if (AdventureManager.events) {
+            AdventureManager.events.off('start', this.onAdventureStart);
+            AdventureManager.events.off('updateStats', this.onUpdateStats);
+            AdventureManager.events.off('missionStart', this.onMissionStart);
+            AdventureManager.events.off('missionComplete', this.onMissionComplete);
+            AdventureManager.events.off('burgPopupOpened', this.onBurgPopupOpened);
+            AdventureManager.events.off('beforeBurgPopup', this.onBeforeBurgPopup);
+            AdventureManager.events.off('beforeMissionSpawn', this.onBeforeMissionSpawn);
+            AdventureManager.events.off('calculateMissionRewards', this.onCalculateMissionRewards);
+        }
         console.log(`Campaign '${this.name}' Ended.`);
     }
 
@@ -194,18 +228,8 @@ const CampaignManager = {
         if (!this.currentCampaignInstance) return;
 
         this.active = true;
-        this.active = true;
         AdventureManager.init();
         AdventureManager.active = true;
-
-        AdventureManager.events.on('start', () => this.currentCampaignInstance.onAdventureStart());
-        AdventureManager.events.on('updateStats', () => this.currentCampaignInstance.onUpdateStats(AdventureManager.party));
-        AdventureManager.events.on('missionStart', (d) => this.currentCampaignInstance.onMissionStart(d));
-        AdventureManager.events.on('missionComplete', (d) => this.currentCampaignInstance.onMissionComplete(d));
-        AdventureManager.events.on('burgPopupOpened', (d) => this.currentCampaignInstance.onBurgPopupOpened(d));
-        AdventureManager.events.on('beforeBurgPopup', (d) => this.currentCampaignInstance.onBeforeBurgPopup(d));
-        AdventureManager.events.on('beforeMissionSpawn', (d) => this.currentCampaignInstance.onBeforeMissionSpawn(d));
-        AdventureManager.events.on('calculateMissionRewards', (d) => this.currentCampaignInstance.onCalculateMissionRewards(d));
 
         this.currentCampaignInstance.onStart(); // Call *before* Adventure start to register listeners
 
