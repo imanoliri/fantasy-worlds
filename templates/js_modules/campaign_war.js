@@ -60,7 +60,42 @@ class WarCampaign extends MilitaryCampaign {
         // Random Capital Spawn Logic
         if (typeof statesData !== 'undefined' && statesData.length > 0) {
             // Filter valid states (ensure they have a capital ID)
-            const validStates = statesData.filter(s => s.capital_id && s.capital_id > 0);
+            let validStates = statesData.filter(s => s.capital_id && s.capital_id > 0);
+
+            // Filter for states that actually have enemies
+            if (window.diplomacyMatrix) {
+                const statesWithEnemies = validStates.filter(s => {
+                    const relations = diplomacyMatrix[s.id];
+                    if (!relations) return false;
+                    // Check if any relation is hostile
+                    // relations is likely an array or object. The usage in onAdventureStart uses forEach on it?
+                    // "relations.forEach((rel, targetStateId) => ...)" implies it might be an array or Map-like if it's from JSON.
+                    // Let's assume array of strings based on typical matrix structures.
+
+                    let hasEnemy = false;
+                    // Handle if it's array
+                    if (Array.isArray(relations)) {
+                        hasEnemy = relations.some(rel => {
+                            if (!rel) return false;
+                            return rel === "Enemy" || rel === "Rival" || (typeof rel === 'string' && rel.includes('War'));
+                        });
+                    } else {
+                        // Handle object
+                        hasEnemy = Object.values(relations).some(rel => {
+                            if (!rel) return false;
+                            return rel === "Enemy" || rel === "Rival" || (typeof rel === 'string' && rel.includes('War'));
+                        });
+                    }
+                    return hasEnemy;
+                });
+
+                if (statesWithEnemies.length > 0) {
+                    validStates = statesWithEnemies;
+                    console.log(`WarCampaign: Filtered to ${validStates.length} states with active enemies.`);
+                } else {
+                    console.warn("WarCampaign: No states with enemies found! Falling back to any valid state.");
+                }
+            }
 
             if (validStates.length > 0) {
                 // Pick random state
