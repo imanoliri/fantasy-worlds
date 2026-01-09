@@ -4,6 +4,7 @@ const relationColors = {
     "Neutral": "#D3D3D3",   // Light Grey
     "Suspicion": "#FFA500", // Orange
     "Enemy": "#FF4500",     // Orange Red
+    "Rival": "#FF4500",     // Orange Red
     "War": "#FF0000",       // Red
     "Vassal": "#87CEEB",    // Sky Blue
     "Suzerain": "#C8A2C8",  // Lilac

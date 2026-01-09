@@ -183,6 +183,7 @@ const relationColors = {
     "Neutral": "#D3D3D3",   // Light Grey
     "Suspicion": "#FFA500", // Orange
     "Enemy": "#FF4500",     // Orange Red
+    "Rival": "#FF4500",     // Orange Red
     "War": "#FF0000",       // Red
     "Vassal": "#87CEEB",    // Sky Blue
     "Suzerain": "#C8A2C8",  // Lilac
@@ -4899,7 +4900,19 @@ class WarCampaign extends MilitaryCampaign {
                     enemyCount = Object.values(relations).filter(r => r === "Enemy" || r === "Rival" || (typeof r === 'string' && r.includes('War'))).length;
                 }
             }
-            return { state, enemyCount };
+
+            // Calculate Stats from Burgs
+            let totalSoldiers = 0;
+            let totalCraftsmen = 0;
+            if (window.burgsData) {
+                const stateBurgs = window.burgsData.filter(b => b.state_id === state.id);
+                stateBurgs.forEach(b => {
+                    totalSoldiers += (b.soldier_quartiers || 0);
+                    totalCraftsmen += (b.craftsman_quartiers || 0);
+                });
+            }
+
+            return { state, enemyCount, totalSoldiers, totalCraftsmen };
         });
 
         const warlikeStates = rankedStates.filter(item => item.enemyCount > 0);
@@ -4917,23 +4930,30 @@ class WarCampaign extends MilitaryCampaign {
         panel.style.top = '50%';
         panel.style.right = '10px';
         panel.style.transform = 'translateY(-50%)';
-        panel.style.backgroundColor = 'rgba(0, 0, 0, 0.8)'; // Darker
-        panel.style.padding = '10px';
+        panel.style.backgroundColor = 'rgba(0, 0, 0, 0.85)'; // Darker & Opaque
+        panel.style.padding = '8px';
         panel.style.borderRadius = '8px';
         panel.style.color = '#fff';
-        panel.style.maxHeight = '400px';
+        panel.style.maxHeight = '500px'; // Taller
         panel.style.overflowY = 'auto'; // Scrollable
         panel.style.zIndex = '1000';
         panel.style.border = '1px solid #e74c3c'; // War Red Border
         panel.style.boxShadow = '0 0 10px rgba(0,0,0,0.5)';
-        panel.style.width = '220px';
+        panel.style.width = '240px'; // Wider for single line
+
+        // Prevent Map Zoom/Pan when interacting with this panel
+        const stopProp = (e) => e.stopPropagation();
+        panel.addEventListener('wheel', stopProp, { passive: false });
+        panel.addEventListener('mousedown', stopProp);
+        panel.addEventListener('dblclick', stopProp);
+        panel.addEventListener('touchstart', stopProp);
+        panel.addEventListener('touchmove', stopProp);
 
         let html = `
             <div class="faction-select-header" style="text-align:center; padding-bottom:5px; border-bottom:1px solid #555; margin-bottom:5px;">
                 <h4 style="margin:0; color:#f39c12;">Select Faction</h4>
-                <div style="display:flex; justify-content:space-between; font-size:10px; margin-top:2px;">
-                    <span style="color: #e74c3c;">🔥 Hostile</span>
-                    <span style="color: #2ecc71;">Peaceful 🕊️</span>
+                <div style="text-align: center; font-size:10px; margin-top:2px; color: #e74c3c; font-weight:bold;">
+                    🔥 Most Belligerent
                 </div>
             </div>
             <div class="faction-list">
@@ -4950,17 +4970,28 @@ class WarCampaign extends MilitaryCampaign {
                 const clickHandler = `updateDiplomacyColors(${s.id})`;
 
                 html += `
-                    <label class="faction-option" style="display: flex; justify-content: space-between; align-items:center; padding: 6px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.2s;">
-                        <div style="display:flex; align-items:center;">
-                            <input type="radio" name="warFactionSelect" value="${s.id}" ${isChecked} onchange="${clickHandler}">
-                            <span style="font-weight: bold; color: ${s.color}; margin-left: 5px; font-size:13px;">${s.name}</span>
+                    <label class="faction-option" style="display: flex; align-items: center; padding: 4px 6px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.2s; white-space: nowrap; overflow: hidden;">
+                        <input type="radio" name="warFactionSelect" value="${s.id}" ${isChecked} onchange="${clickHandler}" style="margin-right: 6px;">
+                        
+                        <div style="flex: 1; overflow: hidden; text-overflow: ellipsis; font-weight: bold; color: ${s.color}; font-size:13px; margin-right: 8px;">
+                            ${s.name}
                         </div>
-                        <div style="font-size: 0.8em; color: #bbb;">${item.enemyCount} ⚔️</div>
+                        
+                        <div style="font-size: 0.8em; color: #ccc; flex-shrink: 0;">
+                            <span title="Craftsmen">${item.totalCraftsmen}🛠️</span> 
+                            <span title="Soldiers" style="margin-left:4px;">${item.totalSoldiers}🛡️</span> 
+                            <span style="color:#888; margin:0 4px;">vs</span> 
+                            <span title="enemies">${item.enemyCount}⚔️</span>
+                        </div>
                     </label>
                 `;
             });
         }
-        html += `</div>`;
+        html += `</div>
+            <div style="text-align: center; font-size:10px; margin-top:5px; color: #2ecc71; font-weight:bold; border-top:1px solid #555; padding-top:5px;">
+                Most Peaceful 🕊️
+            </div>
+        `;
         panel.innerHTML = html;
         container.appendChild(panel);
 
