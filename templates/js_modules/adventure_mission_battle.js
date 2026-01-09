@@ -126,7 +126,6 @@ class BattleMission extends AdventureMission {
 
         // Use ratio R = Player / Enemy.
         // P(Win) = R^2 / (R^2 + 1)
-        const mySoldiers = AdventureManager.party.soldiers;
 
         // Use Battle Class logic for consistency
         const winProb = battle.calculateWinProbability();

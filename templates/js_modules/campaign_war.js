@@ -190,15 +190,9 @@ class WarCampaign extends MilitaryCampaign {
     }
 
     refreshVisuals() {
-        this.clearHighlights(); // Clear all existing rings/markers
+        super.refreshVisuals(); // Draws ⚔️ on all enemies and 🚩 on conquered
 
-        // 1. Mark Conquered Burgs with Flag
-        this.conqueredBurgs.forEach(burgId => {
-            this.drawTextMarker(burgsData.find(b => b.id === burgId)?.cell_id || 0, "🚩");
-        });
-
-        // 2. Highlight Enemy Capitals (Objectives)
-        // Redraw red rings for un-conquered enemy capitals
+        // 2. Highlight Enemy Capitals (Objectives) with Rings
         this.enemyStateIds.forEach(stateId => {
             if (typeof statesData !== 'undefined') {
                 const targetState = statesData.find(s => s.id === stateId);
@@ -207,32 +201,12 @@ class WarCampaign extends MilitaryCampaign {
                     if (!this.conqueredBurgs.has(targetState.capital_id)) {
                         const enemyCapital = burgsData.find(b => b.id === targetState.capital_id);
                         if (enemyCapital) {
-                            this.highlightCell(enemyCapital.cell_id, "#c0392b"); // Red for enemy
+                            this.highlightCell(enemyCapital.cell_id, "#c0392b"); // Red Ring for objective
                         }
                     }
                 }
             }
         });
-    }
-
-    drawTextMarker(cellId, text) {
-        if (!graphData[cellId]) return;
-        let x, y;
-        const burg = burgsData.find(b => b.cell_id === cellId);
-        if (burg) { x = burg.x; y = burg.y; }
-        else { x = graphData[cellId].p[0]; y = graphData[cellId].p[1]; }
-
-        let container = document.getElementById('campaignHighlights');
-        if (!container) return;
-
-        const textEl = document.createElementNS("http://www.w3.org/2000/svg", "text");
-        textEl.setAttribute("x", x);
-        textEl.setAttribute("y", y + 5);
-        textEl.setAttribute("text-anchor", "middle");
-        textEl.setAttribute("font-size", "20px");
-        textEl.setAttribute("style", "pointer-events: none; user-select: none; text-shadow: 1px 1px 2px black;");
-        textEl.textContent = text;
-        container.appendChild(textEl);
     }
 
     updateObjectiveText() {

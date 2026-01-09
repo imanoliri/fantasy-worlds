@@ -11,13 +11,14 @@ class HordeCampaign extends MilitaryCampaign {
 
         // Horde Tuning: Uses RaidBattle
         this.BattleClass = RaidBattle;
+        this.showFriendlyMarkers = true;
 
         // Objectives
         this.addObjective("obj_horde_armies", "Defeat Armies (0/10)", "battle", () => this.armiesDefeated >= 10);
         this.addObjective("obj_horde_capitals", "Pillage Capitals (0/?)", "domination", () => this.checkCapitalsVictory());
 
         // Bind methods
-        this.onBattleWon = this.onBattleWon.bind(this); // For event listeners
+        this.onBattleWonEventListener = this.onBattleWonEventListener.bind(this); // For event listeners
     }
 
 
@@ -58,12 +59,17 @@ class HordeCampaign extends MilitaryCampaign {
         super.onStart();
         console.log("Horde Campaign Started");
         this.updateObjectiveText();
-        this.refreshVisuals();
 
         // Listen for battle wins from standard battles
         if (AdventureManager.events) {
             AdventureManager.events.on('battleWon', this.onBattleWonEventListener.bind(this));
         }
+    }
+
+    onAdventureStart() {
+        super.onAdventureStart();
+        // Now map/UI is ready
+        this.refreshVisuals();
     }
 
     onEnd() {
@@ -81,21 +87,19 @@ class HordeCampaign extends MilitaryCampaign {
     }
 
     refreshVisuals() {
-        this.clearHighlights(); // Clear all existing rings/markers
-
-        // 1. Mark ANY pillaged burg with Red X
-        this.pillagedBurgs.forEach(burgId => {
-            this.drawTextMarker(burgsData.find(b => b.id === burgId)?.cell_id || 0, "❌");
-        });
+        super.refreshVisuals(); // Draws ⚔️ on all enemies and 🚩 on pillaged
 
         // 2. Highlight UNPILLAGED Capitals with Orange Ring
-        const capitals = burgsData.filter(b => b.is_capital);
-        capitals.forEach(burg => {
-            if (!this.pillagedBurgs.has(burg.id)) {
-                // Target: Show Orange Ring
-                this.highlightCell(burg.cell_id, "#e67e22");
-            }
-        });
+        if (window.burgsData) {
+            // 2. Highlight UNPILLAGED Capitals with Orange Ring
+            const capitals = burgsData.filter(b => b.is_capital);
+            capitals.forEach(burg => {
+                if (!this.pillagedBurgs.has(burg.id)) {
+                    // Target: Show Orange Ring
+                    this.highlightCell(burg.cell_id, "#e67e22");
+                }
+            });
+        }
     }
 
     onBeforeMissionSpawn(data) {

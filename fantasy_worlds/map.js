@@ -879,29 +879,31 @@ class BattleMission extends AdventureMission {
 
         const validCells = this.getValidSpawnCells(occupied);
 
-        if (validCells.length > 0) {
-            const randomCell = validCells[Math.floor(Math.random() * validCells.length)];
-            const amount = Math.floor(Math.random() * (200 - 20 + 1)) + 20; // 20 to 200
-            this.data = { cell: randomCell.i, soldiers: amount };
-            this.updateVisuals();
-        }
+        if (validCells.length === 0) return;
+
+        const randomCell = validCells[Math.floor(Math.random() * validCells.length)];
+        const amount = Math.floor(Math.random() * (200 - 20 + 1)) + 20; // 20 to 200
+        this.data = { cell: randomCell.i, soldiers: amount };
+        this.updateVisuals();
     }
 
     updateVisuals() {
         if (!this.element) return;
 
-        if (this.data && AdventureManager.active) {
-            const eData = graphData[this.data.cell];
-            if (eData) {
-                this.element.setAttribute("transform", `translate(${eData.p[0]}, ${eData.p[1]})`);
-                this.element.style.display = "block";
-                if (this.countElement) this.countElement.textContent = this.data.soldiers;
-            } else {
-                this.element.style.display = "none";
-            }
-        } else {
+        if (!this.data || !AdventureManager.active) {
             this.element.style.display = "none";
+            return;
         }
+
+        const eData = graphData[this.data.cell];
+        if (!eData) {
+            this.element.style.display = "none";
+            return;
+        }
+
+        this.element.setAttribute("transform", `translate(${eData.p[0]}, ${eData.p[1]})`);
+        this.element.style.display = "block";
+        if (this.countElement) this.countElement.textContent = this.data.soldiers;
     }
 
     getTargetCell() {
@@ -927,12 +929,15 @@ class BattleMission extends AdventureMission {
         const mySoldiers = AdventureManager.party.soldiers;
         const enemySoldiers = this.data.soldiers;
 
+        const battle = new FieldBattle(null, enemySoldiers);
+
         // Use ratio R = Player / Enemy.
         // P(Win) = R^2 / (R^2 + 1)
-        const ratio = mySoldiers / enemySoldiers;
-        const k = 2; // Squared for sharper curve
-        const winProb = (Math.pow(ratio, k) / (Math.pow(ratio, k) + 1));
+
+        // Use Battle Class logic for consistency
+        const winProb = battle.calculateWinProbability();
         const winPercent = (winProb * 100).toFixed(1);
+        const ratio = mySoldiers / enemySoldiers; // Purely for display
 
         const content = `
              <h2>⚔️ Battle Imminent ⚔️</h2>
@@ -964,75 +969,50 @@ class BattleMission extends AdventureMission {
     resolve() {
         if (!this.data) return;
 
-        const mySoldiers = AdventureManager.party.soldiers;
-        const enemySoldiers = this.data.soldiers;
-        const ratio = mySoldiers / enemySoldiers;
-        const k = 2;
-        const winProb = (Math.pow(ratio, k) / (Math.pow(ratio, k) + 1));
+        const battle = new FieldBattle(null, this.data.soldiers);
 
-        const roll = Math.random();
+        // The Battle class handles everything (Math, Rewards, Casualties, UI, Events)
+        const isWin = battle.resolve();
 
-        if (roll < winProb) {
-            // WIN
-            const goldReward = Math.floor(enemySoldiers / 10) * 2;
-            const soldierReward = Math.floor(enemySoldiers / 10) * 2;
+        AdventureManager.closePopup();
 
-            AdventureManager.party.gold += goldReward;
-            AdventureManager.party.soldiers += soldierReward; // replenish or recruit
-
-            AdventureManager.showFeedback(`VICTORY! Gained ${goldReward} Gold & ${soldierReward} Soldiers.`);
-
-            // Emit Event
-            if (AdventureManager.events) {
-                AdventureManager.events.emit('battleWon', { enemySoldiers: this.data.soldiers });
-            }
-
-            // Floating Text (Win)
-            const cell = graphData[AdventureManager.party.cell];
-            if (cell) {
-                AdventureManager.showFloatingText(`VICTORY!`, cell.p[0], cell.p[1] - 60, "#2ecc71");
-                AdventureManager.showFloatingText(`+${goldReward} 💰`, cell.p[0], cell.p[1] - 40, "#f1c40f");
-                AdventureManager.showFloatingText(`+${soldierReward} ⚔️`, cell.p[0], cell.p[1] - 20, "#9b59b6");
-            }
-
-            AdventureManager.closePopup();
-            this.spawn(); // Respawn
+        if (isWin) {
+            this.spawn(); // Respawn on victory
             AdventureManager.updateStats();
-        } else {
-            // LOSE
-            // Emit Event
-            if (AdventureManager.events) {
-                AdventureManager.events.emit('battleLost', { enemySoldiers: this.data.soldiers });
-            }
-
-            // Retain half of starting army, round down to nearest 5, min 5
-            const retained = Math.max(5, Math.floor((mySoldiers / 2) / 5) * 5);
-            const lost = mySoldiers - retained;
-            AdventureManager.party.soldiers = retained;
-
-            AdventureManager.updateStats();
-            AdventureManager.closePopup();
-
-            // Floating Text (Loss)
-            const cell = graphData[AdventureManager.party.cell];
-            if (cell) {
-                AdventureManager.showFloatingText(`DEFEAT!`, cell.p[0], cell.p[1] - 40, "#e74c3c");
-                if (lost > 0) AdventureManager.showFloatingText(`-${lost} ⚔️`, cell.p[0], cell.p[1] - 20, "#e74c3c");
-            }
-
-            // Damage enemy
-            const damage = mySoldiers;
-            this.data.soldiers = Math.max(0, this.data.soldiers - damage);
-
-            if (this.data.soldiers === 0) {
-                AdventureManager.showFeedback(`DEFEAT! But you wiped out the enemy!`);
-                this.element.style.display = "none";
-                this.data = null;
-                this.spawn();
-            } else {
-                AdventureManager.showFeedback(`DEFEAT! Enemy took ${damage} casualties.`);
-            }
+            return;
         }
+
+        // DEFEAT
+        // FieldBattle emits 'battleLost'.
+        // Logic for "Damage Enemy on Defeat" was in old code.
+        // FieldBattle emit "battleLost" with damageDealt. Use that event?
+        // Or handle it here manually since we have this.data access?
+
+        // Re-implement damage to mission data here since FieldBattle is transient
+        const damage = AdventureManager.party.soldiers; // Soldiers before this battle? No, logic is confusing.
+        // Old logic: const damage = mySoldiers; (At start of battle)
+        // But AdventureManager.party.soldiers is updated inside battle.resolve() -> onDefeat() -> calculateCasualties().
+        // So we need snapshots.
+
+        // Simpler: Just fully respawn or reduce strength.
+        // Let's stick to old logic: Enemy takes damage.
+
+        // We can listen to the event we just emitted? No, synchronous.
+
+        // Let's manually apply damage to this.data
+        const prevSoldiers = battle.playerSoldiers; // Captured in constructor
+        this.data.soldiers = Math.max(0, this.data.soldiers - prevSoldiers);
+
+        if (this.data.soldiers === 0) {
+            AdventureManager.showFeedback(`DEFEAT! But you wiped out the enemy!`);
+            this.element.style.display = "none";
+            this.data = null;
+            this.spawn();
+        } else {
+            AdventureManager.showFeedback(`DEFEAT! Enemy took ${prevSoldiers} casualties.`);
+        }
+
+        AdventureManager.updateStats();
     }
 }
 
@@ -3001,6 +2981,15 @@ const AdventureManager = {
         if (modal.style.display === 'block') {
             modal.style.display = 'none';
         } else {
+            // Inject Campaign Settings if available
+            const settingsCol = modal.querySelector('.options-column:nth-child(2)');
+            if (settingsCol) {
+                if (CampaignManager.active && CampaignManager.currentCampaignInstance && CampaignManager.currentCampaignInstance.getSettingsHtml) {
+                    settingsCol.innerHTML = `<h3>Campaign Settings</h3>` + CampaignManager.currentCampaignInstance.getSettingsHtml();
+                } else {
+                    settingsCol.innerHTML = `<h3>Visual Settings</h3><p style="color: grey; font-style: italic;">(No Active Campaign)</p>`;
+                }
+            }
             modal.style.display = 'block';
         }
     },
@@ -3377,17 +3366,51 @@ class BaseCampaign {
         this.active = false;
         this.objectives = [];
         this.startConfig = null;
+
+        // Bind Handlers
+        this.onAdventureStart = this.onAdventureStart.bind(this);
+        this.onUpdateStats = this.onUpdateStats.bind(this);
+        this.onMissionStart = this.onMissionStart.bind(this);
+        this.onMissionComplete = this.onMissionComplete.bind(this);
+        this.onBurgPopupOpened = this.onBurgPopupOpened.bind(this);
+        this.onBeforeBurgPopup = this.onBeforeBurgPopup.bind(this);
+        this.onBeforeMissionSpawn = this.onBeforeMissionSpawn.bind(this);
+        this.onCalculateMissionRewards = this.onCalculateMissionRewards.bind(this);
     }
 
     // Lifecycle Hooks
     onStart() {
         this.active = true;
         console.log(`Campaign '${this.name}' Started.`);
+
+        // Register Listeners
+        if (AdventureManager.events) {
+            AdventureManager.events.on('start', this.onAdventureStart);
+            AdventureManager.events.on('updateStats', this.onUpdateStats); // Direct bind assumes signature match or ignored args
+            AdventureManager.events.on('missionStart', this.onMissionStart);
+            AdventureManager.events.on('missionComplete', this.onMissionComplete);
+            AdventureManager.events.on('burgPopupOpened', this.onBurgPopupOpened);
+            AdventureManager.events.on('beforeBurgPopup', this.onBeforeBurgPopup);
+            AdventureManager.events.on('beforeMissionSpawn', this.onBeforeMissionSpawn);
+            AdventureManager.events.on('calculateMissionRewards', this.onCalculateMissionRewards);
+        }
     }
 
     onEnd() {
         this.active = false;
         this.clearHighlights();
+
+        // Cleanup Listeners
+        if (AdventureManager.events) {
+            AdventureManager.events.off('start', this.onAdventureStart);
+            AdventureManager.events.off('updateStats', this.onUpdateStats);
+            AdventureManager.events.off('missionStart', this.onMissionStart);
+            AdventureManager.events.off('missionComplete', this.onMissionComplete);
+            AdventureManager.events.off('burgPopupOpened', this.onBurgPopupOpened);
+            AdventureManager.events.off('beforeBurgPopup', this.onBeforeBurgPopup);
+            AdventureManager.events.off('beforeMissionSpawn', this.onBeforeMissionSpawn);
+            AdventureManager.events.off('calculateMissionRewards', this.onCalculateMissionRewards);
+        }
         console.log(`Campaign '${this.name}' Ended.`);
     }
 
@@ -3562,18 +3585,8 @@ const CampaignManager = {
         if (!this.currentCampaignInstance) return;
 
         this.active = true;
-        this.active = true;
         AdventureManager.init();
         AdventureManager.active = true;
-
-        AdventureManager.events.on('start', () => this.currentCampaignInstance.onAdventureStart());
-        AdventureManager.events.on('updateStats', () => this.currentCampaignInstance.onUpdateStats(AdventureManager.party));
-        AdventureManager.events.on('missionStart', (d) => this.currentCampaignInstance.onMissionStart(d));
-        AdventureManager.events.on('missionComplete', (d) => this.currentCampaignInstance.onMissionComplete(d));
-        AdventureManager.events.on('burgPopupOpened', (d) => this.currentCampaignInstance.onBurgPopupOpened(d));
-        AdventureManager.events.on('beforeBurgPopup', (d) => this.currentCampaignInstance.onBeforeBurgPopup(d));
-        AdventureManager.events.on('beforeMissionSpawn', (d) => this.currentCampaignInstance.onBeforeMissionSpawn(d));
-        AdventureManager.events.on('calculateMissionRewards', (d) => this.currentCampaignInstance.onCalculateMissionRewards(d));
 
         this.currentCampaignInstance.onStart(); // Call *before* Adventure start to register listeners
 
@@ -3661,6 +3674,516 @@ const CampaignManager = {
 };
 
 window.CampaignManager = CampaignManager;
+
+
+
+class Battle {
+    constructor(campaign, burgId, enemyStrength) {
+        this.campaign = campaign;
+        this.burg = null;
+        this.burgId = null;
+        if (burgId) {
+            this.burg = burgsData.find(b => b.id === burgId);
+            this.burgId = burgId;
+        }
+        this.enemyStrength = enemyStrength;
+        this.playerSoldiers = AdventureManager.party.soldiers;
+
+        // Base Defaults
+        this.winCurveK = 2.0;
+    }
+
+    // --- Core Flow ---
+
+    resolve() {
+        if (this.playerSoldiers <= 0) {
+            AdventureManager.showFeedback("You have no soldiers to fight with!");
+            return false;
+        }
+
+        const winProb = this.calculateWinProbability();
+        const isWin = Math.random() < winProb;
+
+        if (isWin) {
+            this.onVictory();
+            return true;
+        }
+
+        this.onDefeat();
+        return false;
+    }
+
+    // --- Calculations (Overridable) ---
+
+    calculateWinProbability() {
+        if (this.enemyStrength <= 0) return 1.0;
+        const ratio = this.playerSoldiers / this.enemyStrength;
+        // Logistic-like curve: R^k / (R^k + 1)
+        return Math.pow(ratio, this.winCurveK) / (Math.pow(ratio, this.winCurveK) + 1);
+    }
+
+    calculateCasualties(isVictory) {
+        // Default Logic: 5-25% on win, 25-50% on lose
+        let min = 0;
+        let max = 0;
+        if (isVictory) {
+            min = 0.05;
+            max = 0.25;
+        } else {
+            min = 0.25;
+            max = 0.50;
+        }
+        const lossPct = min + (Math.random() * (max - min));
+        return Math.floor(this.playerSoldiers * lossPct);
+    }
+
+    calculateRewards() {
+        // Default Logic
+        const gold = Math.floor(this.enemyStrength * 0.1);
+        const soldiers = Math.floor(this.enemyStrength * 0.1);
+        let food = 0;
+        if (this.burg && this.burg.net_food > 0) {
+            food = Math.floor(this.burg.net_food * 0.4);
+        }
+        return { gold, soldiers, food };
+    }
+
+    // --- Outcomes ---
+
+    onVictory() {
+        const rewards = this.calculateRewards();
+        const losses = this.calculateCasualties(true);
+
+        // Apply changes
+        AdventureManager.party.gold += rewards.gold;
+        AdventureManager.party.soldiers += rewards.soldiers;
+        AdventureManager.party.food += rewards.food;
+        AdventureManager.party.soldiers = Math.max(0, AdventureManager.party.soldiers - losses);
+
+        // Event Emission (Campaign will listen)
+        if (AdventureManager.events) {
+            AdventureManager.events.emit('battleWon', {
+                burg: this.burg,
+                rewards: rewards,
+                campaignId: this.campaign ? this.campaign.id : null
+            });
+        }
+
+        // UI Feedback
+        const targetName = this.burg ? this.burg.name : "Enemy Army";
+        AdventureManager.showFeedback(`Victory! ${targetName} defeated!`);
+        this.showFloatingStats(true, rewards, losses);
+
+        AdventureManager.updateStats();
+    }
+
+    onDefeat() {
+        const losses = this.calculateCasualties(false);
+        AdventureManager.party.soldiers = Math.max(0, this.playerSoldiers - losses);
+
+        // Event Emission (Campaign will listen)
+        if (AdventureManager.events) {
+            AdventureManager.events.emit('battleLost', {
+                burg: this.burg,
+                campaignId: this.campaign ? this.campaign.id : null
+            });
+        }
+
+        // UI Feedback
+        const targetName = this.burg ? this.burg.name : "Enemy Army";
+        AdventureManager.showFeedback(`Defeat! ${targetName} was too strong.`);
+        this.showFloatingStats(false, null, losses);
+
+        AdventureManager.updateStats();
+    }
+
+    showFloatingStats(isWin, rewards, losses) {
+        const cell = graphData[AdventureManager.party.cell];
+        if (!cell) return;
+        const cx = cell.p[0];
+        const cy = cell.p[1];
+
+        if (isWin) {
+            AdventureManager.showFloatingText(`VICTORY!`, cx, cy - 80, "#2ecc71");
+            AdventureManager.showFloatingText(`+${rewards.gold} 💰`, cx, cy - 60, "#f1c40f");
+            if (rewards.food > 0) AdventureManager.showFloatingText(`+${rewards.food} 🍎`, cx, cy - 40, "#e67e22");
+            if (rewards.soldiers > 0) AdventureManager.showFloatingText(`+${rewards.soldiers} ⚔️`, cx, cy - 20, "#9b59b6");
+            AdventureManager.showFloatingText(`-${losses} 🩸`, cx, cy, "#e74c3c");
+            return
+        }
+        AdventureManager.showFloatingText(`DEFEAT!`, cx, cy - 40, "#e74c3c");
+        AdventureManager.showFloatingText(`-${losses} 🩸`, cx, cy - 20, "#e74c3c");
+    }
+}
+
+class SiegeBattle extends Battle {
+    constructor(campaign, burgId, enemyStrength) {
+        super(campaign, burgId, enemyStrength);
+        this.winCurveK = 1.8; // Chaos of War
+    }
+
+    calculateCasualties(isVictory) {
+        // Sieges are bloody. 
+        // Win: 15-25% (Standardized)
+        // Lose: 25-50% (Rout)
+        let min = 0;
+        let max = 0;
+        if (isVictory) {
+            min = 0.15;
+            max = 0.25;
+        } else {
+            min = 0.25;
+            max = 0.50;
+        }
+        const lossPct = min + (Math.random() * (max - min));
+        return Math.floor(this.playerSoldiers * lossPct);
+    }
+}
+
+class RaidBattle extends Battle {
+    constructor(campaign, burgId, enemyStrength) {
+        super(campaign, burgId, enemyStrength);
+        this.winCurveK = 2.2; // Steamroll mechanics
+    }
+
+    calculateCasualties(isVictory) {
+        if (isVictory) {
+            // Snowball: If we massively outnumber them, casualties are negligible
+            const ratio = this.playerSoldiers / this.enemyStrength;
+            if (ratio > 3) return Math.floor(this.playerSoldiers * 0.02); // 2% losses
+            if (ratio > 2) return Math.floor(this.playerSoldiers * 0.05); // 5% losses
+
+            // Standard risk
+            return Math.floor(this.playerSoldiers * 0.15);
+        }
+
+        // Failed raid is disastrous
+        return Math.floor(this.playerSoldiers * 0.30);
+    }
+
+    calculateRewards() {
+        // Pillage: High Yields
+        const gold = Math.floor(this.enemyStrength / 4); // More gold
+        const soldiers = Math.floor(this.enemyStrength / 4); // Forced conscription
+        let food = 0;
+        if (this.burg && this.burg.net_food > 0) {
+            food = Math.floor(this.burg.net_food * 0.5); // Take half the stores
+        }
+        return { gold, soldiers, food };
+    }
+
+    onVictory() {
+        super.onVictory();
+    }
+}
+
+class FieldBattle extends Battle {
+    constructor(cellId, enemyStrength) {
+        super(null, null, enemyStrength);
+        this.cellId = cellId;
+    }
+
+    calculateRewards() {
+        // Mission Logic: Gold/Soldiers ~ enemy / 10 * 2 (which is 0.2, basically 20%)
+        const gold = Math.floor(this.enemyStrength * 0.2);
+        const soldiers = Math.floor(this.enemyStrength * 0.2);
+        // No food from field battles usually
+        return { gold, soldiers, food: 0 };
+    }
+
+    calculateCasualties(isVictory) {
+        if (isVictory) {
+            // Standard risk? Or matching Mission Logic?
+            return Math.floor(this.playerSoldiers * 0.10);
+        }
+        // Mission Logic: Retain half of starting army, round down to nearest 5.
+        const retained = Math.max(5, Math.floor((this.playerSoldiers / 2) / 5) * 5);
+        return this.playerSoldiers - retained;
+    }
+
+    onVictory() {
+        // Super handles generic rewards and UI
+        super.onVictory();
+        if (AdventureManager.events) {
+            AdventureManager.events.emit('battleWon', { enemySoldiers: this.enemyStrength });
+        }
+    }
+
+    onDefeat() {
+        super.onDefeat(); // Applies casualties
+
+        if (AdventureManager.events) {
+            AdventureManager.events.emit('battleLost', {
+                enemySoldiers: this.enemyStrength,
+                damageDealt: this.playerSoldiers // Assuming full commitment 
+            });
+        }
+    }
+}
+
+
+class MilitaryCampaign extends BaseCampaign {
+    constructor(id, name, description) {
+        super(id, name, description);
+        // Configuration
+        this.battleMarker = "⚔️";
+        this.conqueredStatusLabel = "Conquered";
+        this.BattleClass = Battle; // Default Strategy
+        this.showFriendlyMarkers = false; // Default off
+        this.showEnemyMarkers = true;     // Default on
+        this.showConqueredMarkers = true; // Default on
+
+        // Bind Handlers
+        this.handleBattleWin = this.handleBattleWin.bind(this);
+        this.handleBattleLoss = this.handleBattleLoss.bind(this);
+    }
+
+    onStart() {
+        super.onStart();
+        // Register Event Listeners
+        if (AdventureManager.events) {
+            AdventureManager.events.on('battleWon', this.handleBattleWin);
+            AdventureManager.events.on('battleLost', this.handleBattleLoss);
+        }
+    }
+
+    onEnd() {
+        super.onEnd();
+        // Cleanup Listeners
+        if (AdventureManager.events) {
+            AdventureManager.events.off('battleWon', this.handleBattleWin);
+            AdventureManager.events.off('battleLost', this.handleBattleLoss);
+        }
+    }
+
+    // --- Helper Methods ---
+
+    getWinProbability(playerSoldiers, enemySoldiers) {
+        if (enemySoldiers <= 0) return 1.0;
+        const ratio = playerSoldiers / enemySoldiers;
+        const k = 2; // Sharpness of win probability curve (higher = skills matter more) - moved from config
+        // Logistic-like curve: R^k / (R^k + 1)
+        return Math.pow(ratio, k) / (Math.pow(ratio, k) + 1);
+    }
+
+    // --- Abstract / Overridable Methods ---
+
+    // Factory Method for Battle Instance using configured Class
+    createBattle(burgId, enemyStrength) {
+        return new this.BattleClass(this, burgId, enemyStrength);
+    }
+
+
+    // --- Abstract / Overridable Methods ---
+
+    isHostile(burg) {
+        return false; // Override in child
+    }
+
+    isConquered(burg) {
+        return false; // Override in child
+    }
+
+    onBattleWin(burg, rewards) {
+        // Override in child to update state (add to Set) and objectives
+    }
+
+    onBattleLoss(burg) {
+        // Override in child if needed
+    }
+
+    // --- Event Handlers ---
+
+    handleBattleWin(data) {
+        if (data.campaignId !== this.id) return;
+        this.onBattleWin(data.burg, data.rewards);
+        this.refreshVisuals();
+    }
+
+    handleBattleLoss(data) {
+        if (data.campaignId !== this.id) return;
+        this.onBattleLoss(data.burg);
+        this.refreshVisuals();
+    }
+
+    // --- Shared Interaction Logic ---
+
+    onBeforeBurgPopup(data) {
+        if (this.isHostile(data.burg)) {
+            data.preventReplenish = true;
+        }
+    }
+
+    onBurgPopupOpened(context) {
+        const { burg, buttons } = context;
+
+        // 1. Check if already conquered
+        if (this.isConquered(burg)) {
+            buttons.unshift({
+                label: `City ${this.conqueredStatusLabel} (Yours)`,
+                action: () => { },
+                disabled: true,
+                style: "background: #27ae60; cursor: default; opacity: 1.0; color: white;",
+                class: "btn-recruit"
+            });
+            return;
+        }
+
+        // 2. Logic for Hostile Cities
+        if (this.isHostile(burg)) {
+            // Clear peaceful options
+            buttons.length = 0;
+
+            // Calculate Strength
+            const soldierQ = burg.soldier_quartiers || 0;
+            const strength = Math.max(10, 20 + (15 * soldierQ));
+
+            buttons.push({
+                label: `Attack City (Strength: ${strength})`,
+                onClick: `CampaignManager.currentCampaignInstance.showBattlePopup(${burg.id}, ${strength})`,
+                class: "btn-attack",
+                style: "background: #c0392b; color: white;"
+            });
+            return;
+        }
+
+        // 3. Logic for Non-Hostile (Neutral) - allow attack if not identical to home?
+        // For now, base class defaults to ONLY hostile check. 
+        // Child classes can call super() and then add more buttons if they want.
+    }
+
+    // --- Shared Battle UI ---
+
+    showBattlePopup(burgId, enemyStrength) {
+        if (!AdventureManager.popupElement) AdventureManager.openPopup('');
+
+        let overlay = document.getElementById('modalOverlay');
+        if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.id = 'modalOverlay';
+            overlay.className = 'modal-overlay';
+            document.body.appendChild(overlay);
+        }
+        overlay.style.display = 'block';
+
+        // Create a temporary battle instance just to calculate probability
+        const battle = this.createBattle(burgId, enemyStrength);
+        const mySoldiers = battle.playerSoldiers;
+
+        const winProb = battle.calculateWinProbability();
+        const winPercent = (winProb * 100).toFixed(1);
+
+        const content = `
+             <h2>⚔️ Battle Imminent ⚔️</h2>
+             <div class="content-wrapper" style="display: flex; gap: 20px; align-items: center; justify-content: center;">
+                 <div style="text-align: center;">
+                    <h3>Your Army</h3>
+                    <div style="font-size: 24px; color: #2ecc71; font-weight: bold;">${mySoldiers} 🛡️</div>
+                 </div>
+                 <div style="font-size: 20px; font-weight: bold;">VS</div>
+                 <div style="text-align: center;">
+                    <h3>Garrison</h3>
+                    <div style="font-size: 24px; color: #e74c3c; font-weight: bold;">${enemyStrength} ⚔️</div>
+                 </div>
+             </div>
+             
+             <div style="text-align: center; margin: 15px 0;">
+                <div>Win Probability: <strong>${winPercent}%</strong></div>
+             </div>
+             
+             <div class="actions">
+                 <button class="btn-recruit" style="background-color: #c0392b;" onclick="CampaignManager.currentCampaignInstance.resolveCityBattle(${burgId}, ${enemyStrength})">ATTACK!</button>
+                 <button class="btn-leave" onclick="AdventureManager.closePopup()">Retreat</button>
+             </div>
+        `;
+        AdventureManager.openPopup(content);
+    }
+
+    // --- Shared Battle Resolution ---
+
+    resolveCityBattle(burgId, enemySoldiers) {
+        AdventureManager.closePopup();
+
+        // Use factory to get correct Strategy
+        const battle = this.createBattle(burgId, enemySoldiers);
+        battle.resolve();
+    }
+
+    // --- Visual Helpers ---
+
+    refreshVisuals() {
+        this.clearHighlights();
+
+        if (!window.burgsData) return;
+
+        burgsData.forEach(burg => {
+            if (this.showConqueredMarkers && this.isConquered(burg)) {
+                this.drawTextMarker(burg.cell_id, "🚩");
+            } else if (this.showEnemyMarkers && this.isHostile(burg)) {
+                this.drawTextMarker(burg.cell_id, "⚔️");
+            } else if (this.showFriendlyMarkers) {
+                // Friendly / Neutral
+                this.drawTextMarker(burg.cell_id, "🛡️");
+            }
+        });
+    }
+
+    drawTextMarker(cellId, text) {
+        if (!graphData[cellId]) return;
+        let x, y;
+        const burg = burgsData.find(b => b.cell_id === cellId);
+        if (burg) { x = burg.x; y = burg.y; }
+        else { x = graphData[cellId].p[0]; y = graphData[cellId].p[1]; }
+
+        let container = document.getElementById('campaignHighlights');
+        if (!container) {
+            container = document.createElementNS("http://www.w3.org/2000/svg", "g");
+            container.setAttribute("id", "campaignHighlights");
+            const svg = document.getElementById('mapSvg');
+            if (svg) svg.appendChild(container);
+            else return; // If mapSvg missing, we really can't draw
+        }
+
+        const textEl = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        textEl.setAttribute("x", x);
+        textEl.setAttribute("y", y + 5);
+        textEl.setAttribute("text-anchor", "middle");
+        textEl.setAttribute("font-size", "14px"); // Slightly smaller for global clutter reduction
+        textEl.setAttribute("style", "pointer-events: none; user-select: none; text-shadow: 1px 1px 2px black;");
+        textEl.textContent = text;
+        container.appendChild(textEl);
+    }
+
+    // --- UI Integration ---
+
+    getSettingsHtml() {
+        return `
+            <div class="campaign-settings">
+                <h4>Map Visuals</h4>
+                <label style="display: block; margin: 5px 0;">
+                    <input type="checkbox" onchange="CampaignManager.currentCampaignInstance.toggleSetting('showEnemyMarkers', this.checked)" ${this.showEnemyMarkers ? 'checked' : ''}>
+                    Show Enemies (⚔️)
+                </label>
+                <label style="display: block; margin: 5px 0;">
+                    <input type="checkbox" onchange="CampaignManager.currentCampaignInstance.toggleSetting('showConqueredMarkers', this.checked)" ${this.showConqueredMarkers ? 'checked' : ''}>
+                    Show Conquered (🚩)
+                </label>
+                <label style="display: block; margin: 5px 0;">
+                    <input type="checkbox" onchange="CampaignManager.currentCampaignInstance.toggleSetting('showFriendlyMarkers', this.checked)" ${this.showFriendlyMarkers ? 'checked' : ''}>
+                    Show Friendly (🛡️)
+                </label>
+            </div>
+        `;
+    }
+
+    toggleSetting(setting, value) {
+        if (this[setting] !== undefined) {
+            this[setting] = value;
+            this.refreshVisuals();
+            console.log(`Updated ${setting} to ${value}`);
+        }
+    }
+}
 
 
 class SiegeDefenseCampaign extends BaseCampaign {
@@ -4084,76 +4607,107 @@ CampaignManager.availableCampaigns.push(DiplomatCampaign);
 
 
 ﻿
-class HordeCampaign extends BaseCampaign {
+class HordeCampaign extends MilitaryCampaign {
     constructor() {
         super("horde_v1", "The Horde", "Lead a horde to pillage the world. Defeat 10 armies and pillage all capitals.");
         this.armiesDefeated = 0;
         this.pillagedBurgs = new Set(); // Set of burg IDs
         this.partyStartConfig = { resources: { soldiers: 40 } };
 
+        // Base Class Overrides
+        this.conqueredStatusLabel = "Pillaged";
+
+        // Horde Tuning: Uses RaidBattle
+        this.BattleClass = RaidBattle;
+        this.showFriendlyMarkers = true;
+
         // Objectives
         this.addObjective("obj_horde_armies", "Defeat Armies (0/10)", "battle", () => this.armiesDefeated >= 10);
         this.addObjective("obj_horde_capitals", "Pillage Capitals (0/?)", "domination", () => this.checkCapitalsVictory());
 
         // Bind methods
-        this.onBattleWon = this.onBattleWon.bind(this);
+        this.onBattleWonEventListener = this.onBattleWonEventListener.bind(this); // For event listeners
     }
+
+
+    // --- MilitaryCampaign Hooks ---
+
+    isHostile(burg) {
+        if (!burg) return false;
+
+        // Capital Override: Capitals are ALWAYS hostile targets to pillage
+        if (burg.is_capital) return true;
+
+        const type = burg.type ? burg.type.toLowerCase() : "";
+
+        // Hostile if NOT "Hunter" (or Hunting) AND NOT "Highland" (or Highlands)
+        // Using includes to cover variations
+        if (type.includes("hunt")) return false;
+        if (type.includes("highland")) return false;
+
+        return true; // Default to hostile for all other types
+    }
+
+    isConquered(burg) {
+        return this.pillagedBurgs.has(burg.id);
+    }
+
+    onBattleWin(burg, rewards) {
+        // Mark as pillaged (Capital or not)
+        this.pillagedBurgs.add(burg.id);
+
+        // Update Objectives
+        this.updateObjectiveText();
+        this.checkVictory();
+    }
+
+    // --- Specific Logic ---
 
     onStart() {
         super.onStart();
         console.log("Horde Campaign Started");
         this.updateObjectiveText();
-        this.refreshVisuals();
 
         // Listen for battle wins from standard battles
         if (AdventureManager.events) {
-            AdventureManager.events.on('battleWon', this.onBattleWon);
+            AdventureManager.events.on('battleWon', this.onBattleWonEventListener.bind(this));
         }
+    }
+
+    onAdventureStart() {
+        super.onAdventureStart();
+        // Now map/UI is ready
+        this.refreshVisuals();
     }
 
     onEnd() {
         super.onEnd();
         if (AdventureManager.events) {
-            AdventureManager.events.off('battleWon', this.onBattleWon);
+            AdventureManager.events.off('battleWon', this.onBattleWonEventListener.bind(this));
         }
     }
 
-    refreshVisuals() {
-        this.clearHighlights(); // Clear all existing rings/markers
-
-        // 1. Mark ANY pillaged burg with Red X
-        this.pillagedBurgs.forEach(burgId => {
-            this.drawTextMarker(burgsData.find(b => b.id === burgId)?.cell_id || 0, "❌");
-        });
-
-        // 2. Highlight UNPILLAGED Capitals with Orange Ring
-        const capitals = burgsData.filter(b => b.is_capital);
-        capitals.forEach(burg => {
-            if (!this.pillagedBurgs.has(burg.id)) {
-                // Target: Show Orange Ring
-                this.highlightCell(burg.cell_id, "#e67e22");
-            }
-        });
+    // Wrapper to distinguish between City Battles (base class calls onBattleWin) and generic army battles
+    onBattleWonEventListener() {
+        this.armiesDefeated++;
+        this.updateObjectiveText();
+        this.checkVictory();
     }
 
-    drawTextMarker(cellId, text) {
-        if (!graphData[cellId]) return;
-        let x, y;
-        const burg = burgsData.find(b => b.cell_id === cellId);
-        if (burg) { x = burg.x; y = burg.y; }
-        else { x = graphData[cellId].p[0]; y = graphData[cellId].p[1]; }
+    refreshVisuals() {
+        super.refreshVisuals(); // Draws ⚔️ on all enemies and 🚩 on pillaged
 
-        let container = document.getElementById('campaignHighlights');
-        if (!container) return; // Should exist from highlightCell call or generic init
-
-        const textEl = document.createElementNS("http://www.w3.org/2000/svg", "text");
-        textEl.setAttribute("x", x);
-        textEl.setAttribute("y", y + 5); // Slight offset
-        textEl.setAttribute("text-anchor", "middle");
-        textEl.setAttribute("font-size", "20px");
-        textEl.setAttribute("style", "pointer-events: none; user-select: none;"); // Pass clicks through
-        textEl.textContent = text;
-        container.appendChild(textEl);
+        // 2. Highlight UNPILLAGED Capitals with Orange Ring
+        if (window.burgsData) {
+            // 2. Highlight UNPILLAGED Capitals with Orange Ring
+            const capitals = burgsData.filter(b => b.is_capital);
+            capitals.forEach(burg => {
+                if (!this.pillagedBurgs.has(burg.id)) {
+                    // Target: Show Orange Ring
+                    this.highlightCell(burg.cell_id, "#e67e22");
+                }
+            });
+        }
     }
 
     onBeforeMissionSpawn(data) {
@@ -4161,12 +4715,6 @@ class HordeCampaign extends BaseCampaign {
             data.cancelled = true;
             console.log("HordeCampaign blocked treasure mission.");
         }
-    }
-
-    onBattleWon() {
-        this.armiesDefeated++;
-        this.updateObjectiveText();
-        this.checkVictory();
     }
 
     updateObjectiveText() {
@@ -4204,204 +4752,6 @@ class HordeCampaign extends BaseCampaign {
         return stats.total > 0 && stats.pillaged >= stats.total;
     }
 
-    isHostile(burg) {
-        if (!burg) return false;
-
-        // Capital Override: Capitals are ALWAYS hostile targets to pillage
-        if (burg.is_capital) return true;
-
-        const type = burg.type ? burg.type.toLowerCase() : "";
-
-        // Hostile if NOT "Hunter" (or Hunting) AND NOT "Highland" (or Highlands)
-        // Using includes to cover variations
-        if (type.includes("hunt")) return false;
-        if (type.includes("highland")) return false;
-
-        return true; // Default to hostile for all other types
-    }
-
-    onBeforeBurgPopup(data) {
-        if (this.isHostile(data.burg)) {
-            data.preventReplenish = true;
-        }
-    }
-
-    onBurgPopupOpened(context) {
-        const { burg, party, buttons } = context;
-
-        // Only modify if hostile
-        if (this.isHostile(burg)) {
-            // Preserve Ship Actions (Rent/Leave Ship)
-            const shipButtons = buttons.filter(b => b.label && b.label.includes("Ship"));
-
-            // Clear existing buttons (Standard actions blocked)
-            buttons.length = 0;
-
-
-            // Check if already pillaged
-            if (this.pillagedBurgs.has(burg.id)) {
-                buttons.push({
-                    label: "City Pillaged (Ruins)",
-                    action: () => { }, // No action
-                    disabled: true,
-                    class: "btn-recruit", // Use recruit style but greyed out via inline style
-                    style: "background: #555; cursor: default; opacity: 0.7;"
-                });
-            } else {
-                // Add Fight button
-                // Strength logic: 10 * soldier_quartiers
-                const soldierQ = burg.soldier_quartiers || 0;
-                const strength = Math.max(10, 10 * soldierQ); // Min 10 strength
-
-                buttons.push({
-                    label: `Pillage City (Strength: ${strength})`,
-                    onClick: `CampaignManager.currentCampaignInstance.showBattlePopup(${burg.id}, ${strength})`,
-                    class: "btn-attack",
-                    style: "background: #c0392b; color: white;"
-                });
-            }
-
-            // Add ship buttons back
-            if (shipButtons.length > 0) {
-                if (!this.pillagedBurgs.has(burg.id)) {
-                    shipButtons.forEach(btn => {
-                        btn.disabled = true;
-                        btn.title = "Pillage city to unlock port";
-                        btn.style = "background: #555; cursor: not-allowed; opacity: 0.6;";
-                        btn.onClick = ""; // Prevent execution
-                    });
-                }
-                buttons.unshift(...shipButtons);
-            }
-        }
-    }
-
-    showBattlePopup(burgId, enemyStrength) {
-        if (!AdventureManager.popupElement) AdventureManager.openPopup('');
-
-        // Ensure overlay
-        let overlay = document.getElementById('modalOverlay');
-        if (!overlay) {
-            overlay = document.createElement('div');
-            overlay.id = 'modalOverlay';
-            overlay.className = 'modal-overlay';
-            document.body.appendChild(overlay);
-        }
-        overlay.style.display = 'block';
-
-        const mySoldiers = AdventureManager.party.soldiers;
-
-        // Win Probability Logic
-        const ratio = mySoldiers / enemyStrength;
-        const k = 2;
-        const winProb = (Math.pow(ratio, k) / (Math.pow(ratio, k) + 1));
-        const winPercent = (winProb * 100).toFixed(1);
-
-        const content = `
-             <h2>⚔️ Battle Imminent ⚔️</h2>
-             <div class="content-wrapper" style="display: flex; gap: 20px; align-items: center; justify-content: center;">
-                 <div style="text-align: center;">
-                    <h3>Your Army</h3>
-                    <div style="font-size: 24px; color: #2ecc71; font-weight: bold;">${mySoldiers} 🛡️</div>
-                 </div>
-                 <div style="font-size: 20px; font-weight: bold;">VS</div>
-                 <div style="text-align: center;">
-                    <h3>City Garrison</h3>
-                    <div style="font-size: 24px; color: #e74c3c; font-weight: bold;">${enemyStrength} ⚔️</div>
-                 </div>
-             </div>
-             
-             <div style="text-align: center; margin: 15px 0;">
-                <div>Win Probability: <strong>${winPercent}%</strong></div>
-             </div>
-             
-             <div class="actions">
-                 <button class="btn-recruit" style="background-color: #c0392b;" onclick="CampaignManager.currentCampaignInstance.resolveCityBattle(${burgId}, ${enemyStrength})">ATTACK!</button>
-                 <button class="btn-leave" onclick="AdventureManager.closePopup()">Retreat</button>
-             </div>
-        `;
-        AdventureManager.openPopup(content);
-    }
-
-    resolveCityBattle(burgId, enemySoldiers) {
-        // Find burg again since we passed ID
-        const burg = burgsData.find(b => b.id === burgId);
-        if (!burg) return;
-
-        const playerSoldiers = AdventureManager.party.soldiers;
-
-        if (playerSoldiers <= 0) {
-            AdventureManager.showFeedback("You have no soldiers to fight with!");
-            AdventureManager.closePopup();
-            return;
-        }
-
-        const ratio = playerSoldiers / enemySoldiers;
-        const winProbability = (ratio * ratio) / ((ratio * ratio) + 1);
-
-        const isWin = Math.random() < winProbability;
-
-        AdventureManager.closePopup(); // Close battle popup
-
-        if (isWin) {
-            // Rewards (Aligned with BattleMission plus Food = Gold)
-            const goldReward = Math.floor(enemySoldiers / 10) * 3;
-            const soldierReward = Math.floor(enemySoldiers / 10) * 3;
-
-            // Food Reward: 40% of city's net food
-            let foodReward = 0;
-            // Ensure we have a valid food value
-            const cityFood = burg.net_food || 0;
-            if (cityFood > 0) {
-                foodReward = Math.floor(cityFood * 0.4);
-            }
-
-            AdventureManager.party.gold += goldReward;
-            AdventureManager.party.soldiers += soldierReward;
-            AdventureManager.party.food += foodReward;
-
-            // Mark as pillaged (Capital or not)
-            this.pillagedBurgs.add(burg.id);
-
-            AdventureManager.showFeedback(`Victory! Pillaged ${burg.name}. Gained ${goldReward} gold, ${foodReward} food, ${soldierReward} soldiers.`);
-
-            this.refreshVisuals(); // Update map markers
-
-            // Floating Text (Win)
-            const cell = graphData[AdventureManager.party.cell];
-            if (cell) {
-                AdventureManager.showFloatingText(`VICTORY!`, cell.p[0], cell.p[1] - 80, "#2ecc71");
-                AdventureManager.showFloatingText(`+${goldReward} 💰`, cell.p[0], cell.p[1] - 60, "#f1c40f");
-                AdventureManager.showFloatingText(`+${foodReward} 🍎`, cell.p[0], cell.p[1] - 40, "#e67e22");
-                AdventureManager.showFloatingText(`+${soldierReward} ⚔️`, cell.p[0], cell.p[1] - 20, "#9b59b6");
-            }
-
-            // Update Objectives
-            this.updateObjectiveText();
-            this.checkVictory();
-
-            // Highlight Pillaged? Maybe not needed, standard highlight is fine.
-
-        } else {
-            // Defeat
-            // Losses: High (20-40%)
-            const lossPct = 0.20 + (Math.random() * 0.20);
-            const losses = Math.floor(playerSoldiers * lossPct);
-            AdventureManager.party.soldiers = Math.max(0, playerSoldiers - losses);
-
-            AdventureManager.showFeedback(`Defeat! Failed to pillage ${burg.name}. Retreating with ${losses} casualties.`);
-
-            // Floating Text (Loss)
-            const cell = graphData[AdventureManager.party.cell];
-            if (cell) {
-                AdventureManager.showFloatingText(`DEFEAT!`, cell.p[0], cell.p[1] - 40, "#e74c3c");
-                if (losses > 0) AdventureManager.showFloatingText(`-${losses} ⚔️`, cell.p[0], cell.p[1] - 20, "#e74c3c");
-            }
-        }
-
-        AdventureManager.updateStats();
-    }
-
     onCalculateMissionRewards(context) {
         if (context.type === 'hunt') {
             // Horde gains soldiers from hunting
@@ -4417,8 +4767,7 @@ class HordeCampaign extends BaseCampaign {
 CampaignManager.availableCampaigns.push(HordeCampaign);
 
 
-
-class WarCampaign extends BaseCampaign {
+class WarCampaign extends MilitaryCampaign {
     constructor() {
         super("war_v1", "War of Conquest", "Conquer the capitals of the enemy States to establish your dominion. Defeat their garrisons to claim them.");
 
@@ -4427,6 +4776,12 @@ class WarCampaign extends BaseCampaign {
         this.enemyStateIds = new Set();
         this.partyStartConfig = { resources: { soldiers: 50, tools: 10, food: 50, gold: 10 } };
 
+        // Base Class Overrides
+        this.conqueredStatusLabel = "Conquered";
+
+        // War Tuning: Uses SiegeBattle
+        this.BattleClass = SiegeBattle;
+
         // Diplomatic info for start
         this.homeStateId = 0;
         this.homeStateName = "Unknown";
@@ -4434,9 +4789,31 @@ class WarCampaign extends BaseCampaign {
         this.startCell = -1;
 
         // Objectives
-        // Objectives: We will add dynamic objectives based on enemies in onAdventureStart
         this.addObjective("obj_war_conquer", "Conquer enemy capitals", "conquest", () => false);
     }
+
+    // --- Specific Mechanics ---
+
+
+    // --- MilitaryCampaign Hooks ---
+
+    isHostile(burg) {
+        if (!burg) return false;
+        return this.enemyStateIds.has(burg.state_id);
+    }
+
+    isConquered(burg) {
+        return this.conqueredBurgs.has(burg.id);
+    }
+
+    onBattleWin(burg, rewards) {
+        // Mark Conquered
+        this.conqueredBurgs.add(burg.id);
+        this.checkVictory();
+        this.updateObjectiveText();
+    }
+
+    // --- Specific Logic ---
 
     getPartyStartConfig() {
         // Calculate spawn here to ensure it's ready for AdventureManager.start()
@@ -4473,9 +4850,6 @@ class WarCampaign extends BaseCampaign {
 
         // Fallback Logic
         if (this.startCell === -1) {
-            // Let AdventureManager pick a random spot, but try to resolve home state later?
-            // Or better: Force a random spot ourselves to capture state info.
-            // For now, if we fail to find a capital, just let it be random.
             console.log("WarCampaign: Failed to find random capital, using default random spawn.");
         } else {
             console.log(`WarCampaign: Calculated Spawn at Capital ${spawnBurg ? spawnBurg.name : 'Unknown'} (State: ${this.homeStateName})`);
@@ -4494,7 +4868,6 @@ class WarCampaign extends BaseCampaign {
         console.log("War Campaign Started (Internal Init)");
         this.objectives = [];
         this.conqueredBurgs.clear();
-        this.updateObjectiveText();
     }
 
     onAdventureStart() {
@@ -4586,15 +4959,9 @@ class WarCampaign extends BaseCampaign {
     }
 
     refreshVisuals() {
-        this.clearHighlights(); // Clear all existing rings/markers
+        super.refreshVisuals(); // Draws ⚔️ on all enemies and 🚩 on conquered
 
-        // 1. Mark Conquered Burgs with Flag
-        this.conqueredBurgs.forEach(burgId => {
-            this.drawTextMarker(burgsData.find(b => b.id === burgId)?.cell_id || 0, "🚩");
-        });
-
-        // 2. Highlight Enemy Capitals (Objectives)
-        // Redraw red rings for un-conquered enemy capitals
+        // 2. Highlight Enemy Capitals (Objectives) with Rings
         this.enemyStateIds.forEach(stateId => {
             if (typeof statesData !== 'undefined') {
                 const targetState = statesData.find(s => s.id === stateId);
@@ -4603,7 +4970,7 @@ class WarCampaign extends BaseCampaign {
                     if (!this.conqueredBurgs.has(targetState.capital_id)) {
                         const enemyCapital = burgsData.find(b => b.id === targetState.capital_id);
                         if (enemyCapital) {
-                            this.highlightCell(enemyCapital.cell_id, "#c0392b"); // Red for enemy
+                            this.highlightCell(enemyCapital.cell_id, "#c0392b"); // Red Ring for objective
                         }
                     }
                 }
@@ -4611,236 +4978,9 @@ class WarCampaign extends BaseCampaign {
         });
     }
 
-    drawTextMarker(cellId, text) {
-        if (!graphData[cellId]) return;
-        let x, y;
-        const burg = burgsData.find(b => b.cell_id === cellId);
-        if (burg) { x = burg.x; y = burg.y; }
-        else { x = graphData[cellId].p[0]; y = graphData[cellId].p[1]; }
-
-        let container = document.getElementById('campaignHighlights');
-        if (!container) return;
-
-        const textEl = document.createElementNS("http://www.w3.org/2000/svg", "text");
-        textEl.setAttribute("x", x);
-        textEl.setAttribute("y", y + 5);
-        textEl.setAttribute("text-anchor", "middle");
-        textEl.setAttribute("font-size", "20px");
-        textEl.setAttribute("style", "pointer-events: none; user-select: none; text-shadow: 1px 1px 2px black;");
-        textEl.textContent = text;
-        container.appendChild(textEl);
-    }
-
     updateObjectiveText() {
-        // No longer needed for individual objectives, but keeping method if base calls it or for safety
-        // The checkObjectives loop handles "completed" state automatically.
+        // Hooks calling checkObjectives handles this
         this.renderObjectives();
-    }
-
-    isHostile(burg) {
-        if (!burg) return false;
-        // Hostile if it belongs to an enemy state
-        return this.enemyStateIds.has(burg.state_id);
-    }
-
-    onBeforeBurgPopup(data) {
-        if (this.isHostile(data.burg)) {
-            data.preventReplenish = true;
-        }
-    }
-
-    onBurgPopupOpened(context) {
-        const { burg, buttons } = context;
-
-        // 1. Check if already conquered
-        if (this.conqueredBurgs.has(burg.id)) {
-            // If conquered, it's ours. Standard buttons might be fine (recruit, etc), 
-            // but we usually want to show it's conquered.
-            // Let's clear and show just the status or maybe allow recruit?
-            // User said "Conquered cities will belong to the player", implying normal usage might be allowed?
-            // For now, let's keep the visual tag but allow interaction if it's ours?
-            // Actually, the previous code disabled the button. Let's stick to simple "Conquered" status for now unless requested.
-
-            // Re-evaluating: If it behaves like Horde, pillaged cities are just ruins.
-            // But here we "Conquer" them. "Establish dominion".
-            // Let's keep the "City Conquered" button at the top, but maybe NOT clear other buttons if it's ours now?
-            // Actually, if it behaves like Horde "hostile", then BEFORE conquest it should assume hostile.
-
-            // NOTE: If it is conquered, it is NO LONGER hostile in terms of mechanics, it is ours.
-            // So we don't clear buttons here.
-            buttons.unshift({
-                label: "City Conquered (Yours)",
-                action: () => { },
-                disabled: true,
-                style: "background: #27ae60; cursor: default; opacity: 1.0; color: white;",
-                class: "btn-recruit"
-            });
-            return;
-        }
-
-        // 2. Logic for Enemy/Hostile Cities
-        if (this.isHostile(burg)) {
-            // Horde Behavior: Clear peaceful options
-            buttons.length = 0;
-
-            // Calculate Strength based on defenses
-            const soldierQ = burg.soldier_quartiers || 0;
-            // Base strength 20, + 15 per soldier quartier. Slightly harder than simple pillage.
-            const strength = 20 + (15 * soldierQ);
-
-            buttons.push({
-                label: `Conquer City (Strength: ${strength})`,
-                onClick: `CampaignManager.currentCampaignInstance.showConquestPopup(${burg.id}, ${strength})`,
-                class: "btn-attack",
-                style: "background: #c0392b; color: white;"
-            });
-            return;
-        }
-
-        // 3. Logic for Non-Hostile (Neutral) cities - Default behavior (Trade, Recruit, etc.)
-        // We can optionally add a "Conquer" button here too if we want to allow conquering neutrals?
-        // User objective says "Conquer enemy capitals".
-        // The previous code added "Conquer" to "neutral/hostile" cities.
-        // If we want to allow conquering neutrals, we should add the button but NOT clear the others.
-
-        // For now, sticking to strict "Enemy" definition for the "Hostile" behavior (clearing buttons).
-        // If user wants to conquer neutrals, they still can if we add the button below, but they will also have peaceful options.
-
-        // Add Conquer option for neutrals as well?
-        const soldierQ = burg.soldier_quartiers || 0;
-        const strength = 20 + (15 * soldierQ);
-
-        // Only add conquer button if it's not the home state? Or can we conquer home?
-        if (burg.state_id !== this.homeStateId) {
-            buttons.unshift({
-                label: `Conquer City (Strength: ${strength})`,
-                onClick: `CampaignManager.currentCampaignInstance.showConquestPopup(${burg.id}, ${strength})`,
-                class: "btn-attack",
-                style: "background: #c0392b; color: white;"
-            });
-        }
-    }
-
-    showConquestPopup(burgId, enemyStrength) {
-        if (!AdventureManager.popupElement) AdventureManager.openPopup('');
-
-        // Ensure overlay
-        let overlay = document.getElementById('modalOverlay');
-        if (!overlay) {
-            overlay = document.createElement('div');
-            overlay.id = 'modalOverlay';
-            overlay.className = 'modal-overlay';
-            document.body.appendChild(overlay);
-        }
-        overlay.style.display = 'block';
-
-        const mySoldiers = AdventureManager.party.soldiers;
-
-        // Win Probability Logic
-        const ratio = mySoldiers / enemyStrength;
-        const k = 2; // Sharpness of the curve
-        const winProb = (Math.pow(ratio, k) / (Math.pow(ratio, k) + 1));
-        const winPercent = (winProb * 100).toFixed(1);
-
-        const content = `
-             <h2>⚔️ Conquest Battle ⚔️</h2>
-             <div class="content-wrapper" style="display: flex; gap: 20px; align-items: center; justify-content: center;">
-                 <div style="text-align: center;">
-                    <h3>Your Army</h3>
-                    <div style="font-size: 24px; color: #2ecc71; font-weight: bold;">${mySoldiers} 🛡️</div>
-                 </div>
-                 <div style="font-size: 20px; font-weight: bold;">VS</div>
-                 <div style="text-align: center;">
-                    <h3>City Garrison</h3>
-                    <div style="font-size: 24px; color: #e74c3c; font-weight: bold;">${enemyStrength} ⚔️</div>
-                 </div>
-             </div>
-             
-             <div style="text-align: center; margin: 15px 0;">
-                <div>Win Probability: <strong>${winPercent}%</strong></div>
-                <div style="font-size: 0.9em; color: #aaa;">Conquest requires decisive victory.</div>
-             </div>
-             
-             <div class="actions">
-                 <button class="btn-recruit" style="background-color: #c0392b;" onclick="CampaignManager.currentCampaignInstance.resolveConquest(${burgId}, ${enemyStrength})">ATTACK!</button>
-                 <button class="btn-leave" onclick="AdventureManager.closePopup()">Retreat</button>
-             </div>
-        `;
-        AdventureManager.openPopup(content);
-    }
-
-    resolveConquest(burgId, enemySoldiers) {
-        const burg = burgsData.find(b => b.id === burgId);
-        if (!burg) return;
-
-        const playerSoldiers = AdventureManager.party.soldiers;
-
-        if (playerSoldiers <= 0) {
-            AdventureManager.showFeedback("You have no soldiers to fight with!");
-            AdventureManager.closePopup();
-            return;
-        }
-
-        const ratio = playerSoldiers / enemySoldiers;
-        const winProbability = (ratio * ratio) / ((ratio * ratio) + 1);
-        const isWin = Math.random() < winProbability;
-
-        AdventureManager.closePopup();
-
-        if (isWin) {
-            // Victory
-            // Casualties: 10-30%
-            const lossPct = 0.10 + (Math.random() * 0.20);
-            const losses = Math.floor(playerSoldiers * lossPct);
-            AdventureManager.party.soldiers = Math.max(0, playerSoldiers - losses);
-
-            // Rewards
-            // Gold
-            const goldReward = Math.floor(enemySoldiers / 5);
-            // Food (Looted stores - 30% of net food)
-            let foodReward = 0;
-            const cityFood = burg.net_food || 0;
-            if (cityFood > 0) {
-                foodReward = Math.floor(cityFood * 0.3);
-            }
-
-            AdventureManager.party.gold += goldReward;
-            AdventureManager.party.food += foodReward;
-
-            // Mark Conquered
-            this.conqueredBurgs.add(burg.id);
-            this.refreshVisuals(); // Update Map Visuals (Flags)
-
-            AdventureManager.showFeedback(`Victory! ${burg.name} conquered! Gained ${goldReward} gold, ${foodReward} food.`);
-
-            // Floating Text
-            const cell = graphData[AdventureManager.party.cell];
-            if (cell) {
-                AdventureManager.showFloatingText(`CONQUERED!`, cell.p[0], cell.p[1] - 80, "#2ecc71");
-                AdventureManager.showFloatingText(`+${goldReward} 💰`, cell.p[0], cell.p[1] - 60, "#f1c40f");
-                if (foodReward > 0) AdventureManager.showFloatingText(`+${foodReward} 🍎`, cell.p[0], cell.p[1] - 40, "#e67e22");
-                AdventureManager.showFloatingText(`-${losses} Casualties`, cell.p[0], cell.p[1], "#e74c3c");
-            }
-
-            this.updateObjectiveText();
-            this.checkVictory();
-
-        } else {
-            // Defeat
-            // Casualties: High (30-50%)
-            const lossPct = 0.30 + (Math.random() * 0.20);
-            const losses = Math.floor(playerSoldiers * lossPct);
-            AdventureManager.party.soldiers = Math.max(0, playerSoldiers - losses);
-
-            AdventureManager.showFeedback(`Defeat! The garrison of ${burg.name} held strong. You retreated with ${losses} casualties.`);
-            // Floating Text
-            const cell = graphData[AdventureManager.party.cell];
-            if (cell) {
-                AdventureManager.showFloatingText(`DEFEAT!`, cell.p[0], cell.p[1] - 40, "#e74c3c");
-                AdventureManager.showFloatingText(`-${losses} ⚔️`, cell.p[0], cell.p[1] - 20, "#e74c3c");
-            }
-        }
-        AdventureManager.updateStats();
     }
 }
 

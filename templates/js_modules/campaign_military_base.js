@@ -5,6 +5,9 @@ class MilitaryCampaign extends BaseCampaign {
         this.battleMarker = "⚔️";
         this.conqueredStatusLabel = "Conquered";
         this.BattleClass = Battle; // Default Strategy
+        this.showFriendlyMarkers = false; // Default off
+        this.showEnemyMarkers = true;     // Default on
+        this.showConqueredMarkers = true; // Default on
 
         // Bind Handlers
         this.handleBattleWin = this.handleBattleWin.bind(this);
@@ -182,7 +185,24 @@ class MilitaryCampaign extends BaseCampaign {
         battle.resolve();
     }
 
-    // --- visual Helpers ---
+    // --- Visual Helpers ---
+
+    refreshVisuals() {
+        this.clearHighlights();
+
+        if (!window.burgsData) return;
+
+        burgsData.forEach(burg => {
+            if (this.showConqueredMarkers && this.isConquered(burg)) {
+                this.drawTextMarker(burg.cell_id, "🚩");
+            } else if (this.showEnemyMarkers && this.isHostile(burg)) {
+                this.drawTextMarker(burg.cell_id, "⚔️");
+            } else if (this.showFriendlyMarkers) {
+                // Friendly / Neutral
+                this.drawTextMarker(burg.cell_id, "🛡️");
+            }
+        });
+    }
 
     drawTextMarker(cellId, text) {
         if (!graphData[cellId]) return;
@@ -192,15 +212,51 @@ class MilitaryCampaign extends BaseCampaign {
         else { x = graphData[cellId].p[0]; y = graphData[cellId].p[1]; }
 
         let container = document.getElementById('campaignHighlights');
-        if (!container) return;
+        if (!container) {
+            container = document.createElementNS("http://www.w3.org/2000/svg", "g");
+            container.setAttribute("id", "campaignHighlights");
+            const svg = document.getElementById('mapSvg');
+            if (svg) svg.appendChild(container);
+            else return; // If mapSvg missing, we really can't draw
+        }
 
         const textEl = document.createElementNS("http://www.w3.org/2000/svg", "text");
         textEl.setAttribute("x", x);
         textEl.setAttribute("y", y + 5);
         textEl.setAttribute("text-anchor", "middle");
-        textEl.setAttribute("font-size", "20px");
+        textEl.setAttribute("font-size", "14px"); // Slightly smaller for global clutter reduction
         textEl.setAttribute("style", "pointer-events: none; user-select: none; text-shadow: 1px 1px 2px black;");
         textEl.textContent = text;
         container.appendChild(textEl);
+    }
+
+    // --- UI Integration ---
+
+    getSettingsHtml() {
+        return `
+            <div class="campaign-settings">
+                <h4>Map Visuals</h4>
+                <label style="display: block; margin: 5px 0;">
+                    <input type="checkbox" onchange="CampaignManager.currentCampaignInstance.toggleSetting('showEnemyMarkers', this.checked)" ${this.showEnemyMarkers ? 'checked' : ''}>
+                    Show Enemies (⚔️)
+                </label>
+                <label style="display: block; margin: 5px 0;">
+                    <input type="checkbox" onchange="CampaignManager.currentCampaignInstance.toggleSetting('showConqueredMarkers', this.checked)" ${this.showConqueredMarkers ? 'checked' : ''}>
+                    Show Conquered (🚩)
+                </label>
+                <label style="display: block; margin: 5px 0;">
+                    <input type="checkbox" onchange="CampaignManager.currentCampaignInstance.toggleSetting('showFriendlyMarkers', this.checked)" ${this.showFriendlyMarkers ? 'checked' : ''}>
+                    Show Friendly (🛡️)
+                </label>
+            </div>
+        `;
+    }
+
+    toggleSetting(setting, value) {
+        if (this[setting] !== undefined) {
+            this[setting] = value;
+            this.refreshVisuals();
+            console.log(`Updated ${setting} to ${value}`);
+        }
     }
 }

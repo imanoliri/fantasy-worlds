@@ -150,7 +150,7 @@ class SiegeBattle extends Battle {
         // Lose: 25-50% (Rout)
         let min = 0;
         let max = 0;
-        if (isVictoryVictory) {
+        if (isVictory) {
             min = 0.15;
             max = 0.25;
         } else {
