@@ -2981,15 +2981,6 @@ const AdventureManager = {
         if (modal.style.display === 'block') {
             modal.style.display = 'none';
         } else {
-            // Inject Campaign Settings if available
-            const settingsCol = modal.querySelector('.options-column:nth-child(2)');
-            if (settingsCol) {
-                if (CampaignManager.active && CampaignManager.currentCampaignInstance && CampaignManager.currentCampaignInstance.getSettingsHtml) {
-                    settingsCol.innerHTML = `<h3>Campaign Settings</h3>` + CampaignManager.currentCampaignInstance.getSettingsHtml();
-                } else {
-                    settingsCol.innerHTML = `<h3>Visual Settings</h3><p style="color: grey; font-style: italic;">(No Active Campaign)</p>`;
-                }
-            }
             modal.style.display = 'block';
         }
     },
@@ -3929,9 +3920,9 @@ class MilitaryCampaign extends BaseCampaign {
         this.battleMarker = "⚔️";
         this.conqueredStatusLabel = "Conquered";
         this.BattleClass = Battle; // Default Strategy
-        this.showFriendlyMarkers = false; // Default off
         this.showEnemyMarkers = true;     // Default on
         this.showConqueredMarkers = true; // Default on
+        this.showFriendlyMarkers = false; // Default off
 
         // Bind Handlers
         this.handleBattleWin = this.handleBattleWin.bind(this);
@@ -4156,24 +4147,67 @@ class MilitaryCampaign extends BaseCampaign {
 
     // --- UI Integration ---
 
-    getSettingsHtml() {
-        return `
-            <div class="campaign-settings">
-                <h4>Map Visuals</h4>
-                <label style="display: block; margin: 5px 0;">
-                    <input type="checkbox" onchange="CampaignManager.currentCampaignInstance.toggleSetting('showEnemyMarkers', this.checked)" ${this.showEnemyMarkers ? 'checked' : ''}>
-                    Show Enemies (⚔️)
-                </label>
-                <label style="display: block; margin: 5px 0;">
-                    <input type="checkbox" onchange="CampaignManager.currentCampaignInstance.toggleSetting('showConqueredMarkers', this.checked)" ${this.showConqueredMarkers ? 'checked' : ''}>
-                    Show Conquered (🚩)
-                </label>
-                <label style="display: block; margin: 5px 0;">
-                    <input type="checkbox" onchange="CampaignManager.currentCampaignInstance.toggleSetting('showFriendlyMarkers', this.checked)" ${this.showFriendlyMarkers ? 'checked' : ''}>
-                    Show Friendly (🛡️)
-                </label>
-            </div>
+    // --- UI Integration ---
+
+    renderFloatingControls() {
+        // Ensure only one exists
+        this.removeFloatingControls();
+
+        const container = document.getElementById('mapContainer');
+        if (!container) return;
+
+        const controls = document.createElement('div');
+        controls.id = 'militaryCampaignControls';
+        controls.className = 'campaign-floating-controls';
+
+        // Inline styles for simplicity/portability
+        controls.style.position = 'absolute';
+        controls.style.top = '60px'; // Below the top header/stats
+        controls.style.right = '10px';
+        controls.style.backgroundColor = 'rgba(0, 0, 0, 0.6)';
+        controls.style.padding = '10px';
+        controls.style.borderRadius = '8px';
+        controls.style.color = '#fff';
+        controls.style.fontSize = '12px';
+        controls.style.zIndex = '1000';
+        controls.style.display = 'flex';
+        controls.style.flexDirection = 'column';
+        controls.style.gap = '5px';
+        controls.style.backdropFilter = 'blur(2px)';
+        controls.style.border = '1px solid rgba(255,255,255,0.2)';
+
+        controls.innerHTML = `
+            <label style="cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                <input type="checkbox" onchange="CampaignManager.currentCampaignInstance.toggleSetting('showEnemyMarkers', this.checked)" ${this.showEnemyMarkers ? 'checked' : ''}>
+                <span>Enemies (⚔️)</span>
+            </label>
+            <label style="cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                <input type="checkbox" onchange="CampaignManager.currentCampaignInstance.toggleSetting('showConqueredMarkers', this.checked)" ${this.showConqueredMarkers ? 'checked' : ''}>
+                <span>Conquered (🚩)</span>
+            </label>
+            <label style="cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                <input type="checkbox" onchange="CampaignManager.currentCampaignInstance.toggleSetting('showFriendlyMarkers', this.checked)" ${this.showFriendlyMarkers ? 'checked' : ''}>
+                <span>Friendly (🛡️)</span>
+            </label>
         `;
+
+        container.appendChild(controls);
+    }
+
+    removeFloatingControls() {
+        const controls = document.getElementById('militaryCampaignControls');
+        if (controls) controls.remove();
+    }
+
+    onAdventureStart() {
+        super.onAdventureStart();
+        // Render Floating UI
+        this.renderFloatingControls();
+    }
+
+    onEnd() {
+        super.onEnd();
+        this.removeFloatingControls();
     }
 
     toggleSetting(setting, value) {
@@ -4619,7 +4653,6 @@ class HordeCampaign extends MilitaryCampaign {
 
         // Horde Tuning: Uses RaidBattle
         this.BattleClass = RaidBattle;
-        this.showFriendlyMarkers = true;
 
         // Objectives
         this.addObjective("obj_horde_armies", "Defeat Armies (0/10)", "battle", () => this.armiesDefeated >= 10);

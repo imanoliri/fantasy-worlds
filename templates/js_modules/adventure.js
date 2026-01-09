@@ -1140,15 +1140,6 @@ const AdventureManager = {
         if (modal.style.display === 'block') {
             modal.style.display = 'none';
         } else {
-            // Inject Campaign Settings if available
-            const settingsCol = modal.querySelector('.options-column:nth-child(2)');
-            if (settingsCol) {
-                if (CampaignManager.active && CampaignManager.currentCampaignInstance && CampaignManager.currentCampaignInstance.getSettingsHtml) {
-                    settingsCol.innerHTML = `<h3>Campaign Settings</h3>` + CampaignManager.currentCampaignInstance.getSettingsHtml();
-                } else {
-                    settingsCol.innerHTML = `<h3>Visual Settings</h3><p style="color: grey; font-style: italic;">(No Active Campaign)</p>`;
-                }
-            }
             modal.style.display = 'block';
         }
     },

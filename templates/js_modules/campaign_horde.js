@@ -11,7 +11,6 @@ class HordeCampaign extends MilitaryCampaign {
 
         // Horde Tuning: Uses RaidBattle
         this.BattleClass = RaidBattle;
-        this.showFriendlyMarkers = true;
 
         // Objectives
         this.addObjective("obj_horde_armies", "Defeat Armies (0/10)", "battle", () => this.armiesDefeated >= 10);
