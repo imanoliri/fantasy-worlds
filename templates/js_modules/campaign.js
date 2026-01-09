@@ -222,10 +222,57 @@ const CampaignManager = {
         document.getElementById('campaignCancelBtn').classList.add('hidden'); // Ensure cancel is hidden
         this.currentCampaignInstance.renderObjectives();
         document.getElementById('campaignObjectives').classList.remove('hidden');
+
+        // New Setup Logic: Mount Custom UI
+        if (typeof this.currentCampaignInstance.mountSetupUI === 'function') {
+            this.currentCampaignInstance.mountSetupUI();
+        }
+        // Fallback: Legacy sidebar injection
+        else {
+            const setupContainer = document.getElementById('campaignSetupContainer');
+            if (setupContainer) {
+                setupContainer.innerHTML = "";
+                if (typeof this.currentCampaignInstance.renderSetupUI === 'function') {
+                    setupContainer.innerHTML = this.currentCampaignInstance.renderSetupUI();
+                }
+            }
+        }
     },
 
     startCampaign() {
         if (!this.currentCampaignInstance) return;
+
+        // Capture Setup UI Selection (Generic DOM check)
+        // Check Floating Panel first
+        const floatingPanel = document.getElementById('warFactionSelectPanel');
+        if (floatingPanel) {
+            const radios = floatingPanel.querySelectorAll('input[type="radio"]:checked');
+            if (radios.length > 0) {
+                if (this.currentCampaignInstance.presetStateId !== undefined) {
+                    this.currentCampaignInstance.presetStateId = parseInt(radios[0].value);
+                }
+            }
+        }
+
+        // Check Sidebar Fallback
+        const setupContainer = document.getElementById('campaignSetupContainer');
+        if (setupContainer && setupContainer.childNodes.length > 0) {
+            const radios = setupContainer.querySelectorAll('input[type="radio"]:checked');
+            if (radios.length > 0) {
+                if (this.currentCampaignInstance.presetStateId !== undefined) {
+                    // Only overwrite if not already set (or overwrite? prefer floating)
+                    if (!this.currentCampaignInstance.presetStateId) {
+                        this.currentCampaignInstance.presetStateId = parseInt(radios[0].value);
+                    }
+                }
+            }
+        }
+
+        // Unmount Setup UI
+        if (typeof this.currentCampaignInstance.unmountSetupUI === 'function') {
+            this.currentCampaignInstance.unmountSetupUI();
+        }
+        if (setupContainer) setupContainer.innerHTML = ""; // Clear legacy
 
         this.active = true;
         AdventureManager.init();
@@ -259,6 +306,10 @@ const CampaignManager = {
     cancelCampaign() {
         // 1. Cleanup current campaign
         if (this.currentCampaignInstance) {
+            // Unmount Setup UI (in case we cancel BEFORE starting)
+            if (typeof this.currentCampaignInstance.unmountSetupUI === 'function') {
+                this.currentCampaignInstance.unmountSetupUI();
+            }
             this.currentCampaignInstance.onEnd();
             this.currentCampaignInstance = null;
         }
