@@ -124,8 +124,8 @@ class WarCampaign extends MilitaryCampaign {
                         </div>
                         
                         <div style="font-size: 0.8em; color: #ccc; flex-shrink: 0;">
-                            <span title="Craftsmen">${item.totalCraftsmen}🛠️</span> 
-                            <span title="Soldiers" style="margin-left:4px;">${item.totalSoldiers}🛡️</span> 
+                            <span title="Soldiers">${item.totalSoldiers}🛡️</span> 
+                            <span title="Craftsmen" style="margin-left:4px;">${item.totalCraftsmen}🛠️</span> 
                             <span style="color:#888; margin:0 4px;">vs</span> 
                             <span title="enemies">${item.enemyCount}⚔️</span>
                         </div>
