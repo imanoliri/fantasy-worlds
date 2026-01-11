@@ -31,7 +31,7 @@ class WarCampaign extends MilitaryCampaign {
         if (!window.statesData || !window.diplomacyMatrix) return;
 
         // Remove existing if any
-        this.unmountSetupUI();
+        this.teardownSetup();
 
         // Calculate Agression/Difficulty
         const validStates = statesData.filter(s => s.capital_id && s.capital_id > 0);
@@ -147,7 +147,7 @@ class WarCampaign extends MilitaryCampaign {
         }
     }
 
-    unmountSetupUI() {
+    teardownSetup() {
         const panel = document.getElementById('warFactionSelectPanel');
         if (panel) panel.remove();
 

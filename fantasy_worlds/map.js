@@ -110,7 +110,8 @@ function selectGameMode(mode) {
         btn.innerHTML = "Adventure ▼";
 
         // If coming from Campaign Mode, we must RESET to ensure fresh Adventure
-        if (window.CampaignManager && window.CampaignManager.active) {
+        // Cleanup if active OR if we are just in setup (instance exists)
+        if (window.CampaignManager && (window.CampaignManager.active || window.CampaignManager.currentCampaignInstance)) {
             CampaignManager.cancelCampaign();
             // cancelCampaign calls reset(), so AdventureManager.active becomes false
         }
@@ -161,8 +162,8 @@ function selectGameMode(mode) {
         const sidebar = document.getElementById('adventureSidebar');
         if (sidebar) sidebar.classList.add('hidden');
 
-        // Stop Campaign if active
-        if (window.CampaignManager && window.CampaignManager.active) {
+        // Stop Campaign if active or in setup
+        if (window.CampaignManager && (window.CampaignManager.active || window.CampaignManager.currentCampaignInstance)) {
             CampaignManager.cancelCampaign();
         }
 
@@ -3411,6 +3412,11 @@ class BaseCampaign {
         return this.partyStartConfig || {};
     }
 
+    // Lifecycle Hook for Setup Phase Cleanup
+    teardownSetup() {
+        // Override in child classes to clean up setup UI (e.g. faction selectors)
+    }
+
     // Event Handlers
     onAdventureStart() {
         if (this.partyStartConfig) {
@@ -3564,6 +3570,13 @@ const CampaignManager = {
 
     selectCampaign(index) {
         if (index === "") return;
+
+        // Cleanup previous selection if exists
+        if (this.currentCampaignInstance) {
+            this.currentCampaignInstance.teardownSetup();
+            // Also call onEnd just in case, though usually only active campaigns need onEnd
+        }
+
         const CampClass = this.availableCampaigns[index];
         this.currentCampaignInstance = new CampClass();
 
@@ -3618,9 +3631,7 @@ const CampaignManager = {
         }
 
         // Unmount Setup UI
-        if (typeof this.currentCampaignInstance.unmountSetupUI === 'function') {
-            this.currentCampaignInstance.unmountSetupUI();
-        }
+        this.currentCampaignInstance.teardownSetup();
         if (setupContainer) setupContainer.innerHTML = ""; // Clear legacy
 
         this.active = true;
@@ -3656,9 +3667,7 @@ const CampaignManager = {
         // 1. Cleanup current campaign
         if (this.currentCampaignInstance) {
             // Unmount Setup UI (in case we cancel BEFORE starting)
-            if (typeof this.currentCampaignInstance.unmountSetupUI === 'function') {
-                this.currentCampaignInstance.unmountSetupUI();
-            }
+            this.currentCampaignInstance.teardownSetup();
             this.currentCampaignInstance.onEnd();
             this.currentCampaignInstance = null;
         }
@@ -4885,7 +4894,8 @@ class WarCampaign extends MilitaryCampaign {
         if (!window.statesData || !window.diplomacyMatrix) return;
 
         // Remove existing if any
-        this.unmountSetupUI();
+        // Remove existing if any
+        this.teardownSetup();
 
         // Calculate Agression/Difficulty
         const validStates = statesData.filter(s => s.capital_id && s.capital_id > 0);
@@ -4981,7 +4991,7 @@ class WarCampaign extends MilitaryCampaign {
                             <span title="Soldiers">${item.totalSoldiers}🛡️</span> 
                             <span title="Craftsmen" style="margin-left:4px;">${item.totalCraftsmen}🛠️</span> 
                             <span style="color:#888; margin:0 4px;">vs</span> 
-                            <span title="enemies" style="color:#e74c3c;">${item.enemyCount}⚔️</span>
+                            <span title="enemies">${item.enemyCount}⚔️</span>
                         </div>
                     </label>
                 `;
@@ -5001,7 +5011,7 @@ class WarCampaign extends MilitaryCampaign {
         }
     }
 
-    unmountSetupUI() {
+    teardownSetup() {
         const panel = document.getElementById('warFactionSelectPanel');
         if (panel) panel.remove();
 

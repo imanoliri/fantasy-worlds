@@ -98,7 +98,8 @@ function selectGameMode(mode) {
         btn.innerHTML = "Adventure ▼";
 
         // If coming from Campaign Mode, we must RESET to ensure fresh Adventure
-        if (window.CampaignManager && window.CampaignManager.active) {
+        // Cleanup if active OR if we are just in setup (instance exists)
+        if (window.CampaignManager && (window.CampaignManager.active || window.CampaignManager.currentCampaignInstance)) {
             CampaignManager.cancelCampaign();
             // cancelCampaign calls reset(), so AdventureManager.active becomes false
         }
@@ -149,8 +150,8 @@ function selectGameMode(mode) {
         const sidebar = document.getElementById('adventureSidebar');
         if (sidebar) sidebar.classList.add('hidden');
 
-        // Stop Campaign if active
-        if (window.CampaignManager && window.CampaignManager.active) {
+        // Stop Campaign if active or in setup
+        if (window.CampaignManager && (window.CampaignManager.active || window.CampaignManager.currentCampaignInstance)) {
             CampaignManager.cancelCampaign();
         }
 

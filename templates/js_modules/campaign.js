@@ -62,6 +62,11 @@ class BaseCampaign {
         return this.partyStartConfig || {};
     }
 
+    // Lifecycle Hook for Setup Phase Cleanup
+    teardownSetup() {
+        // Override in child classes to clean up setup UI (e.g. faction selectors)
+    }
+
     // Event Handlers
     onAdventureStart() {
         if (this.partyStartConfig) {
@@ -215,6 +220,13 @@ const CampaignManager = {
 
     selectCampaign(index) {
         if (index === "") return;
+
+        // Cleanup previous selection if exists
+        if (this.currentCampaignInstance) {
+            this.currentCampaignInstance.teardownSetup();
+            // Also call onEnd just in case, though usually only active campaigns need onEnd
+        }
+
         const CampClass = this.availableCampaigns[index];
         this.currentCampaignInstance = new CampClass();
 
@@ -269,9 +281,7 @@ const CampaignManager = {
         }
 
         // Unmount Setup UI
-        if (typeof this.currentCampaignInstance.unmountSetupUI === 'function') {
-            this.currentCampaignInstance.unmountSetupUI();
-        }
+        this.currentCampaignInstance.teardownSetup();
         if (setupContainer) setupContainer.innerHTML = ""; // Clear legacy
 
         this.active = true;
@@ -307,9 +317,7 @@ const CampaignManager = {
         // 1. Cleanup current campaign
         if (this.currentCampaignInstance) {
             // Unmount Setup UI (in case we cancel BEFORE starting)
-            if (typeof this.currentCampaignInstance.unmountSetupUI === 'function') {
-                this.currentCampaignInstance.unmountSetupUI();
-            }
+            this.currentCampaignInstance.teardownSetup();
             this.currentCampaignInstance.onEnd();
             this.currentCampaignInstance = null;
         }
