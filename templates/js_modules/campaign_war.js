@@ -67,44 +67,13 @@ class WarCampaign extends MilitaryCampaign {
         const container = document.getElementById('mapContainer');
         if (!container) return;
 
-        const panel = document.createElement('div');
-        panel.id = 'warFactionSelectPanel';
-        panel.className = 'campaign-floating-controls'; // Reuse class for basic style
+        // Get Static Panel
+        const panel = document.getElementById('warFactionSelectPanel');
+        const listContainer = document.getElementById('warFactionList');
 
-        // Specific styling for Right-Middle placement
-        panel.style.position = 'absolute';
-        panel.style.top = '50%';
-        panel.style.right = '10px';
-        panel.style.transform = 'translateY(-50%)';
-        panel.style.backgroundColor = 'rgba(0, 0, 0, 0.85)'; // Darker & Opaque
-        panel.style.padding = '8px';
-        panel.style.borderRadius = '8px';
-        panel.style.color = '#fff';
-        panel.style.maxHeight = '500px'; // Taller
-        panel.style.overflowY = 'auto'; // Scrollable
-        panel.style.zIndex = '1000';
-        panel.style.border = '1px solid #e74c3c'; // War Red Border
-        panel.style.boxShadow = '0 0 10px rgba(0,0,0,0.5)';
-        panel.style.width = '240px'; // Wider for single line
+        if (!panel || !listContainer) return;
 
-        // Prevent Map Zoom/Pan when interacting with this panel
-        const stopProp = (e) => e.stopPropagation();
-        panel.addEventListener('wheel', stopProp, { passive: false });
-        panel.addEventListener('mousedown', stopProp);
-        panel.addEventListener('dblclick', stopProp);
-        panel.addEventListener('touchstart', stopProp);
-        panel.addEventListener('touchmove', stopProp);
-
-        let html = `
-            <div class="faction-select-header" style="text-align:center; padding-bottom:5px; border-bottom:1px solid #555; margin-bottom:5px;">
-                <h4 style="margin:0; color:#f39c12;">Select Faction</h4>
-                <div style="text-align: center; font-size:10px; margin-top:2px; color: #e74c3c; font-weight:bold;">
-                    🔥 Most Belligerent
-                </div>
-            </div>
-            <div class="faction-list">
-        `;
-
+        let html = "";
         if (warlikeStates.length === 0) {
             html += "<p>No suitable states found.</p>";
         } else {
@@ -133,18 +102,26 @@ class WarCampaign extends MilitaryCampaign {
                 `;
             });
         }
-        html += `</div>
-            <div style="text-align: center; font-size:10px; margin-top:5px; color: #2ecc71; font-weight:bold; border-top:1px solid #555; padding-top:5px;">
-                Most Peaceful 🕊️
-            </div>
-        `;
-        panel.innerHTML = html;
-        container.appendChild(panel);
+
+        listContainer.innerHTML = html;
+        panel.classList.remove('hidden');
 
         // Trigger Highlight for the default selected (First item)
         if (warlikeStates.length > 0) {
             updateDiplomacyColors(warlikeStates[0].state.id);
         }
+    }
+
+    teardownSetup() {
+        const panel = document.getElementById('warFactionSelectPanel');
+        if (panel) {
+            panel.classList.add('hidden');
+            // Optional: Clear content to save memory/clean state? 
+            // document.getElementById('warFactionList').innerHTML = ""; 
+        }
+
+        // Clean map
+        updateDiplomacyColors(null);
     }
 
     teardownSetup() {

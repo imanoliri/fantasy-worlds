@@ -116,6 +116,31 @@
             <button id="adventureOptionsBtn" class="adventure-btn floating-options-btn hidden"
                 data-click-action="AdventureManager.toggleOptions">⚙️</button>
 
+            <!-- War Campaign Faction Select Panel (Static) -->
+            <div id="warFactionSelectPanel" class="campaign-floating-controls hidden"
+                style="position: absolute; top: 50%; right: 10px; transform: translateY(-50%); background-color: rgba(0, 0, 0, 0.85); padding: 8px; border-radius: 8px; color: #fff; max-height: 500px; overflow-y: auto; z-index: 1000; border: 1px solid #e74c3c; box-shadow: 0 0 10px rgba(0,0,0,0.5); width: 240px;"
+                onwheel="event.stopPropagation()" onmousedown="event.stopPropagation()"
+                ondblclick="event.stopPropagation()" ontouchstart="event.stopPropagation()"
+                ontouchmove="event.stopPropagation()">
+
+                <div class="faction-select-header"
+                    style="text-align:center; padding-bottom:5px; border-bottom:1px solid #555; margin-bottom:5px;">
+                    <h4 style="margin:0; color:#f39c12;">Select Faction</h4>
+                    <div style="text-align: center; font-size:10px; margin-top:2px; color: #e74c3c; font-weight:bold;">
+                        🔥 Most Belligerent
+                    </div>
+                </div>
+
+                <div id="warFactionList" class="faction-list">
+                    <!-- Dynamic Content Populated by campaign_war.js -->
+                </div>
+
+                <div
+                    style="text-align: center; font-size:10px; margin-top:5px; color: #2ecc71; font-weight:bold; border-top:1px solid #555; padding-top:5px;">
+                    Most Peaceful 🕊️
+                </div>
+            </div>
+
             <svg id="mapSvg" viewBox="{{ min_x-50 }} {{ min_y-50 }} {{ width }} {{ height }}"
                 preserveAspectRatio="xMidYMid meet">
                 <!-- Background Polygons -->
