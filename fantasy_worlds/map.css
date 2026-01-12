@@ -1443,3 +1443,53 @@ button:disabled {
     cursor: not-allowed !important;
     pointer-events: none;
 }
+
+/* War Campaign Faction Selector Panel */
+#warFactionSelectPanel {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    background-color: rgba(0, 0, 0, 0.85);
+    padding: 8px;
+    border-radius: 8px;
+    color: #fff;
+    max-height: 500px;
+    overflow-y: auto;
+    z-index: 1000;
+    border: 1px solid #e74c3c;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    width: 240px;
+    transition: all 0.2s ease-in-out;
+}
+
+/* Mobile Devices (Phones) */
+@media (orientation: portrait) {
+    #warFactionSelectPanel {
+        width: 160px;
+        /* Significantly reduced width */
+        max-height: 50vh;
+        /* Limit height to half screen */
+        right: 5px;
+        /* Tighter margin */
+        padding: 4px;
+        /* Reduced padding */
+    }
+
+    #warFactionSelectPanel h4 {
+        font-size: 1rem;
+        /* Smaller header */
+    }
+
+    #warFactionSelectPanel .faction-option {
+        padding: 2px 4px !important;
+    }
+
+    #warFactionSelectPanel .faction-option div {
+        font-size: 11px !important;
+    }
+
+    #warFactionSelectPanel .faction-option span {
+        font-size: 0.7em;
+    }
+}
