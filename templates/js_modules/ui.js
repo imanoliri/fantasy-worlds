@@ -235,6 +235,16 @@ class FactionSelector {
                     </label>
                 `;
             });
+        } else {
+            // Default Option for standard Political Map: "No State"
+            html += `
+                <label class="faction-option" style="display: flex; align-items: center; padding: 4px 6px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.2s; white-space: nowrap; overflow: hidden;">
+                    <input type="radio" name="warFactionSelect" value="-2" onchange="FactionSelectorInstance.onSelect(-2)" style="margin-right: 6px;">
+                    <div style="flex: 1; font-weight: bold; color: #bbb; font-size:13px; font-style: italic;">
+                        No State (Clear)
+                    </div>
+                </label>
+            `;
         }
 
         if (rankedStates.length === 0) {
@@ -284,8 +294,8 @@ class FactionSelector {
 
     onSelect(stateId) {
         if (window.updateDiplomacyColors) {
-            // Handle Random (-1) by clearing logic
-            if (stateId === -1) {
+            // Handle Random (-1) or No State (-2) by clearing logic
+            if (stateId === -1 || stateId === -2) {
                 updateDiplomacyColors(null);
             } else {
                 updateDiplomacyColors(stateId);
