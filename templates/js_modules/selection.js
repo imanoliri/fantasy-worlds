@@ -239,10 +239,31 @@ function selectState(stateId) {
     const btn = document.getElementById('mapModeBtn');
     if (btn) {
         const currentMode = btn.getAttribute('data-current-mode');
-        // Only run diplomacy update if already in state mode (or switch to it?)
-        // User said "when you are on the state map", so we assume mode is already 'state'.
+        // Only run diplomacy update if already in state mode
         if (currentMode === 'state') {
             const id = parseInt(stateId);
+            let targetId = id;
+
+            // Toggle logic: If clicking the same state, deselect (target "No State" / -2)
+            if (diplomacySelectedStateId === id) {
+                targetId = -2;
+            }
+
+            // check if Faction Selector is active/visible by checking for a radio input?
+            // Or just check if the radio exists.
+            const radio = document.querySelector(`input[name="warFactionSelect"][value="${targetId}"]`);
+
+            if (radio) {
+                radio.checked = true;
+                if (typeof FactionSelectorInstance !== 'undefined') {
+                    FactionSelectorInstance.onSelect(targetId);
+                    // Sync our local tracker with what FactionSelector likely did
+                    diplomacySelectedStateId = (targetId === -2) ? null : targetId;
+                    return;
+                }
+            }
+
+            // Fallback for when Faction Selector is not active/available
             if (diplomacySelectedStateId === id) {
                 // Toggle Off
                 updateDiplomacyColors(null);
