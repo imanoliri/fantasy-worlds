@@ -177,6 +177,120 @@ function selectGameMode(mode) {
     if (dropdown) dropdown.classList.remove('show');
 }
 
+class FactionSelector {
+    constructor(containerId = 'warFactionSelectPanel', listId = 'warFactionList') {
+        this.containerId = containerId;
+        this.listId = listId;
+    }
+
+    show() {
+        if (!window.statesData || !window.diplomacyMatrix) return;
+
+        const panel = document.getElementById(this.containerId);
+        const listContainer = document.getElementById(this.listId);
+        if (!panel || !listContainer) return;
+
+        // Calculate Agression/Difficulty
+        // Filter valid states (ensure they have a capital ID)
+        const validStates = statesData.filter(s => s.capital_id && s.capital_id > 0);
+
+        const rankedStates = validStates.map(state => {
+            let enemyCount = 0;
+            const relations = diplomacyMatrix[state.id];
+            if (relations) {
+                if (Array.isArray(relations)) {
+                    enemyCount = relations.filter(r => r === "Enemy" || r === "Rival" || (typeof r === 'string' && r.includes('War'))).length;
+                } else {
+                    enemyCount = Object.values(relations).filter(r => r === "Enemy" || r === "Rival" || (typeof r === 'string' && r.includes('War'))).length;
+                }
+            }
+
+            // Calculate Stats from Burgs
+            let totalSoldiers = 0;
+            let totalCraftsmen = 0;
+            if (window.burgsData) {
+                const stateBurgs = window.burgsData.filter(b => b.state_id === state.id);
+                stateBurgs.forEach(b => {
+                    totalSoldiers += (b.soldier_quartiers || 0);
+                    totalCraftsmen += (b.craftsman_quartiers || 0);
+                });
+            }
+
+            return { state, enemyCount, totalSoldiers, totalCraftsmen };
+        });
+
+        // Filter: Show only states with enemies? NO, for Political Map we want ALL states (or at least valid ones).
+        // The original logic filtered `warlikeStates`.
+        // For general Political Map, simple sorting by power or name might be better.
+        // But to reuse the "Faction Selector" UI which has specific columns (enemies), keeping consistent logic is good.
+        // Let's sort by enemy count then total soldiers.
+
+        rankedStates.sort((a, b) => {
+            if (b.enemyCount !== a.enemyCount) return b.enemyCount - a.enemyCount;
+            return b.totalSoldiers - a.totalSoldiers;
+        });
+
+        let html = "";
+        if (rankedStates.length === 0) {
+            html += "<p>No suitable states found.</p>";
+        } else {
+            rankedStates.forEach((item, index) => {
+                const s = item.state;
+                // Don't auto-check any for Political Map mode unless user clicks?
+                // Actually, logic is cleaner if we rely on click.
+                // But we must support `updateDiplomacyColors` needing an ID.
+
+                const isChecked = "";
+
+                // OnClick Update Diplomacy Map
+                // Using global function
+                const clickHandler = `FactionSelectorInstance.onSelect(${s.id})`;
+
+                html += `
+                    <label class="faction-option" style="display: flex; align-items: center; padding: 4px 6px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.2s; white-space: nowrap; overflow: hidden;">
+                        <input type="radio" name="warFactionSelect" value="${s.id}" ${isChecked} onchange="${clickHandler}" style="margin-right: 6px;">
+                        
+                        <div style="flex: 1; overflow: hidden; text-overflow: ellipsis; font-weight: bold; color: ${s.color}; font-size:13px; margin-right: 8px;">
+                            ${s.name}
+                        </div>
+                        
+                        <div style="font-size: 0.8em; color: #ccc; flex-shrink: 0;">
+                            <span title="Soldiers">${item.totalSoldiers}🛡️</span> 
+                            <span title="Craftsmen" style="margin-left:4px;">${item.totalCraftsmen}🛠️</span> 
+                            <span style="color:#888; margin:0 4px;">vs</span> 
+                            <span title="enemies">${item.enemyCount}⚔️</span>
+                        </div>
+                    </label>
+                `;
+            });
+        }
+
+        listContainer.innerHTML = html;
+        panel.classList.remove('hidden');
+    }
+
+    hide() {
+        const panel = document.getElementById(this.containerId);
+        if (panel) {
+            panel.classList.add('hidden');
+        }
+        // Also clear map selection?
+        if (window.updateDiplomacyColors) {
+            updateDiplomacyColors(null);
+        }
+    }
+
+    onSelect(stateId) {
+        if (window.updateDiplomacyColors) {
+            updateDiplomacyColors(stateId);
+        }
+    }
+}
+
+// Global Instance
+const FactionSelectorInstance = new FactionSelector();
+
+
 
 const relationColors = {
     "Ally": "#32CD32",      // Lime Green
@@ -219,11 +333,21 @@ function setMapMode(mode) {
     if (mode === 'none') {
         mapGroup.style.display = 'none';
         if (mapBtn) mapBtn.innerText = 'Map: None';
+        if (typeof FactionSelectorInstance !== 'undefined') FactionSelectorInstance.hide();
         return;
     }
 
     // Ensure map is visible for other modes
     mapGroup.style.display = 'block';
+
+    // Toggle Faction Selector
+    if (typeof FactionSelectorInstance !== 'undefined') {
+        if (mode === 'state') {
+            FactionSelectorInstance.show();
+        } else {
+            FactionSelectorInstance.hide();
+        }
+    }
 
     if (mode === 'state') {
         if (mapBtn) mapBtn.innerText = 'Map: Political';
@@ -4896,103 +5020,20 @@ class WarCampaign extends MilitaryCampaign {
         // Remove existing if any
         this.teardownSetup();
 
-        // Calculate Agression/Difficulty
-        const validStates = statesData.filter(s => s.capital_id && s.capital_id > 0);
-
-        const rankedStates = validStates.map(state => {
-            let enemyCount = 0;
-            const relations = diplomacyMatrix[state.id];
-            if (relations) {
-                if (Array.isArray(relations)) {
-                    enemyCount = relations.filter(r => r === "Enemy" || r === "Rival" || (typeof r === 'string' && r.includes('War'))).length;
-                } else {
-                    enemyCount = Object.values(relations).filter(r => r === "Enemy" || r === "Rival" || (typeof r === 'string' && r.includes('War'))).length;
-                }
-            }
-
-            // Calculate Stats from Burgs
-            let totalSoldiers = 0;
-            let totalCraftsmen = 0;
-            if (window.burgsData) {
-                const stateBurgs = window.burgsData.filter(b => b.state_id === state.id);
-                stateBurgs.forEach(b => {
-                    totalSoldiers += (b.soldier_quartiers || 0);
-                    totalCraftsmen += (b.craftsman_quartiers || 0);
-                });
-            }
-
-            return { state, enemyCount, totalSoldiers, totalCraftsmen };
-        });
-
-        const warlikeStates = rankedStates.filter(item => item.enemyCount > 0);
-        warlikeStates.sort((a, b) => b.enemyCount - a.enemyCount);
-
-        const container = document.getElementById('mapContainer');
-        if (!container) return;
-
-        // Get Static Panel
-        const panel = document.getElementById('warFactionSelectPanel');
-        const listContainer = document.getElementById('warFactionList');
-
-        if (!panel || !listContainer) return;
-
-        let html = "";
-        if (warlikeStates.length === 0) {
-            html += "<p>No suitable states found.</p>";
-        } else {
-            warlikeStates.forEach((item, index) => {
-                const s = item.state;
-                const isChecked = index === 0 ? "checked" : "";
-
-                // OnClick Update Diplomacy Map
-                const clickHandler = `updateDiplomacyColors(${s.id})`;
-
-                html += `
-                    <label class="faction-option" style="display: flex; align-items: center; padding: 4px 6px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.2s; white-space: nowrap; overflow: hidden;">
-                        <input type="radio" name="warFactionSelect" value="${s.id}" ${isChecked} onchange="${clickHandler}" style="margin-right: 6px;">
-                        
-                        <div style="flex: 1; overflow: hidden; text-overflow: ellipsis; font-weight: bold; color: ${s.color}; font-size:13px; margin-right: 8px;">
-                            ${s.name}
-                        </div>
-                        
-                        <div style="font-size: 0.8em; color: #ccc; flex-shrink: 0;">
-                            <span title="Soldiers">${item.totalSoldiers}🛡️</span> 
-                            <span title="Craftsmen" style="margin-left:4px;">${item.totalCraftsmen}🛠️</span> 
-                            <span style="color:#888; margin:0 4px;">vs</span> 
-                            <span title="enemies">${item.enemyCount}⚔️</span>
-                        </div>
-                    </label>
-                `;
-            });
-        }
-
-        listContainer.innerHTML = html;
-        panel.classList.remove('hidden');
-
-        // Trigger Highlight for the default selected (First item)
-        if (warlikeStates.length > 0) {
-            updateDiplomacyColors(warlikeStates[0].state.id);
+        // Force Political Map Mode
+        // This naturally triggers FactionSelectorInstance.show() via map_render.js logic
+        if (typeof setMapMode === 'function') {
+            setMapMode('state');
+        } else if (typeof FactionSelectorInstance !== 'undefined') {
+            // Fallback
+            FactionSelectorInstance.show();
         }
     }
 
     teardownSetup() {
-        const panel = document.getElementById('warFactionSelectPanel');
-        if (panel) {
-            panel.classList.add('hidden');
-            // Optional: Clear content to save memory/clean state? 
-            // document.getElementById('warFactionList').innerHTML = ""; 
+        if (typeof FactionSelectorInstance !== 'undefined') {
+            FactionSelectorInstance.hide();
         }
-
-        // Clean map
-        updateDiplomacyColors(null);
-    }
-
-    teardownSetup() {
-        const panel = document.getElementById('warFactionSelectPanel');
-        if (panel) panel.remove();
-
-        // Clean map
-        updateDiplomacyColors(null);
     }
 
     // --- Specific Mechanics ---

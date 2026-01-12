@@ -39,11 +39,21 @@ function setMapMode(mode) {
     if (mode === 'none') {
         mapGroup.style.display = 'none';
         if (mapBtn) mapBtn.innerText = 'Map: None';
+        if (typeof FactionSelectorInstance !== 'undefined') FactionSelectorInstance.hide();
         return;
     }
 
     // Ensure map is visible for other modes
     mapGroup.style.display = 'block';
+
+    // Toggle Faction Selector
+    if (typeof FactionSelectorInstance !== 'undefined') {
+        if (mode === 'state') {
+            FactionSelectorInstance.show();
+        } else {
+            FactionSelectorInstance.hide();
+        }
+    }
 
     if (mode === 'state') {
         if (mapBtn) mapBtn.innerText = 'Map: Political';
