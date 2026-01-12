@@ -190,6 +190,15 @@ class FactionSelector {
         const listContainer = document.getElementById(this.listId);
         if (!panel || !listContainer) return;
 
+        // Auto-fetch options from Campaign if not provided (Handling Cycle Mode)
+        if (!customOptions || customOptions.length === 0) {
+            if (window.CampaignManager && window.CampaignManager.currentCampaignInstance && !window.CampaignManager.active) {
+                if (typeof window.CampaignManager.currentCampaignInstance.getFactionSelectorOptions === 'function') {
+                    customOptions = window.CampaignManager.currentCampaignInstance.getFactionSelectorOptions();
+                }
+            }
+        }
+
         // Calculate Agression/Difficulty
         // Filter valid states (ensure they have a capital ID)
         const validStates = statesData.filter(s => s.capital_id && s.capital_id > 0);
@@ -5061,32 +5070,29 @@ class WarCampaign extends MilitaryCampaign {
         }
 
         if (typeof FactionSelectorInstance !== 'undefined') {
-            // Define Random Option
-            const randomOption = {
-                id: 'random',
-                label: 'Random Faction 🎲',
-                value: '-1',
-                checked: true,
-                onChange: 'FactionSelectorInstance.onSelect(-1)'
-            };
-
-            // Inject option
-            FactionSelectorInstance.show([randomOption]);
+            // Inject options
+            FactionSelectorInstance.show(this.getFactionSelectorOptions());
         }
     }
 
-    teardownSetup() {
-        if (typeof FactionSelectorInstance !== 'undefined') {
-            // Check if we are still in Political Map Mode
-            const btn = document.getElementById('mapModeBtn');
-            const currentMode = btn ? btn.getAttribute('data-current-mode') : null;
+    getFactionSelectorOptions() {
+        return [{
+            id: 'random',
+            label: 'Random Faction 🎲',
+            value: '-1',
+            checked: true,
+            onChange: 'FactionSelectorInstance.onSelect(-1)'
+        }];
+    }
 
-            if (currentMode === 'state') {
-                // Revert to default selector (No State option)
-                FactionSelectorInstance.show();
-            } else {
-                FactionSelectorInstance.hide();
-            }
+    teardownSetup() {
+        if (typeof setMapMode === 'function') {
+            // setMapMode('biome') will internally call FactionSelectorInstance.hide()
+            // before applying the new map colors. This order is correct.
+            setMapMode('biome');
+        } else if (typeof FactionSelectorInstance !== 'undefined') {
+            // Fallback: Manually hide if we couldn't change map mode
+            FactionSelectorInstance.hide();
         }
     }
 

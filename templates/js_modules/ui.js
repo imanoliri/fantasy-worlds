@@ -178,6 +178,15 @@ class FactionSelector {
         const listContainer = document.getElementById(this.listId);
         if (!panel || !listContainer) return;
 
+        // Auto-fetch options from Campaign if not provided (Handling Cycle Mode)
+        if (!customOptions || customOptions.length === 0) {
+            if (window.CampaignManager && window.CampaignManager.currentCampaignInstance && !window.CampaignManager.active) {
+                if (typeof window.CampaignManager.currentCampaignInstance.getFactionSelectorOptions === 'function') {
+                    customOptions = window.CampaignManager.currentCampaignInstance.getFactionSelectorOptions();
+                }
+            }
+        }
+
         // Calculate Agression/Difficulty
         // Filter valid states (ensure they have a capital ID)
         const validStates = statesData.filter(s => s.capital_id && s.capital_id > 0);
