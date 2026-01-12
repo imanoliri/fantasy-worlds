@@ -358,8 +358,8 @@ def generate_map(burgs, output_file, trades_data=None, map_name="Interactive Map
             'p': c.get('p', [0, 0])
         } for c in (map_data.get('pack', {}).get('cells', []) if map_data else [])]),
         'marine_id': marine_id,
-        'states_data': json.dumps(states_data),
-        'states_data_json': json.dumps(states) if states else "[]"
+        'states_data': states_data,
+        'states_data_json': json.dumps(states_data),
     }
     
     html_output = template.render(context)
