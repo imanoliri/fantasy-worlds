@@ -1493,3 +1493,23 @@ button:disabled {
         font-size: 0.7em;
     }
 }
+
+/* Faction Selector List Styles */
+.hidden-radio {
+    display: none;
+}
+
+.faction-option {
+    transition: all 0.2s ease;
+}
+
+.faction-option:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.faction-option.active {
+    background: rgba(255, 255, 255, 0.25) !important;
+    border-left: 4px solid #fff;
+    padding-left: 6px !important;
+    /* Adjust for border */
+}

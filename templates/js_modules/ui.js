@@ -216,12 +216,6 @@ class FactionSelector {
             return { state, enemyCount, totalSoldiers, totalCraftsmen };
         });
 
-        // Filter: Show only states with enemies? NO, for Political Map we want ALL states (or at least valid ones).
-        // The original logic filtered `warlikeStates`.
-        // For general Political Map, simple sorting by power or name might be better.
-        // But to reuse the "Faction Selector" UI which has specific columns (enemies), keeping consistent logic is good.
-        // Let's sort by enemy count then total soldiers.
-
         rankedStates.sort((a, b) => {
             if (b.enemyCount !== a.enemyCount) return b.enemyCount - a.enemyCount;
             return b.totalSoldiers - a.totalSoldiers;
@@ -235,9 +229,12 @@ class FactionSelector {
                 const checkedStr = opt.checked ? "checked" : "";
                 const changeHandler = opt.onChange ? opt.onChange : `FactionSelectorInstance.onSelect(${opt.value})`; // Default handler if not provided
 
+                // Add ID to label for selection highlighting
+                const domId = `faction-option-${opt.value}`;
+
                 html += `
-                    <label class="faction-option" style="display: flex; align-items: center; padding: 4px 6px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.2s; white-space: nowrap; overflow: hidden;">
-                        <input type="radio" name="warFactionSelect" value="${opt.value}" ${checkedStr} onchange="${changeHandler}" style="margin-right: 6px;">
+                    <label id="${domId}" class="faction-option ${opt.checked ? 'active' : ''}" style="display: flex; align-items: center; padding: 4px 6px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.2s; white-space: nowrap; overflow: hidden;">
+                        <input type="radio" class="hidden-radio" name="warFactionSelect" value="${opt.value}" ${checkedStr} onchange="${changeHandler}">
                         <div style="flex: 1; font-weight: bold; color: #fff; font-size:13px;">
                             ${opt.label}
                         </div>
@@ -246,9 +243,10 @@ class FactionSelector {
             });
         } else {
             // Default Option for standard Political Map: "No State"
+            // Use ID faction-option--2 for No State
             html += `
-                <label class="faction-option" style="display: flex; align-items: center; padding: 4px 6px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.2s; white-space: nowrap; overflow: hidden;">
-                    <input type="radio" name="warFactionSelect" value="-2" onchange="FactionSelectorInstance.onSelect(-2)" style="margin-right: 6px;">
+                <label id="faction-option--2" class="faction-option" style="display: flex; align-items: center; padding: 4px 6px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.2s; white-space: nowrap; overflow: hidden;">
+                    <input type="radio" class="hidden-radio" name="warFactionSelect" value="-2" onchange="FactionSelectorInstance.onSelect(-2)">
                     <div style="flex: 1; font-weight: bold; color: #bbb; font-size:13px; font-style: italic;">
                         No State (Clear)
                     </div>
@@ -261,15 +259,13 @@ class FactionSelector {
         } else {
             rankedStates.forEach((item, index) => {
                 const s = item.state;
-                // If custom options provided (like Random), they might be default.
-                // If NO custom options, we don't start with any checked usually.
                 const isChecked = "";
-
+                const domId = `faction-option-${s.id}`;
                 const clickHandler = `FactionSelectorInstance.onSelect(${s.id})`;
 
                 html += `
-                    <label class="faction-option" style="display: flex; align-items: center; padding: 4px 6px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.2s; white-space: nowrap; overflow: hidden;">
-                        <input type="radio" name="warFactionSelect" value="${s.id}" ${isChecked} onchange="${clickHandler}" style="margin-right: 6px;">
+                    <label id="${domId}" class="faction-option" style="display: flex; align-items: center; padding: 4px 6px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.2s; white-space: nowrap; overflow: hidden;">
+                        <input type="radio" class="hidden-radio" name="warFactionSelect" value="${s.id}" ${isChecked} onchange="${clickHandler}">
                         
                         <div style="flex: 1; overflow: hidden; text-overflow: ellipsis; font-weight: bold; color: ${s.color}; font-size:13px; margin-right: 8px;">
                             ${s.name}
@@ -307,6 +303,24 @@ class FactionSelector {
             window.CampaignManager.currentCampaignInstance.presetStateId = stateId;
         }
 
+        // --- UI Update: Visual Selection & Scroll ---
+        // 1. Remove active class from all options
+        const allOptions = document.querySelectorAll('.faction-option');
+        allOptions.forEach(el => el.classList.remove('active'));
+
+        // 2. Add active class to selected option
+        const selectedId = `faction-option-${stateId}`;
+        const selectedEl = document.getElementById(selectedId);
+        if (selectedEl) {
+            selectedEl.classList.add('active');
+
+            // 3. Scroll into View
+            // Use block: 'nearest' to avoid jumping if already visible, 'center' if far away.
+            // 'nearest' is usually safer for UX unless we want to force attention.
+            selectedEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        // --- Logic Update ---
         if (window.updateDiplomacyColors) {
             // Handle Random (-1) or No State (-2) by clearing logic
             if (stateId === -1 || stateId === -2) {
