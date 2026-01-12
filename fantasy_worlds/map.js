@@ -183,7 +183,7 @@ class FactionSelector {
         this.listId = listId;
     }
 
-    show() {
+    show(customOptions = []) {
         if (!window.statesData || !window.diplomacyMatrix) return;
 
         const panel = document.getElementById(this.containerId);
@@ -231,19 +231,33 @@ class FactionSelector {
         });
 
         let html = "";
+
+        // Render Custom Options (e.g. Random from War Campaign)
+        if (customOptions && customOptions.length > 0) {
+            customOptions.forEach(opt => {
+                const checkedStr = opt.checked ? "checked" : "";
+                const changeHandler = opt.onChange ? opt.onChange : `FactionSelectorInstance.onSelect(${opt.value})`; // Default handler if not provided
+
+                html += `
+                    <label class="faction-option" style="display: flex; align-items: center; padding: 4px 6px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.2s; white-space: nowrap; overflow: hidden;">
+                        <input type="radio" name="warFactionSelect" value="${opt.value}" ${checkedStr} onchange="${changeHandler}" style="margin-right: 6px;">
+                        <div style="flex: 1; font-weight: bold; color: #fff; font-size:13px;">
+                            ${opt.label}
+                        </div>
+                    </label>
+                `;
+            });
+        }
+
         if (rankedStates.length === 0) {
             html += "<p>No suitable states found.</p>";
         } else {
             rankedStates.forEach((item, index) => {
                 const s = item.state;
-                // Don't auto-check any for Political Map mode unless user clicks?
-                // Actually, logic is cleaner if we rely on click.
-                // But we must support `updateDiplomacyColors` needing an ID.
-
+                // If custom options provided (like Random), they might be default.
+                // If NO custom options, we don't start with any checked usually.
                 const isChecked = "";
 
-                // OnClick Update Diplomacy Map
-                // Using global function
                 const clickHandler = `FactionSelectorInstance.onSelect(${s.id})`;
 
                 html += `
@@ -282,7 +296,12 @@ class FactionSelector {
 
     onSelect(stateId) {
         if (window.updateDiplomacyColors) {
-            updateDiplomacyColors(stateId);
+            // Handle Random (-1) by clearing logic
+            if (stateId === -1) {
+                updateDiplomacyColors(null);
+            } else {
+                updateDiplomacyColors(stateId);
+            }
         }
     }
 }
@@ -5024,9 +5043,20 @@ class WarCampaign extends MilitaryCampaign {
         // This naturally triggers FactionSelectorInstance.show() via map_render.js logic
         if (typeof setMapMode === 'function') {
             setMapMode('state');
-        } else if (typeof FactionSelectorInstance !== 'undefined') {
-            // Fallback
-            FactionSelectorInstance.show();
+        }
+
+        if (typeof FactionSelectorInstance !== 'undefined') {
+            // Define Random Option
+            const randomOption = {
+                id: 'random',
+                label: 'Random Faction 🎲',
+                value: '-1',
+                checked: true,
+                onChange: 'FactionSelectorInstance.onSelect(-1)'
+            };
+
+            // Inject option
+            FactionSelectorInstance.show([randomOption]);
         }
     }
 
@@ -5075,7 +5105,7 @@ class WarCampaign extends MilitaryCampaign {
             let selectedState = null;
 
             // 1. Check for Preset Selection
-            if (this.presetStateId) {
+            if (this.presetStateId && this.presetStateId > 0) {
                 selectedState = statesData.find(s => s.id === this.presetStateId);
                 console.log(`WarCampaign: Using user-selected state ${this.presetStateId}`);
             }

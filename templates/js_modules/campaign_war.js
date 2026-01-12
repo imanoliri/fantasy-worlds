@@ -37,9 +37,20 @@ class WarCampaign extends MilitaryCampaign {
         // This naturally triggers FactionSelectorInstance.show() via map_render.js logic
         if (typeof setMapMode === 'function') {
             setMapMode('state');
-        } else if (typeof FactionSelectorInstance !== 'undefined') {
-            // Fallback
-            FactionSelectorInstance.show();
+        }
+
+        if (typeof FactionSelectorInstance !== 'undefined') {
+            // Define Random Option
+            const randomOption = {
+                id: 'random',
+                label: 'Random Faction 🎲',
+                value: '-1',
+                checked: true,
+                onChange: 'FactionSelectorInstance.onSelect(-1)'
+            };
+
+            // Inject option
+            FactionSelectorInstance.show([randomOption]);
         }
     }
 
@@ -88,7 +99,7 @@ class WarCampaign extends MilitaryCampaign {
             let selectedState = null;
 
             // 1. Check for Preset Selection
-            if (this.presetStateId) {
+            if (this.presetStateId && this.presetStateId > 0) {
                 selectedState = statesData.find(s => s.id === this.presetStateId);
                 console.log(`WarCampaign: Using user-selected state ${this.presetStateId}`);
             }
