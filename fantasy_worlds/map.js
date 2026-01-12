@@ -305,6 +305,11 @@ class FactionSelector {
     }
 
     onSelect(stateId) {
+        // Propagate to Campaign Manager if active setup
+        if (window.CampaignManager && window.CampaignManager.currentCampaignInstance) {
+            window.CampaignManager.currentCampaignInstance.presetStateId = stateId;
+        }
+
         if (window.updateDiplomacyColors) {
             // Handle Random (-1) or No State (-2) by clearing logic
             if (stateId === -1 || stateId === -2) {
@@ -5072,7 +5077,16 @@ class WarCampaign extends MilitaryCampaign {
 
     teardownSetup() {
         if (typeof FactionSelectorInstance !== 'undefined') {
-            FactionSelectorInstance.hide();
+            // Check if we are still in Political Map Mode
+            const btn = document.getElementById('mapModeBtn');
+            const currentMode = btn ? btn.getAttribute('data-current-mode') : null;
+
+            if (currentMode === 'state') {
+                // Revert to default selector (No State option)
+                FactionSelectorInstance.show();
+            } else {
+                FactionSelectorInstance.hide();
+            }
         }
     }
 

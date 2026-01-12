@@ -56,7 +56,16 @@ class WarCampaign extends MilitaryCampaign {
 
     teardownSetup() {
         if (typeof FactionSelectorInstance !== 'undefined') {
-            FactionSelectorInstance.hide();
+            // Check if we are still in Political Map Mode
+            const btn = document.getElementById('mapModeBtn');
+            const currentMode = btn ? btn.getAttribute('data-current-mode') : null;
+
+            if (currentMode === 'state') {
+                // Revert to default selector (No State option)
+                FactionSelectorInstance.show();
+            } else {
+                FactionSelectorInstance.hide();
+            }
         }
     }
 

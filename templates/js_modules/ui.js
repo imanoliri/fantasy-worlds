@@ -293,6 +293,11 @@ class FactionSelector {
     }
 
     onSelect(stateId) {
+        // Propagate to Campaign Manager if active setup
+        if (window.CampaignManager && window.CampaignManager.currentCampaignInstance) {
+            window.CampaignManager.currentCampaignInstance.presetStateId = stateId;
+        }
+
         if (window.updateDiplomacyColors) {
             // Handle Random (-1) or No State (-2) by clearing logic
             if (stateId === -1 || stateId === -2) {
