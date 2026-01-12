@@ -234,7 +234,7 @@ class FactionSelector {
 
                 html += `
                     <label id="${domId}" class="faction-option ${opt.checked ? 'active' : ''}" style="display: flex; align-items: center; padding: 4px 6px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.2s; white-space: nowrap; overflow: hidden;">
-                        <input type="radio" class="hidden-radio" name="warFactionSelect" value="${opt.value}" ${checkedStr} onchange="${changeHandler}">
+                        <input type="radio" name="warFactionSelect" value="${opt.value}" ${checkedStr} onchange="${changeHandler}">
                         <div style="flex: 1; font-weight: bold; color: #fff; font-size:13px;">
                             ${opt.label}
                         </div>
@@ -246,7 +246,7 @@ class FactionSelector {
             // Use ID faction-option--2 for No State
             html += `
                 <label id="faction-option--2" class="faction-option" style="display: flex; align-items: center; padding: 4px 6px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.2s; white-space: nowrap; overflow: hidden;">
-                    <input type="radio" class="hidden-radio" name="warFactionSelect" value="-2" onchange="FactionSelectorInstance.onSelect(-2)">
+                    <input type="radio" name="warFactionSelect" value="-2" onchange="FactionSelectorInstance.onSelect(-2)">
                     <div style="flex: 1; font-weight: bold; color: #bbb; font-size:13px; font-style: italic;">
                         No State (Clear)
                     </div>
@@ -265,7 +265,7 @@ class FactionSelector {
 
                 html += `
                     <label id="${domId}" class="faction-option" style="display: flex; align-items: center; padding: 4px 6px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.2s; white-space: nowrap; overflow: hidden;">
-                        <input type="radio" class="hidden-radio" name="warFactionSelect" value="${s.id}" ${isChecked} onchange="${clickHandler}">
+                        <input type="radio" name="warFactionSelect" value="${s.id}" ${isChecked} onchange="${clickHandler}" style="margin-right: 8px;">
                         
                         <div style="flex: 1; overflow: hidden; text-overflow: ellipsis; font-weight: bold; color: ${s.color}; font-size:13px; margin-right: 8px;">
                             ${s.name}

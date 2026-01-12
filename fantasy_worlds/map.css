@@ -1509,7 +1509,4 @@ button:disabled {
 
 .faction-option.active {
     background: rgba(255, 255, 255, 0.25) !important;
-    border-left: 4px solid #fff;
-    padding-left: 6px !important;
-    /* Adjust for border */
 }
