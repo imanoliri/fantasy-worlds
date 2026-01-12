@@ -5531,8 +5531,20 @@ function highlightTradeRowsByIds(fromId, toId, className) {
 function selectBurg(id) {
     if (!id) return; // Ignore clear calls if any
 
+    const modeBtn = document.getElementById('mapModeBtn');
+    const currentMode = modeBtn ? modeBtn.getAttribute('data-current-mode') : null;
+
+    // Handle State/Political Mode
+    if (currentMode === 'state') {
+        const burgDot = document.querySelector(`.burg-dot[data-id="${id}"]`);
+        if (burgDot && burgDot.hasAttribute('data-state-id')) {
+            const stateId = burgDot.getAttribute('data-state-id');
+            if (window.selectState) selectState(stateId);
+        }
+        return;
+    }
+
     // Restrict highlighting to Free Mode only
-    const modeBtn = document.getElementById('gameModeBtn');
     if (modeBtn && !modeBtn.innerText.includes('Free Mode')) {
         return;
     }
