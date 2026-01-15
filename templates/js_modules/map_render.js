@@ -4,6 +4,7 @@ const relationColors = {
     "Neutral": "#D3D3D3",   // Light Grey
     "Suspicion": "#FFA500", // Orange
     "Enemy": "#FF4500",     // Orange Red
+    "Rival": "#FF4500",     // Orange Red
     "War": "#FF0000",       // Red
     "Vassal": "#87CEEB",    // Sky Blue
     "Suzerain": "#C8A2C8",  // Lilac
@@ -38,11 +39,21 @@ function setMapMode(mode) {
     if (mode === 'none') {
         mapGroup.style.display = 'none';
         if (mapBtn) mapBtn.innerText = 'Map: None';
+        if (typeof FactionSelectorInstance !== 'undefined') FactionSelectorInstance.hide();
         return;
     }
 
     // Ensure map is visible for other modes
     mapGroup.style.display = 'block';
+
+    // Toggle Faction Selector
+    if (typeof FactionSelectorInstance !== 'undefined') {
+        if (mode === 'state') {
+            FactionSelectorInstance.show();
+        } else {
+            FactionSelectorInstance.hide();
+        }
+    }
 
     if (mode === 'state') {
         if (mapBtn) mapBtn.innerText = 'Map: Political';

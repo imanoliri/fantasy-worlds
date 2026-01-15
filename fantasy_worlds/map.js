@@ -110,7 +110,8 @@ function selectGameMode(mode) {
         btn.innerHTML = "Adventure ▼";
 
         // If coming from Campaign Mode, we must RESET to ensure fresh Adventure
-        if (window.CampaignManager && window.CampaignManager.active) {
+        // Cleanup if active OR if we are just in setup (instance exists)
+        if (window.CampaignManager && (window.CampaignManager.active || window.CampaignManager.currentCampaignInstance)) {
             CampaignManager.cancelCampaign();
             // cancelCampaign calls reset(), so AdventureManager.active becomes false
         }
@@ -161,8 +162,8 @@ function selectGameMode(mode) {
         const sidebar = document.getElementById('adventureSidebar');
         if (sidebar) sidebar.classList.add('hidden');
 
-        // Stop Campaign if active
-        if (window.CampaignManager && window.CampaignManager.active) {
+        // Stop Campaign if active or in setup
+        if (window.CampaignManager && (window.CampaignManager.active || window.CampaignManager.currentCampaignInstance)) {
             CampaignManager.cancelCampaign();
         }
 
@@ -176,6 +177,177 @@ function selectGameMode(mode) {
     if (dropdown) dropdown.classList.remove('show');
 }
 
+class FactionSelector {
+    constructor(containerId = 'warFactionSelectPanel', listId = 'warFactionList') {
+        this.containerId = containerId;
+        this.listId = listId;
+    }
+
+    show(customOptions = []) {
+        if (!window.statesData || !window.diplomacyMatrix) return;
+
+        const panel = document.getElementById(this.containerId);
+        const listContainer = document.getElementById(this.listId);
+        if (!panel || !listContainer) return;
+
+        // Auto-fetch options from Campaign if not provided (Handling Cycle Mode)
+        if (!customOptions || customOptions.length === 0) {
+            if (window.CampaignManager && window.CampaignManager.currentCampaignInstance && !window.CampaignManager.active) {
+                if (typeof window.CampaignManager.currentCampaignInstance.getFactionSelectorOptions === 'function') {
+                    customOptions = window.CampaignManager.currentCampaignInstance.getFactionSelectorOptions();
+                }
+            }
+        }
+
+        // Calculate Agression/Difficulty
+        // Filter valid states (ensure they have a capital ID)
+        const validStates = statesData.filter(s => s.capital_id && s.capital_id > 0);
+
+        const rankedStates = validStates.map(state => {
+            let enemyCount = 0;
+            const relations = diplomacyMatrix[state.id];
+            if (relations) {
+                if (Array.isArray(relations)) {
+                    enemyCount = relations.filter(r => r === "Enemy" || r === "Rival" || (typeof r === 'string' && r.includes('War'))).length;
+                } else {
+                    enemyCount = Object.values(relations).filter(r => r === "Enemy" || r === "Rival" || (typeof r === 'string' && r.includes('War'))).length;
+                }
+            }
+
+            // Calculate Stats from Burgs
+            let totalSoldiers = 0;
+            let totalCraftsmen = 0;
+            if (window.burgsData) {
+                const stateBurgs = window.burgsData.filter(b => b.state_id === state.id);
+                stateBurgs.forEach(b => {
+                    totalSoldiers += (b.soldier_quartiers || 0);
+                    totalCraftsmen += (b.craftsman_quartiers || 0);
+                });
+            }
+
+            return { state, enemyCount, totalSoldiers, totalCraftsmen };
+        });
+
+        rankedStates.sort((a, b) => {
+            if (b.enemyCount !== a.enemyCount) return b.enemyCount - a.enemyCount;
+            return b.totalSoldiers - a.totalSoldiers;
+        });
+
+        let html = "";
+
+        // Render Custom Options (e.g. Random from War Campaign)
+        if (customOptions && customOptions.length > 0) {
+            customOptions.forEach(opt => {
+                const checkedStr = opt.checked ? "checked" : "";
+                const changeHandler = opt.onChange ? opt.onChange : `FactionSelectorInstance.onSelect(${opt.value})`; // Default handler if not provided
+
+                // Add ID to label for selection highlighting
+                const domId = `faction-option-${opt.value}`;
+
+                html += `
+                    <label id="${domId}" class="faction-option ${opt.checked ? 'active' : ''}" style="display: flex; align-items: center; padding: 4px 6px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.2s; white-space: nowrap; overflow: hidden;">
+                        <input type="radio" name="warFactionSelect" value="${opt.value}" ${checkedStr} onchange="${changeHandler}">
+                        <div style="flex: 1; font-weight: bold; color: #fff; font-size:13px;">
+                            ${opt.label}
+                        </div>
+                    </label>
+                `;
+            });
+        } else {
+            // Default Option for standard Political Map: "No State"
+            // Use ID faction-option--2 for No State
+            html += `
+                <label id="faction-option--2" class="faction-option" style="display: flex; align-items: center; padding: 4px 6px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.2s; white-space: nowrap; overflow: hidden;">
+                    <input type="radio" name="warFactionSelect" value="-2" onchange="FactionSelectorInstance.onSelect(-2)">
+                    <div style="flex: 1; font-weight: bold; color: #bbb; font-size:13px; font-style: italic;">
+                        No State (Clear)
+                    </div>
+                </label>
+            `;
+        }
+
+        if (rankedStates.length === 0) {
+            html += "<p>No suitable states found.</p>";
+        } else {
+            rankedStates.forEach((item, index) => {
+                const s = item.state;
+                const isChecked = "";
+                const domId = `faction-option-${s.id}`;
+                const clickHandler = `FactionSelectorInstance.onSelect(${s.id})`;
+
+                html += `
+                    <label id="${domId}" class="faction-option" style="display: flex; align-items: center; padding: 4px 6px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.2s; white-space: nowrap; overflow: hidden;">
+                        <input type="radio" name="warFactionSelect" value="${s.id}" ${isChecked} onchange="${clickHandler}" style="margin-right: 8px;">
+                        
+                        <div style="flex: 1; overflow: hidden; text-overflow: ellipsis; font-weight: bold; color: ${s.color}; font-size:13px; margin-right: 8px;">
+                            ${s.name}
+                        </div>
+                        
+                        <div style="font-size: 0.8em; color: #ccc; flex-shrink: 0;">
+                            <span title="Soldiers">${item.totalSoldiers}🛡️</span> 
+                            <span title="Craftsmen" style="margin-left:4px;">${item.totalCraftsmen}🛠️</span> 
+                            <span style="color:#888; margin:0 4px;">vs</span> 
+                            <span title="enemies">${item.enemyCount}⚔️</span>
+                        </div>
+                    </label>
+                `;
+            });
+        }
+
+        listContainer.innerHTML = html;
+        panel.classList.remove('hidden');
+    }
+
+    hide() {
+        const panel = document.getElementById(this.containerId);
+        if (panel) {
+            panel.classList.add('hidden');
+        }
+        // Also clear map selection?
+        if (window.updateDiplomacyColors) {
+            updateDiplomacyColors(null);
+        }
+    }
+
+    onSelect(stateId) {
+        // Propagate to Campaign Manager if active setup
+        if (window.CampaignManager && window.CampaignManager.currentCampaignInstance) {
+            window.CampaignManager.currentCampaignInstance.presetStateId = stateId;
+        }
+
+        // --- UI Update: Visual Selection & Scroll ---
+        // 1. Remove active class from all options
+        const allOptions = document.querySelectorAll('.faction-option');
+        allOptions.forEach(el => el.classList.remove('active'));
+
+        // 2. Add active class to selected option
+        const selectedId = `faction-option-${stateId}`;
+        const selectedEl = document.getElementById(selectedId);
+        if (selectedEl) {
+            selectedEl.classList.add('active');
+
+            // 3. Scroll into View
+            // Use block: 'nearest' to avoid jumping if already visible, 'center' if far away.
+            // 'nearest' is usually safer for UX unless we want to force attention.
+            selectedEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        // --- Logic Update ---
+        if (window.updateDiplomacyColors) {
+            // Handle Random (-1) or No State (-2) by clearing logic
+            if (stateId === -1 || stateId === -2) {
+                updateDiplomacyColors(null);
+            } else {
+                updateDiplomacyColors(stateId);
+            }
+        }
+    }
+}
+
+// Global Instance
+const FactionSelectorInstance = new FactionSelector();
+
+
 
 const relationColors = {
     "Ally": "#32CD32",      // Lime Green
@@ -183,6 +355,7 @@ const relationColors = {
     "Neutral": "#D3D3D3",   // Light Grey
     "Suspicion": "#FFA500", // Orange
     "Enemy": "#FF4500",     // Orange Red
+    "Rival": "#FF4500",     // Orange Red
     "War": "#FF0000",       // Red
     "Vassal": "#87CEEB",    // Sky Blue
     "Suzerain": "#C8A2C8",  // Lilac
@@ -217,11 +390,21 @@ function setMapMode(mode) {
     if (mode === 'none') {
         mapGroup.style.display = 'none';
         if (mapBtn) mapBtn.innerText = 'Map: None';
+        if (typeof FactionSelectorInstance !== 'undefined') FactionSelectorInstance.hide();
         return;
     }
 
     // Ensure map is visible for other modes
     mapGroup.style.display = 'block';
+
+    // Toggle Faction Selector
+    if (typeof FactionSelectorInstance !== 'undefined') {
+        if (mode === 'state') {
+            FactionSelectorInstance.show();
+        } else {
+            FactionSelectorInstance.hide();
+        }
+    }
 
     if (mode === 'state') {
         if (mapBtn) mapBtn.innerText = 'Map: Political';
@@ -879,29 +1062,31 @@ class BattleMission extends AdventureMission {
 
         const validCells = this.getValidSpawnCells(occupied);
 
-        if (validCells.length > 0) {
-            const randomCell = validCells[Math.floor(Math.random() * validCells.length)];
-            const amount = Math.floor(Math.random() * (200 - 20 + 1)) + 20; // 20 to 200
-            this.data = { cell: randomCell.i, soldiers: amount };
-            this.updateVisuals();
-        }
+        if (validCells.length === 0) return;
+
+        const randomCell = validCells[Math.floor(Math.random() * validCells.length)];
+        const amount = Math.floor(Math.random() * (200 - 20 + 1)) + 20; // 20 to 200
+        this.data = { cell: randomCell.i, soldiers: amount };
+        this.updateVisuals();
     }
 
     updateVisuals() {
         if (!this.element) return;
 
-        if (this.data && AdventureManager.active) {
-            const eData = graphData[this.data.cell];
-            if (eData) {
-                this.element.setAttribute("transform", `translate(${eData.p[0]}, ${eData.p[1]})`);
-                this.element.style.display = "block";
-                if (this.countElement) this.countElement.textContent = this.data.soldiers;
-            } else {
-                this.element.style.display = "none";
-            }
-        } else {
+        if (!this.data || !AdventureManager.active) {
             this.element.style.display = "none";
+            return;
         }
+
+        const eData = graphData[this.data.cell];
+        if (!eData) {
+            this.element.style.display = "none";
+            return;
+        }
+
+        this.element.setAttribute("transform", `translate(${eData.p[0]}, ${eData.p[1]})`);
+        this.element.style.display = "block";
+        if (this.countElement) this.countElement.textContent = this.data.soldiers;
     }
 
     getTargetCell() {
@@ -927,12 +1112,15 @@ class BattleMission extends AdventureMission {
         const mySoldiers = AdventureManager.party.soldiers;
         const enemySoldiers = this.data.soldiers;
 
+        const battle = new FieldBattle(null, enemySoldiers);
+
         // Use ratio R = Player / Enemy.
         // P(Win) = R^2 / (R^2 + 1)
-        const ratio = mySoldiers / enemySoldiers;
-        const k = 2; // Squared for sharper curve
-        const winProb = (Math.pow(ratio, k) / (Math.pow(ratio, k) + 1));
+
+        // Use Battle Class logic for consistency
+        const winProb = battle.calculateWinProbability();
         const winPercent = (winProb * 100).toFixed(1);
+        const ratio = mySoldiers / enemySoldiers; // Purely for display
 
         const content = `
              <h2>⚔️ Battle Imminent ⚔️</h2>
@@ -964,75 +1152,50 @@ class BattleMission extends AdventureMission {
     resolve() {
         if (!this.data) return;
 
-        const mySoldiers = AdventureManager.party.soldiers;
-        const enemySoldiers = this.data.soldiers;
-        const ratio = mySoldiers / enemySoldiers;
-        const k = 2;
-        const winProb = (Math.pow(ratio, k) / (Math.pow(ratio, k) + 1));
+        const battle = new FieldBattle(null, this.data.soldiers);
 
-        const roll = Math.random();
+        // The Battle class handles everything (Math, Rewards, Casualties, UI, Events)
+        const isWin = battle.resolve();
 
-        if (roll < winProb) {
-            // WIN
-            const goldReward = Math.floor(enemySoldiers / 10) * 2;
-            const soldierReward = Math.floor(enemySoldiers / 10) * 2;
+        AdventureManager.closePopup();
 
-            AdventureManager.party.gold += goldReward;
-            AdventureManager.party.soldiers += soldierReward; // replenish or recruit
-
-            AdventureManager.showFeedback(`VICTORY! Gained ${goldReward} Gold & ${soldierReward} Soldiers.`);
-
-            // Emit Event
-            if (AdventureManager.events) {
-                AdventureManager.events.emit('battleWon', { enemySoldiers: this.data.soldiers });
-            }
-
-            // Floating Text (Win)
-            const cell = graphData[AdventureManager.party.cell];
-            if (cell) {
-                AdventureManager.showFloatingText(`VICTORY!`, cell.p[0], cell.p[1] - 60, "#2ecc71");
-                AdventureManager.showFloatingText(`+${goldReward} 💰`, cell.p[0], cell.p[1] - 40, "#f1c40f");
-                AdventureManager.showFloatingText(`+${soldierReward} ⚔️`, cell.p[0], cell.p[1] - 20, "#9b59b6");
-            }
-
-            AdventureManager.closePopup();
-            this.spawn(); // Respawn
+        if (isWin) {
+            this.spawn(); // Respawn on victory
             AdventureManager.updateStats();
-        } else {
-            // LOSE
-            // Emit Event
-            if (AdventureManager.events) {
-                AdventureManager.events.emit('battleLost', { enemySoldiers: this.data.soldiers });
-            }
-
-            // Retain half of starting army, round down to nearest 5, min 5
-            const retained = Math.max(5, Math.floor((mySoldiers / 2) / 5) * 5);
-            const lost = mySoldiers - retained;
-            AdventureManager.party.soldiers = retained;
-
-            AdventureManager.updateStats();
-            AdventureManager.closePopup();
-
-            // Floating Text (Loss)
-            const cell = graphData[AdventureManager.party.cell];
-            if (cell) {
-                AdventureManager.showFloatingText(`DEFEAT!`, cell.p[0], cell.p[1] - 40, "#e74c3c");
-                if (lost > 0) AdventureManager.showFloatingText(`-${lost} ⚔️`, cell.p[0], cell.p[1] - 20, "#e74c3c");
-            }
-
-            // Damage enemy
-            const damage = mySoldiers;
-            this.data.soldiers = Math.max(0, this.data.soldiers - damage);
-
-            if (this.data.soldiers === 0) {
-                AdventureManager.showFeedback(`DEFEAT! But you wiped out the enemy!`);
-                this.element.style.display = "none";
-                this.data = null;
-                this.spawn();
-            } else {
-                AdventureManager.showFeedback(`DEFEAT! Enemy took ${damage} casualties.`);
-            }
+            return;
         }
+
+        // DEFEAT
+        // FieldBattle emits 'battleLost'.
+        // Logic for "Damage Enemy on Defeat" was in old code.
+        // FieldBattle emit "battleLost" with damageDealt. Use that event?
+        // Or handle it here manually since we have this.data access?
+
+        // Re-implement damage to mission data here since FieldBattle is transient
+        const damage = AdventureManager.party.soldiers; // Soldiers before this battle? No, logic is confusing.
+        // Old logic: const damage = mySoldiers; (At start of battle)
+        // But AdventureManager.party.soldiers is updated inside battle.resolve() -> onDefeat() -> calculateCasualties().
+        // So we need snapshots.
+
+        // Simpler: Just fully respawn or reduce strength.
+        // Let's stick to old logic: Enemy takes damage.
+
+        // We can listen to the event we just emitted? No, synchronous.
+
+        // Let's manually apply damage to this.data
+        const prevSoldiers = battle.playerSoldiers; // Captured in constructor
+        this.data.soldiers = Math.max(0, this.data.soldiers - prevSoldiers);
+
+        if (this.data.soldiers === 0) {
+            AdventureManager.showFeedback(`DEFEAT! But you wiped out the enemy!`);
+            this.element.style.display = "none";
+            this.data = null;
+            this.spawn();
+        } else {
+            AdventureManager.showFeedback(`DEFEAT! Enemy took ${prevSoldiers} casualties.`);
+        }
+
+        AdventureManager.updateStats();
     }
 }
 
@@ -3377,23 +3540,62 @@ class BaseCampaign {
         this.active = false;
         this.objectives = [];
         this.startConfig = null;
+
+        // Bind Handlers
+        this.onAdventureStart = this.onAdventureStart.bind(this);
+        this.onUpdateStats = this.onUpdateStats.bind(this);
+        this.onMissionStart = this.onMissionStart.bind(this);
+        this.onMissionComplete = this.onMissionComplete.bind(this);
+        this.onBurgPopupOpened = this.onBurgPopupOpened.bind(this);
+        this.onBeforeBurgPopup = this.onBeforeBurgPopup.bind(this);
+        this.onBeforeMissionSpawn = this.onBeforeMissionSpawn.bind(this);
+        this.onCalculateMissionRewards = this.onCalculateMissionRewards.bind(this);
     }
 
     // Lifecycle Hooks
     onStart() {
         this.active = true;
         console.log(`Campaign '${this.name}' Started.`);
+
+        // Register Listeners
+        if (AdventureManager.events) {
+            AdventureManager.events.on('start', this.onAdventureStart);
+            AdventureManager.events.on('updateStats', this.onUpdateStats); // Direct bind assumes signature match or ignored args
+            AdventureManager.events.on('missionStart', this.onMissionStart);
+            AdventureManager.events.on('missionComplete', this.onMissionComplete);
+            AdventureManager.events.on('burgPopupOpened', this.onBurgPopupOpened);
+            AdventureManager.events.on('beforeBurgPopup', this.onBeforeBurgPopup);
+            AdventureManager.events.on('beforeMissionSpawn', this.onBeforeMissionSpawn);
+            AdventureManager.events.on('calculateMissionRewards', this.onCalculateMissionRewards);
+        }
     }
 
     onEnd() {
         this.active = false;
         this.clearHighlights();
+
+        // Cleanup Listeners
+        if (AdventureManager.events) {
+            AdventureManager.events.off('start', this.onAdventureStart);
+            AdventureManager.events.off('updateStats', this.onUpdateStats);
+            AdventureManager.events.off('missionStart', this.onMissionStart);
+            AdventureManager.events.off('missionComplete', this.onMissionComplete);
+            AdventureManager.events.off('burgPopupOpened', this.onBurgPopupOpened);
+            AdventureManager.events.off('beforeBurgPopup', this.onBeforeBurgPopup);
+            AdventureManager.events.off('beforeMissionSpawn', this.onBeforeMissionSpawn);
+            AdventureManager.events.off('calculateMissionRewards', this.onCalculateMissionRewards);
+        }
         console.log(`Campaign '${this.name}' Ended.`);
     }
 
     // Configuration Hooks
     getPartyStartConfig() {
         return this.partyStartConfig || {};
+    }
+
+    // Lifecycle Hook for Setup Phase Cleanup
+    teardownSetup() {
+        // Override in child classes to clean up setup UI (e.g. faction selectors)
     }
 
     // Event Handlers
@@ -3549,6 +3751,13 @@ const CampaignManager = {
 
     selectCampaign(index) {
         if (index === "") return;
+
+        // Cleanup previous selection if exists
+        if (this.currentCampaignInstance) {
+            this.currentCampaignInstance.teardownSetup();
+            // Also call onEnd just in case, though usually only active campaigns need onEnd
+        }
+
         const CampClass = this.availableCampaigns[index];
         this.currentCampaignInstance = new CampClass();
 
@@ -3556,24 +3765,59 @@ const CampaignManager = {
         document.getElementById('campaignCancelBtn').classList.add('hidden'); // Ensure cancel is hidden
         this.currentCampaignInstance.renderObjectives();
         document.getElementById('campaignObjectives').classList.remove('hidden');
+
+        // New Setup Logic: Mount Custom UI
+        if (typeof this.currentCampaignInstance.mountSetupUI === 'function') {
+            this.currentCampaignInstance.mountSetupUI();
+        }
+        // Fallback: Legacy sidebar injection
+        else {
+            const setupContainer = document.getElementById('campaignSetupContainer');
+            if (setupContainer) {
+                setupContainer.innerHTML = "";
+                if (typeof this.currentCampaignInstance.renderSetupUI === 'function') {
+                    setupContainer.innerHTML = this.currentCampaignInstance.renderSetupUI();
+                }
+            }
+        }
     },
 
     startCampaign() {
         if (!this.currentCampaignInstance) return;
 
-        this.active = true;
+        // Capture Setup UI Selection (Generic DOM check)
+        // Check Floating Panel first
+        const floatingPanel = document.getElementById('warFactionSelectPanel');
+        if (floatingPanel) {
+            const radios = floatingPanel.querySelectorAll('input[type="radio"]:checked');
+            if (radios.length > 0) {
+                if (this.currentCampaignInstance.presetStateId !== undefined) {
+                    this.currentCampaignInstance.presetStateId = parseInt(radios[0].value);
+                }
+            }
+        }
+
+        // Check Sidebar Fallback
+        const setupContainer = document.getElementById('campaignSetupContainer');
+        if (setupContainer && setupContainer.childNodes.length > 0) {
+            const radios = setupContainer.querySelectorAll('input[type="radio"]:checked');
+            if (radios.length > 0) {
+                if (this.currentCampaignInstance.presetStateId !== undefined) {
+                    // Only overwrite if not already set (or overwrite? prefer floating)
+                    if (!this.currentCampaignInstance.presetStateId) {
+                        this.currentCampaignInstance.presetStateId = parseInt(radios[0].value);
+                    }
+                }
+            }
+        }
+
+        // Unmount Setup UI
+        this.currentCampaignInstance.teardownSetup();
+        if (setupContainer) setupContainer.innerHTML = ""; // Clear legacy
+
         this.active = true;
         AdventureManager.init();
         AdventureManager.active = true;
-
-        AdventureManager.events.on('start', () => this.currentCampaignInstance.onAdventureStart());
-        AdventureManager.events.on('updateStats', () => this.currentCampaignInstance.onUpdateStats(AdventureManager.party));
-        AdventureManager.events.on('missionStart', (d) => this.currentCampaignInstance.onMissionStart(d));
-        AdventureManager.events.on('missionComplete', (d) => this.currentCampaignInstance.onMissionComplete(d));
-        AdventureManager.events.on('burgPopupOpened', (d) => this.currentCampaignInstance.onBurgPopupOpened(d));
-        AdventureManager.events.on('beforeBurgPopup', (d) => this.currentCampaignInstance.onBeforeBurgPopup(d));
-        AdventureManager.events.on('beforeMissionSpawn', (d) => this.currentCampaignInstance.onBeforeMissionSpawn(d));
-        AdventureManager.events.on('calculateMissionRewards', (d) => this.currentCampaignInstance.onCalculateMissionRewards(d));
 
         this.currentCampaignInstance.onStart(); // Call *before* Adventure start to register listeners
 
@@ -3603,6 +3847,8 @@ const CampaignManager = {
     cancelCampaign() {
         // 1. Cleanup current campaign
         if (this.currentCampaignInstance) {
+            // Unmount Setup UI (in case we cancel BEFORE starting)
+            this.currentCampaignInstance.teardownSetup();
             this.currentCampaignInstance.onEnd();
             this.currentCampaignInstance = null;
         }
@@ -3661,6 +3907,607 @@ const CampaignManager = {
 };
 
 window.CampaignManager = CampaignManager;
+
+
+
+class Battle {
+    constructor(campaign, burgId, enemyStrength) {
+        this.campaign = campaign;
+        this.burg = null;
+        this.burgId = null;
+        if (burgId) {
+            this.burg = burgsData.find(b => b.id === burgId);
+            this.burgId = burgId;
+        }
+        this.enemyStrength = enemyStrength;
+        this.playerSoldiers = AdventureManager.party.soldiers;
+
+        // Base Defaults
+        this.winCurveK = 2.0;
+    }
+
+    // --- Core Flow ---
+
+    resolve() {
+        if (this.playerSoldiers <= 0) {
+            AdventureManager.showFeedback("You have no soldiers to fight with!");
+            return false;
+        }
+
+        const winProb = this.calculateWinProbability();
+        const isWin = Math.random() < winProb;
+
+        if (isWin) {
+            this.onVictory();
+            return true;
+        }
+
+        this.onDefeat();
+        return false;
+    }
+
+    // --- Calculations (Overridable) ---
+
+    calculateWinProbability() {
+        if (this.enemyStrength <= 0) return 1.0;
+        const ratio = this.playerSoldiers / this.enemyStrength;
+        // Logistic-like curve: R^k / (R^k + 1)
+        return Math.pow(ratio, this.winCurveK) / (Math.pow(ratio, this.winCurveK) + 1);
+    }
+
+    calculateCasualties(isVictory) {
+        // Default Logic: 5-25% on win, 25-50% on lose
+        let min = 0;
+        let max = 0;
+        if (isVictory) {
+            min = 0.05;
+            max = 0.25;
+        } else {
+            min = 0.25;
+            max = 0.50;
+        }
+        const lossPct = min + (Math.random() * (max - min));
+        return Math.floor(this.playerSoldiers * lossPct);
+    }
+
+    calculateRewards() {
+        // Default Logic
+        const gold = Math.floor(this.enemyStrength * 0.1);
+        const soldiers = Math.floor(this.enemyStrength * 0.1);
+        let food = 0;
+        if (this.burg && this.burg.net_food > 0) {
+            food = Math.floor(this.burg.net_food * 0.4);
+        }
+        return { gold, soldiers, food };
+    }
+
+    // --- Outcomes ---
+
+    onVictory() {
+        const rewards = this.calculateRewards();
+        const losses = this.calculateCasualties(true);
+
+        // Apply changes
+        AdventureManager.party.gold += rewards.gold;
+        AdventureManager.party.soldiers += rewards.soldiers;
+        AdventureManager.party.food += rewards.food;
+        AdventureManager.party.soldiers = Math.max(0, AdventureManager.party.soldiers - losses);
+
+        // Event Emission (Campaign will listen)
+        if (AdventureManager.events) {
+            AdventureManager.events.emit('battleWon', {
+                burg: this.burg,
+                rewards: rewards,
+                campaignId: this.campaign ? this.campaign.id : null
+            });
+        }
+
+        // UI Feedback
+        const targetName = this.burg ? this.burg.name : "Enemy Army";
+        AdventureManager.showFeedback(`Victory! ${targetName} defeated!`);
+        this.showFloatingStats(true, rewards, losses);
+
+        AdventureManager.updateStats();
+    }
+
+    onDefeat() {
+        const losses = this.calculateCasualties(false);
+        AdventureManager.party.soldiers = Math.max(0, this.playerSoldiers - losses);
+
+        // Event Emission (Campaign will listen)
+        if (AdventureManager.events) {
+            AdventureManager.events.emit('battleLost', {
+                burg: this.burg,
+                campaignId: this.campaign ? this.campaign.id : null
+            });
+        }
+
+        // UI Feedback
+        const targetName = this.burg ? this.burg.name : "Enemy Army";
+        AdventureManager.showFeedback(`Defeat! ${targetName} was too strong.`);
+        this.showFloatingStats(false, null, losses);
+
+        AdventureManager.updateStats();
+    }
+
+    showFloatingStats(isWin, rewards, losses) {
+        const cell = graphData[AdventureManager.party.cell];
+        if (!cell) return;
+        const cx = cell.p[0];
+        const cy = cell.p[1];
+
+        if (isWin) {
+            AdventureManager.showFloatingText(`VICTORY!`, cx, cy - 80, "#2ecc71");
+            AdventureManager.showFloatingText(`+${rewards.gold} 💰`, cx, cy - 60, "#f1c40f");
+            if (rewards.food > 0) AdventureManager.showFloatingText(`+${rewards.food} 🍎`, cx, cy - 40, "#e67e22");
+            if (rewards.soldiers > 0) AdventureManager.showFloatingText(`+${rewards.soldiers} ⚔️`, cx, cy - 20, "#9b59b6");
+            AdventureManager.showFloatingText(`-${losses} 🩸`, cx, cy, "#e74c3c");
+            return
+        }
+        AdventureManager.showFloatingText(`DEFEAT!`, cx, cy - 40, "#e74c3c");
+        AdventureManager.showFloatingText(`-${losses} 🩸`, cx, cy - 20, "#e74c3c");
+    }
+}
+
+class SiegeBattle extends Battle {
+    constructor(campaign, burgId, enemyStrength) {
+        super(campaign, burgId, enemyStrength);
+        this.winCurveK = 1.8; // Chaos of War
+    }
+
+    calculateCasualties(isVictory) {
+        // Sieges are bloody. 
+        // Win: 15-25% (Standardized)
+        // Lose: 25-50% (Rout)
+        let min = 0;
+        let max = 0;
+        if (isVictory) {
+            min = 0.15;
+            max = 0.25;
+        } else {
+            min = 0.25;
+            max = 0.50;
+        }
+        const lossPct = min + (Math.random() * (max - min));
+        return Math.floor(this.playerSoldiers * lossPct);
+    }
+}
+
+class RaidBattle extends Battle {
+    constructor(campaign, burgId, enemyStrength) {
+        super(campaign, burgId, enemyStrength);
+        this.winCurveK = 2.0; // Standardize to 2.0 as per snippet
+    }
+
+    calculateCasualties(isVictory) {
+        if (isVictory) {
+            return 0; // Flawless victory for the Horde
+        }
+        // Defeat is disastrous: 20-40% losses
+        const lossPct = 0.20 + (Math.random() * 0.20);
+        return Math.floor(this.playerSoldiers * lossPct);
+    }
+
+    calculateRewards() {
+        // Pillage: High Yields (30% of enemy strength)
+        const gold = Math.floor(this.enemyStrength / 10) * 3;
+        const soldiers = Math.floor(this.enemyStrength / 10) * 3;
+
+        let food = 0;
+        if (this.burg && this.burg.net_food > 0) {
+            food = Math.floor(this.burg.net_food * 0.4); // 40% of food
+        }
+        return { gold, soldiers, food };
+    }
+
+    onVictory() {
+        const rewards = this.calculateRewards();
+        const losses = this.calculateCasualties(true);
+
+        // Apply changes
+        AdventureManager.party.gold += rewards.gold;
+        AdventureManager.party.soldiers += rewards.soldiers;
+        AdventureManager.party.food += rewards.food;
+        AdventureManager.party.soldiers = Math.max(0, AdventureManager.party.soldiers - losses);
+
+        // Event Emission
+        if (AdventureManager.events) {
+            AdventureManager.events.emit('battleWon', {
+                burg: this.burg,
+                rewards: rewards,
+                campaignId: this.campaign ? this.campaign.id : null
+            });
+        }
+
+        // Custom UI Feedback for Pillage
+        const targetName = this.burg ? this.burg.name : "Target";
+        AdventureManager.showFeedback(`Victory! Pillaged ${targetName}. Gained ${rewards.gold} gold, ${rewards.food} food, ${rewards.soldiers} soldiers.`);
+        this.showFloatingStats(true, rewards, losses);
+
+        AdventureManager.updateStats();
+    }
+}
+
+class FieldBattle extends Battle {
+    constructor(cellId, enemyStrength) {
+        super(null, null, enemyStrength);
+        this.cellId = cellId;
+    }
+
+    calculateRewards() {
+        // Mission Logic: Gold/Soldiers ~ enemy / 10 * 2 (which is 0.2, basically 20%)
+        const gold = Math.floor(this.enemyStrength * 0.2);
+        const soldiers = Math.floor(this.enemyStrength * 0.2);
+        // No food from field battles usually
+        return { gold, soldiers, food: 0 };
+    }
+
+    calculateCasualties(isVictory) {
+        if (isVictory) {
+            // Standard risk? Or matching Mission Logic?
+            return Math.floor(this.playerSoldiers * 0.10);
+        }
+        // Mission Logic: Retain half of starting army, round down to nearest 5.
+        const retained = Math.max(5, Math.floor((this.playerSoldiers / 2) / 5) * 5);
+        return this.playerSoldiers - retained;
+    }
+
+    onVictory() {
+        // Super handles generic rewards and UI
+        super.onVictory();
+        if (AdventureManager.events) {
+            AdventureManager.events.emit('battleWon', { enemySoldiers: this.enemyStrength });
+        }
+    }
+
+    onDefeat() {
+        super.onDefeat(); // Applies casualties
+
+        if (AdventureManager.events) {
+            AdventureManager.events.emit('battleLost', {
+                enemySoldiers: this.enemyStrength,
+                damageDealt: this.playerSoldiers // Assuming full commitment 
+            });
+        }
+    }
+}
+
+
+class MilitaryCampaign extends BaseCampaign {
+    constructor(id, name, description) {
+        super(id, name, description);
+        // Configuration
+        this.battleMarker = "⚔️";
+        this.conqueredStatusLabel = "Conquered";
+        this.BattleClass = Battle; // Default Strategy
+        this.showEnemyMarkers = true;     // Default on
+        this.showConqueredMarkers = true; // Default on
+        this.showFriendlyMarkers = false; // Default off
+
+        // Bind Handlers
+        this.handleBattleWin = this.handleBattleWin.bind(this);
+        this.handleBattleLoss = this.handleBattleLoss.bind(this);
+    }
+
+    onStart() {
+        super.onStart();
+        // Register Event Listeners
+        if (AdventureManager.events) {
+            AdventureManager.events.on('battleWon', this.handleBattleWin);
+            AdventureManager.events.on('battleLost', this.handleBattleLoss);
+        }
+    }
+
+    onEnd() {
+        super.onEnd();
+        // Cleanup Listeners
+        if (AdventureManager.events) {
+            AdventureManager.events.off('battleWon', this.handleBattleWin);
+            AdventureManager.events.off('battleLost', this.handleBattleLoss);
+        }
+    }
+
+    // --- Helper Methods ---
+
+    getWinProbability(playerSoldiers, enemySoldiers) {
+        if (enemySoldiers <= 0) return 1.0;
+        const ratio = playerSoldiers / enemySoldiers;
+        const k = 2; // Sharpness of win probability curve (higher = skills matter more) - moved from config
+        // Logistic-like curve: R^k / (R^k + 1)
+        return Math.pow(ratio, k) / (Math.pow(ratio, k) + 1);
+    }
+
+    // --- Abstract / Overridable Methods ---
+
+    // Factory Method for Battle Instance using configured Class
+    createBattle(burgId, enemyStrength) {
+        return new this.BattleClass(this, burgId, enemyStrength);
+    }
+
+
+    // --- Abstract / Overridable Methods ---
+
+    isHostile(burg) {
+        return false; // Override in child
+    }
+
+    isConquered(burg) {
+        return false; // Override in child
+    }
+
+    onBattleWin(burg, rewards) {
+        // Override in child to update state (add to Set) and objectives
+    }
+
+    onBattleLoss(burg) {
+        // Override in child if needed
+    }
+
+    // --- Event Handlers ---
+
+    handleBattleWin(data) {
+        if (data.campaignId !== this.id) return;
+        this.onBattleWin(data.burg, data.rewards);
+        this.refreshVisuals();
+    }
+
+    handleBattleLoss(data) {
+        if (data.campaignId !== this.id) return;
+        this.onBattleLoss(data.burg);
+        this.refreshVisuals();
+    }
+
+    // --- Shared Interaction Logic ---
+
+    onBeforeBurgPopup(data) {
+        if (this.isHostile(data.burg)) {
+            data.preventReplenish = true;
+        }
+    }
+
+    // Configurable Labels (Override in Child)
+    getAttackButtonLabel(burg) {
+        return this.attackButtonLabel || "Attack City"; // Default
+    }
+
+    getConqueredButtonLabel(burg) {
+        return `City ${this.conqueredStatusLabel} (Yours)`; // Default
+    }
+
+    onBurgPopupOpened(context) {
+        const { burg, buttons } = context;
+
+        // 1. Check if already conquered
+        if (this.isConquered(burg)) {
+            // Preserve utility buttons (Ship/Leave)
+            const preserved = buttons.filter(b => this.shouldPreserveButton(b.id));
+            buttons.length = 0;
+            if (preserved.length) buttons.push(...preserved);
+
+            buttons.unshift({
+                label: this.getConqueredButtonLabel(burg),
+                action: () => { },
+                disabled: true,
+                style: "background: #27ae60; cursor: default; opacity: 1.0; color: white;",
+                class: "btn-recruit"
+            });
+            return;
+        }
+
+        // 2. Logic for Hostile Cities
+        if (this.isHostile(burg)) {
+            // Preserve utility buttons (Ship/Leave)
+            const preserved = buttons.filter(b => this.shouldPreserveButton(b.id));
+
+            // Clear peaceful options
+            buttons.length = 0;
+            if (preserved.length) buttons.push(...preserved);
+
+            // Calculate Strength
+            const soldierQ = burg.soldier_quartiers || 0;
+            // Allow child class to tune strength calculation if needed, or use default logic
+            const strength = this.calculateGarrisonStrength(burg);
+
+            buttons.push({
+                label: `${this.getAttackButtonLabel(burg)} (Strength: ${strength})`,
+                onClick: `CampaignManager.currentCampaignInstance.showBattlePopup(${burg.id}, ${strength})`,
+                class: "btn-attack",
+                style: "background: #c0392b; color: white;"
+            });
+            return;
+        }
+
+        // 3. Logic for Non-Hostile (Neutral) - allow attack if not identical to home?
+        // For now, base class defaults to ONLY hostile check. 
+        // Child classes can call super() and then add more buttons if they want.
+    }
+
+    shouldPreserveButton(btnId) {
+        // List of IDs to keep even when hostile
+        const keep = ['leave_ship', 'rent_ship'];
+        return keep.includes(btnId);
+    }
+
+    calculateGarrisonStrength(burg) {
+        const soldierQ = burg.soldier_quartiers || 0;
+        return Math.max(10, (15 * soldierQ));
+    }
+
+    // --- Shared Battle UI ---
+
+    showBattlePopup(burgId, enemyStrength) {
+        if (!AdventureManager.popupElement) AdventureManager.openPopup('');
+
+        let overlay = document.getElementById('modalOverlay');
+        if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.id = 'modalOverlay';
+            overlay.className = 'modal-overlay';
+            document.body.appendChild(overlay);
+        }
+        overlay.style.display = 'block';
+
+        // Create a temporary battle instance just to calculate probability
+        const battle = this.createBattle(burgId, enemyStrength);
+        const mySoldiers = battle.playerSoldiers;
+
+        const winProb = battle.calculateWinProbability();
+        const winPercent = (winProb * 100).toFixed(1);
+
+        const content = `
+             <h2>⚔️ Battle Imminent ⚔️</h2>
+             <div class="content-wrapper" style="display: flex; gap: 20px; align-items: center; justify-content: center;">
+                 <div style="text-align: center;">
+                    <h3>Your Army</h3>
+                    <div style="font-size: 24px; color: #2ecc71; font-weight: bold;">${mySoldiers} 🛡️</div>
+                 </div>
+                 <div style="font-size: 20px; font-weight: bold;">VS</div>
+                 <div style="text-align: center;">
+                    <h3>Garrison</h3>
+                    <div style="font-size: 24px; color: #e74c3c; font-weight: bold;">${enemyStrength} ⚔️</div>
+                 </div>
+             </div>
+             
+             <div style="text-align: center; margin: 15px 0;">
+                <div>Win Probability: <strong>${winPercent}%</strong></div>
+             </div>
+             
+             <div class="actions">
+                 <button class="btn-recruit" style="background-color: #c0392b;" onclick="CampaignManager.currentCampaignInstance.resolveCityBattle(${burgId}, ${enemyStrength})">ATTACK!</button>
+                 <button class="btn-leave" onclick="AdventureManager.closePopup()">Retreat</button>
+             </div>
+        `;
+        AdventureManager.openPopup(content);
+    }
+
+    // --- Shared Battle Resolution ---
+
+    resolveCityBattle(burgId, enemySoldiers) {
+        AdventureManager.closePopup();
+
+        // Use factory to get correct Strategy
+        const battle = this.createBattle(burgId, enemySoldiers);
+        battle.resolve();
+    }
+
+    // --- Visual Helpers ---
+
+    refreshVisuals() {
+        this.clearHighlights();
+
+        if (!window.burgsData) return;
+
+        burgsData.forEach(burg => {
+            if (this.showConqueredMarkers && this.isConquered(burg)) {
+                this.drawTextMarker(burg.cell_id, "🚩");
+            } else if (this.showEnemyMarkers && this.isHostile(burg)) {
+                this.drawTextMarker(burg.cell_id, "⚔️");
+            } else if (this.showFriendlyMarkers) {
+                // Friendly / Neutral
+                this.drawTextMarker(burg.cell_id, "🛡️");
+            }
+        });
+    }
+
+    drawTextMarker(cellId, text) {
+        if (!graphData[cellId]) return;
+        let x, y;
+        const burg = burgsData.find(b => b.cell_id === cellId);
+        if (burg) { x = burg.x; y = burg.y; }
+        else { x = graphData[cellId].p[0]; y = graphData[cellId].p[1]; }
+
+        let container = document.getElementById('campaignHighlights');
+        if (!container) {
+            container = document.createElementNS("http://www.w3.org/2000/svg", "g");
+            container.setAttribute("id", "campaignHighlights");
+            const svg = document.getElementById('mapSvg');
+            if (svg) svg.appendChild(container);
+            else return; // If mapSvg missing, we really can't draw
+        }
+
+        const textEl = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        textEl.setAttribute("x", x);
+        textEl.setAttribute("y", y + 5);
+        textEl.setAttribute("text-anchor", "middle");
+        textEl.setAttribute("font-size", "14px"); // Slightly smaller for global clutter reduction
+        textEl.setAttribute("style", "pointer-events: none; user-select: none; text-shadow: 1px 1px 2px black;");
+        textEl.textContent = text;
+        container.appendChild(textEl);
+    }
+
+    // --- UI Integration ---
+
+    // --- UI Integration ---
+
+    renderFloatingControls() {
+        // Ensure only one exists
+        this.removeFloatingControls();
+
+        const container = document.getElementById('mapContainer');
+        if (!container) return;
+
+        const controls = document.createElement('div');
+        controls.id = 'militaryCampaignControls';
+        controls.className = 'campaign-floating-controls';
+
+        // Inline styles for simplicity/portability
+        controls.style.position = 'absolute';
+        controls.style.top = '60px'; // Below the top header/stats
+        controls.style.right = '10px';
+        controls.style.backgroundColor = 'rgba(0, 0, 0, 0.6)';
+        controls.style.padding = '10px';
+        controls.style.borderRadius = '8px';
+        controls.style.color = '#fff';
+        controls.style.fontSize = '12px';
+        controls.style.zIndex = '1000';
+        controls.style.display = 'flex';
+        controls.style.flexDirection = 'column';
+        controls.style.gap = '5px';
+        controls.style.backdropFilter = 'blur(2px)';
+        controls.style.border = '1px solid rgba(255,255,255,0.2)';
+
+        controls.innerHTML = `
+            <label style="cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                <input type="checkbox" onchange="CampaignManager.currentCampaignInstance.toggleSetting('showEnemyMarkers', this.checked)" ${this.showEnemyMarkers ? 'checked' : ''}>
+                <span>Enemies (⚔️)</span>
+            </label>
+            <label style="cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                <input type="checkbox" onchange="CampaignManager.currentCampaignInstance.toggleSetting('showConqueredMarkers', this.checked)" ${this.showConqueredMarkers ? 'checked' : ''}>
+                <span>Conquered (🚩)</span>
+            </label>
+            <label style="cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                <input type="checkbox" onchange="CampaignManager.currentCampaignInstance.toggleSetting('showFriendlyMarkers', this.checked)" ${this.showFriendlyMarkers ? 'checked' : ''}>
+                <span>Friendly (🛡️)</span>
+            </label>
+        `;
+
+        container.appendChild(controls);
+    }
+
+    removeFloatingControls() {
+        const controls = document.getElementById('militaryCampaignControls');
+        if (controls) controls.remove();
+    }
+
+    onAdventureStart() {
+        super.onAdventureStart();
+        // Render Floating UI
+        this.renderFloatingControls();
+    }
+
+    onEnd() {
+        super.onEnd();
+        this.removeFloatingControls();
+    }
+
+    toggleSetting(setting, value) {
+        if (this[setting] !== undefined) {
+            this[setting] = value;
+            this.refreshVisuals();
+            console.log(`Updated ${setting} to ${value}`);
+        }
+    }
+}
 
 
 class SiegeDefenseCampaign extends BaseCampaign {
@@ -4084,76 +4931,119 @@ CampaignManager.availableCampaigns.push(DiplomatCampaign);
 
 
 ﻿
-class HordeCampaign extends BaseCampaign {
+class HordeCampaign extends MilitaryCampaign {
     constructor() {
         super("horde_v1", "The Horde", "Lead a horde to pillage the world. Defeat 10 armies and pillage all capitals.");
         this.armiesDefeated = 0;
         this.pillagedBurgs = new Set(); // Set of burg IDs
         this.partyStartConfig = { resources: { soldiers: 40 } };
 
+        // Base Class Overrides
+        this.conqueredStatusLabel = "Pillaged";
+
+        // Horde Tuning: Uses RaidBattle
+        this.BattleClass = RaidBattle;
+
         // Objectives
         this.addObjective("obj_horde_armies", "Defeat Armies (0/10)", "battle", () => this.armiesDefeated >= 10);
         this.addObjective("obj_horde_capitals", "Pillage Capitals (0/?)", "domination", () => this.checkCapitalsVictory());
 
         // Bind methods
-        this.onBattleWon = this.onBattleWon.bind(this);
+        this.onBattleWonEventListener = this.onBattleWonEventListener.bind(this); // For event listeners
+
+        // Configurations
+        this.attackButtonLabel = "Pillage City";
     }
+
+
+    // --- MilitaryCampaign Hooks ---
+
+    isHostile(burg) {
+        if (!burg) return false;
+
+        // Capital Override: Capitals are ALWAYS hostile targets to pillage
+        if (burg.is_capital) return true;
+
+        const type = burg.type ? burg.type.toLowerCase() : "";
+
+        // Hostile if NOT "Hunter" (or Hunting) AND NOT "Highland" (or Highlands)
+        // Using includes to cover variations
+        if (type.includes("hunt")) return false;
+        if (type.includes("highland")) return false;
+
+        return true; // Default to hostile for all other types
+    }
+
+    isConquered(burg) {
+        return this.pillagedBurgs.has(burg.id);
+    }
+
+    getConqueredButtonLabel(burg) {
+        return "City Pillaged (Ruins)";
+    }
+
+    calculateGarrisonStrength(burg) {
+        // Horde Logic: 10 * soldier_quartiers (Weaker than standard war)
+        const soldierQ = burg.soldier_quartiers || 0;
+        return 10 + 10 * (1 + soldierQ);
+    }
+
+    onBattleWin(burg, rewards) {
+        // Mark as pillaged (Capital or not)
+        this.pillagedBurgs.add(burg.id);
+
+        // Update Objectives
+        this.updateObjectiveText();
+        this.checkVictory();
+    }
+
+    // --- Specific Logic ---
 
     onStart() {
         super.onStart();
         console.log("Horde Campaign Started");
         this.updateObjectiveText();
-        this.refreshVisuals();
 
         // Listen for battle wins from standard battles
         if (AdventureManager.events) {
-            AdventureManager.events.on('battleWon', this.onBattleWon);
+            AdventureManager.events.on('battleWon', this.onBattleWonEventListener.bind(this));
         }
+    }
+
+    onAdventureStart() {
+        super.onAdventureStart();
+        // Now map/UI is ready
+        this.refreshVisuals();
     }
 
     onEnd() {
         super.onEnd();
         if (AdventureManager.events) {
-            AdventureManager.events.off('battleWon', this.onBattleWon);
+            AdventureManager.events.off('battleWon', this.onBattleWonEventListener.bind(this));
         }
     }
 
-    refreshVisuals() {
-        this.clearHighlights(); // Clear all existing rings/markers
-
-        // 1. Mark ANY pillaged burg with Red X
-        this.pillagedBurgs.forEach(burgId => {
-            this.drawTextMarker(burgsData.find(b => b.id === burgId)?.cell_id || 0, "❌");
-        });
-
-        // 2. Highlight UNPILLAGED Capitals with Orange Ring
-        const capitals = burgsData.filter(b => b.is_capital);
-        capitals.forEach(burg => {
-            if (!this.pillagedBurgs.has(burg.id)) {
-                // Target: Show Orange Ring
-                this.highlightCell(burg.cell_id, "#e67e22");
-            }
-        });
+    // Wrapper to distinguish between City Battles (base class calls onBattleWin) and generic army battles
+    onBattleWonEventListener() {
+        this.armiesDefeated++;
+        this.updateObjectiveText();
+        this.checkVictory();
     }
 
-    drawTextMarker(cellId, text) {
-        if (!graphData[cellId]) return;
-        let x, y;
-        const burg = burgsData.find(b => b.cell_id === cellId);
-        if (burg) { x = burg.x; y = burg.y; }
-        else { x = graphData[cellId].p[0]; y = graphData[cellId].p[1]; }
+    refreshVisuals() {
+        super.refreshVisuals(); // Draws ⚔️ on all enemies and 🚩 on pillaged
 
-        let container = document.getElementById('campaignHighlights');
-        if (!container) return; // Should exist from highlightCell call or generic init
-
-        const textEl = document.createElementNS("http://www.w3.org/2000/svg", "text");
-        textEl.setAttribute("x", x);
-        textEl.setAttribute("y", y + 5); // Slight offset
-        textEl.setAttribute("text-anchor", "middle");
-        textEl.setAttribute("font-size", "20px");
-        textEl.setAttribute("style", "pointer-events: none; user-select: none;"); // Pass clicks through
-        textEl.textContent = text;
-        container.appendChild(textEl);
+        // 2. Highlight UNPILLAGED Capitals with Orange Ring
+        if (window.burgsData) {
+            // 2. Highlight UNPILLAGED Capitals with Orange Ring
+            const capitals = burgsData.filter(b => b.is_capital);
+            capitals.forEach(burg => {
+                if (!this.pillagedBurgs.has(burg.id)) {
+                    // Target: Show Orange Ring
+                    this.highlightCell(burg.cell_id, "#e67e22");
+                }
+            });
+        }
     }
 
     onBeforeMissionSpawn(data) {
@@ -4161,12 +5051,6 @@ class HordeCampaign extends BaseCampaign {
             data.cancelled = true;
             console.log("HordeCampaign blocked treasure mission.");
         }
-    }
-
-    onBattleWon() {
-        this.armiesDefeated++;
-        this.updateObjectiveText();
-        this.checkVictory();
     }
 
     updateObjectiveText() {
@@ -4204,204 +5088,6 @@ class HordeCampaign extends BaseCampaign {
         return stats.total > 0 && stats.pillaged >= stats.total;
     }
 
-    isHostile(burg) {
-        if (!burg) return false;
-
-        // Capital Override: Capitals are ALWAYS hostile targets to pillage
-        if (burg.is_capital) return true;
-
-        const type = burg.type ? burg.type.toLowerCase() : "";
-
-        // Hostile if NOT "Hunter" (or Hunting) AND NOT "Highland" (or Highlands)
-        // Using includes to cover variations
-        if (type.includes("hunt")) return false;
-        if (type.includes("highland")) return false;
-
-        return true; // Default to hostile for all other types
-    }
-
-    onBeforeBurgPopup(data) {
-        if (this.isHostile(data.burg)) {
-            data.preventReplenish = true;
-        }
-    }
-
-    onBurgPopupOpened(context) {
-        const { burg, party, buttons } = context;
-
-        // Only modify if hostile
-        if (this.isHostile(burg)) {
-            // Preserve Ship Actions (Rent/Leave Ship)
-            const shipButtons = buttons.filter(b => b.label && b.label.includes("Ship"));
-
-            // Clear existing buttons (Standard actions blocked)
-            buttons.length = 0;
-
-
-            // Check if already pillaged
-            if (this.pillagedBurgs.has(burg.id)) {
-                buttons.push({
-                    label: "City Pillaged (Ruins)",
-                    action: () => { }, // No action
-                    disabled: true,
-                    class: "btn-recruit", // Use recruit style but greyed out via inline style
-                    style: "background: #555; cursor: default; opacity: 0.7;"
-                });
-            } else {
-                // Add Fight button
-                // Strength logic: 10 * soldier_quartiers
-                const soldierQ = burg.soldier_quartiers || 0;
-                const strength = Math.max(10, 10 * soldierQ); // Min 10 strength
-
-                buttons.push({
-                    label: `Pillage City (Strength: ${strength})`,
-                    onClick: `CampaignManager.currentCampaignInstance.showBattlePopup(${burg.id}, ${strength})`,
-                    class: "btn-attack",
-                    style: "background: #c0392b; color: white;"
-                });
-            }
-
-            // Add ship buttons back
-            if (shipButtons.length > 0) {
-                if (!this.pillagedBurgs.has(burg.id)) {
-                    shipButtons.forEach(btn => {
-                        btn.disabled = true;
-                        btn.title = "Pillage city to unlock port";
-                        btn.style = "background: #555; cursor: not-allowed; opacity: 0.6;";
-                        btn.onClick = ""; // Prevent execution
-                    });
-                }
-                buttons.unshift(...shipButtons);
-            }
-        }
-    }
-
-    showBattlePopup(burgId, enemyStrength) {
-        if (!AdventureManager.popupElement) AdventureManager.openPopup('');
-
-        // Ensure overlay
-        let overlay = document.getElementById('modalOverlay');
-        if (!overlay) {
-            overlay = document.createElement('div');
-            overlay.id = 'modalOverlay';
-            overlay.className = 'modal-overlay';
-            document.body.appendChild(overlay);
-        }
-        overlay.style.display = 'block';
-
-        const mySoldiers = AdventureManager.party.soldiers;
-
-        // Win Probability Logic
-        const ratio = mySoldiers / enemyStrength;
-        const k = 2;
-        const winProb = (Math.pow(ratio, k) / (Math.pow(ratio, k) + 1));
-        const winPercent = (winProb * 100).toFixed(1);
-
-        const content = `
-             <h2>⚔️ Battle Imminent ⚔️</h2>
-             <div class="content-wrapper" style="display: flex; gap: 20px; align-items: center; justify-content: center;">
-                 <div style="text-align: center;">
-                    <h3>Your Army</h3>
-                    <div style="font-size: 24px; color: #2ecc71; font-weight: bold;">${mySoldiers} 🛡️</div>
-                 </div>
-                 <div style="font-size: 20px; font-weight: bold;">VS</div>
-                 <div style="text-align: center;">
-                    <h3>City Garrison</h3>
-                    <div style="font-size: 24px; color: #e74c3c; font-weight: bold;">${enemyStrength} ⚔️</div>
-                 </div>
-             </div>
-             
-             <div style="text-align: center; margin: 15px 0;">
-                <div>Win Probability: <strong>${winPercent}%</strong></div>
-             </div>
-             
-             <div class="actions">
-                 <button class="btn-recruit" style="background-color: #c0392b;" onclick="CampaignManager.currentCampaignInstance.resolveCityBattle(${burgId}, ${enemyStrength})">ATTACK!</button>
-                 <button class="btn-leave" onclick="AdventureManager.closePopup()">Retreat</button>
-             </div>
-        `;
-        AdventureManager.openPopup(content);
-    }
-
-    resolveCityBattle(burgId, enemySoldiers) {
-        // Find burg again since we passed ID
-        const burg = burgsData.find(b => b.id === burgId);
-        if (!burg) return;
-
-        const playerSoldiers = AdventureManager.party.soldiers;
-
-        if (playerSoldiers <= 0) {
-            AdventureManager.showFeedback("You have no soldiers to fight with!");
-            AdventureManager.closePopup();
-            return;
-        }
-
-        const ratio = playerSoldiers / enemySoldiers;
-        const winProbability = (ratio * ratio) / ((ratio * ratio) + 1);
-
-        const isWin = Math.random() < winProbability;
-
-        AdventureManager.closePopup(); // Close battle popup
-
-        if (isWin) {
-            // Rewards (Aligned with BattleMission plus Food = Gold)
-            const goldReward = Math.floor(enemySoldiers / 10) * 3;
-            const soldierReward = Math.floor(enemySoldiers / 10) * 3;
-
-            // Food Reward: 40% of city's net food
-            let foodReward = 0;
-            // Ensure we have a valid food value
-            const cityFood = burg.net_food || 0;
-            if (cityFood > 0) {
-                foodReward = Math.floor(cityFood * 0.4);
-            }
-
-            AdventureManager.party.gold += goldReward;
-            AdventureManager.party.soldiers += soldierReward;
-            AdventureManager.party.food += foodReward;
-
-            // Mark as pillaged (Capital or not)
-            this.pillagedBurgs.add(burg.id);
-
-            AdventureManager.showFeedback(`Victory! Pillaged ${burg.name}. Gained ${goldReward} gold, ${foodReward} food, ${soldierReward} soldiers.`);
-
-            this.refreshVisuals(); // Update map markers
-
-            // Floating Text (Win)
-            const cell = graphData[AdventureManager.party.cell];
-            if (cell) {
-                AdventureManager.showFloatingText(`VICTORY!`, cell.p[0], cell.p[1] - 80, "#2ecc71");
-                AdventureManager.showFloatingText(`+${goldReward} 💰`, cell.p[0], cell.p[1] - 60, "#f1c40f");
-                AdventureManager.showFloatingText(`+${foodReward} 🍎`, cell.p[0], cell.p[1] - 40, "#e67e22");
-                AdventureManager.showFloatingText(`+${soldierReward} ⚔️`, cell.p[0], cell.p[1] - 20, "#9b59b6");
-            }
-
-            // Update Objectives
-            this.updateObjectiveText();
-            this.checkVictory();
-
-            // Highlight Pillaged? Maybe not needed, standard highlight is fine.
-
-        } else {
-            // Defeat
-            // Losses: High (20-40%)
-            const lossPct = 0.20 + (Math.random() * 0.20);
-            const losses = Math.floor(playerSoldiers * lossPct);
-            AdventureManager.party.soldiers = Math.max(0, playerSoldiers - losses);
-
-            AdventureManager.showFeedback(`Defeat! Failed to pillage ${burg.name}. Retreating with ${losses} casualties.`);
-
-            // Floating Text (Loss)
-            const cell = graphData[AdventureManager.party.cell];
-            if (cell) {
-                AdventureManager.showFloatingText(`DEFEAT!`, cell.p[0], cell.p[1] - 40, "#e74c3c");
-                if (losses > 0) AdventureManager.showFloatingText(`-${losses} ⚔️`, cell.p[0], cell.p[1] - 20, "#e74c3c");
-            }
-        }
-
-        AdventureManager.updateStats();
-    }
-
     onCalculateMissionRewards(context) {
         if (context.type === 'hunt') {
             // Horde gains soldiers from hunting
@@ -4415,6 +5101,319 @@ class HordeCampaign extends BaseCampaign {
 
 // Register Campaign
 CampaignManager.availableCampaigns.push(HordeCampaign);
+
+
+class WarCampaign extends MilitaryCampaign {
+    constructor() {
+        super("war_v1", "War of Conquest", "Conquer the capitals of the enemy States to establish your dominion. Defeat their garrisons to claim them.");
+
+        // Internal State
+        this.conqueredBurgs = new Set();
+        this.enemyStateIds = new Set();
+        this.partyStartConfig = { resources: { soldiers: 50, tools: 10, food: 50, gold: 10 } };
+
+        // Base Class Overrides
+        this.conqueredStatusLabel = "Conquered";
+
+        // War Tuning: Uses SiegeBattle
+        this.BattleClass = SiegeBattle;
+
+        // Diplomatic info for start
+        this.homeStateId = 0;
+        this.homeStateName = "Unknown";
+        this.homeBurgName = "Unknown";
+        this.startCell = -1;
+
+        // Objectives
+        this.addObjective("obj_war_conquer", "Conquer enemy capitals", "conquest", () => false);
+
+        this.presetStateId = null; // User selection
+    }
+
+    // --- UI Setup ---
+
+    mountSetupUI() {
+        if (!window.statesData || !window.diplomacyMatrix) return;
+
+        // Remove existing if any
+        this.teardownSetup();
+
+        // Force Political Map Mode
+        // This naturally triggers FactionSelectorInstance.show() via map_render.js logic
+        if (typeof setMapMode === 'function') {
+            setMapMode('state');
+        }
+
+        if (typeof FactionSelectorInstance !== 'undefined') {
+            // Inject options
+            FactionSelectorInstance.show(this.getFactionSelectorOptions());
+        }
+    }
+
+    getFactionSelectorOptions() {
+        return [{
+            id: 'random',
+            label: 'Random Faction 🎲',
+            value: '-1',
+            checked: true,
+            onChange: 'FactionSelectorInstance.onSelect(-1)'
+        }];
+    }
+
+    teardownSetup() {
+        if (typeof setMapMode === 'function') {
+            // setMapMode('biome') will internally call FactionSelectorInstance.hide()
+            // before applying the new map colors. This order is correct.
+            setMapMode('biome');
+        } else if (typeof FactionSelectorInstance !== 'undefined') {
+            // Fallback: Manually hide if we couldn't change map mode
+            FactionSelectorInstance.hide();
+        }
+    }
+
+    // --- Specific Mechanics ---
+
+
+    // --- MilitaryCampaign Hooks ---
+
+    isHostile(burg) {
+        if (!burg) return false;
+        return this.enemyStateIds.has(burg.state_id);
+    }
+
+    isConquered(burg) {
+        return this.conqueredBurgs.has(burg.id);
+    }
+
+    onBattleWin(burg, rewards) {
+        // Mark Conquered
+        this.conqueredBurgs.add(burg.id);
+        this.checkVictory();
+        this.updateObjectiveText();
+    }
+
+    // --- Specific Logic ---
+
+    getPartyStartConfig() {
+        // Calculate spawn here to ensure it's ready for AdventureManager.start()
+
+        // Reset internal state for fresh run
+        this.homeStateId = 0;
+        this.homeStateName = "Unknown";
+        this.homeBurgName = "Unknown";
+        this.startCell = -1;
+        this.enemyStateIds.clear();
+        let spawnBurg = null;
+
+        // Random Capital Spawn Logic
+        if (typeof statesData !== 'undefined' && statesData.length > 0) {
+            let selectedState = null;
+
+            // 1. Check for Preset Selection
+            if (this.presetStateId && this.presetStateId > 0) {
+                selectedState = statesData.find(s => s.id === this.presetStateId);
+                console.log(`WarCampaign: Using user-selected state ${this.presetStateId}`);
+            }
+
+            // 2. Fallback to Random if no selection or invalid
+            if (!selectedState) {
+                // Filter valid states (ensure they have a capital ID)
+                let validStates = statesData.filter(s => s.capital_id && s.capital_id > 0);
+
+                // Filter for states that actually have enemies
+                if (window.diplomacyMatrix) {
+                    const statesWithEnemies = validStates.filter(s => {
+                        const relations = diplomacyMatrix[s.id];
+                        if (!relations) return false;
+                        // Check if any relation is hostile
+                        // relations is likely an array or object. The usage in onAdventureStart uses forEach on it?
+                        // "relations.forEach((rel, targetStateId) => ...)" implies it might be an array or Map-like if it's from JSON.
+                        // Let's assume array of strings based on typical matrix structures.
+
+                        let hasEnemy = false;
+                        // Handle if it's array
+                        if (Array.isArray(relations)) {
+                            hasEnemy = relations.some(rel => {
+                                if (!rel) return false;
+                                return rel === "Enemy" || rel === "Rival" || (typeof rel === 'string' && rel.includes('War'));
+                            });
+                        } else {
+                            // Handle object
+                            hasEnemy = Object.values(relations).some(rel => {
+                                if (!rel) return false;
+                                return rel === "Enemy" || rel === "Rival" || (typeof rel === 'string' && rel.includes('War'));
+                            });
+                        }
+                        return hasEnemy;
+                    });
+
+                    if (statesWithEnemies.length > 0) {
+                        validStates = statesWithEnemies;
+                        console.log(`WarCampaign: Filtered to ${validStates.length} states with active enemies.`);
+                    } else {
+                        console.warn("WarCampaign: No states with enemies found! Falling back to any valid state.");
+                    }
+                }
+
+                if (validStates.length > 0) {
+                    // Pick random state
+                    selectedState = validStates[Math.floor(Math.random() * validStates.length)];
+                }
+            }
+
+            // 3. Process Selection
+            if (selectedState) {
+                // Find capital burg (match ID)
+                if (window.burgsData) {
+                    spawnBurg = burgsData.find(b => b.id === selectedState.capital_id);
+                    if (spawnBurg) {
+                        this.homeStateId = spawnBurg.state_id;
+                        this.homeStateName = spawnBurg.state_name;
+                        this.homeBurgName = spawnBurg.name;
+                        this.startCell = spawnBurg.cell_id;
+                    }
+                }
+            }
+        }
+
+        // Fallback Logic
+        if (this.startCell === -1) {
+            console.log("WarCampaign: Failed to find random capital, using default random spawn.");
+        } else {
+            console.log(`WarCampaign: Calculated Spawn at Capital ${spawnBurg ? spawnBurg.name : 'Unknown'} (State: ${this.homeStateName})`);
+        }
+
+        const config = {
+            resources: this.partyStartConfig.resources,
+            cell: this.startCell
+        };
+
+        return config;
+    }
+
+    onStart() {
+        super.onStart();
+        console.log("War Campaign Started (Internal Init)");
+        this.objectives = [];
+        this.conqueredBurgs.clear();
+    }
+
+    onAdventureStart() {
+        super.onAdventureStart();
+
+        // Now we are safely started, and AdventureManager has processed our config.
+        // We can show feedback and pings.
+
+        // 1. Ping Location
+        if (this.startCell !== -1) {
+            // Double check where we actually are
+            const actualCell = AdventureManager.party.cell;
+            const cellData = window.graphData ? graphData[actualCell] : null;
+            if (cellData) {
+                AdventureManager.showLocationPing(cellData.p[0], cellData.p[1]);
+            }
+        }
+
+        // 2. Identify Enemies logic (moved from onStart)
+        // If we fell back to random spawn, we might need to resolve home state now from current location
+        if (this.homeStateId === 0) {
+            const cellId = AdventureManager.party.cell;
+            if (window.burgsData) {
+                const b = burgsData.find(b => b.cell_id === cellId);
+                if (b) {
+                    this.homeStateId = b.state_id;
+                    this.homeStateName = b.state_name;
+                }
+            }
+            // Could add DOM fallback here if really needed
+        }
+
+        const enemies = [];
+        if (window.diplomacyMatrix && diplomacyMatrix[this.homeStateId]) {
+            const relations = diplomacyMatrix[this.homeStateId];
+            relations.forEach((rel, targetStateId) => {
+                const isHostile = rel === "Enemy" || rel === "Rival" || (typeof rel === 'string' && rel.includes('War'));
+
+                if (isHostile) {
+                    this.enemyStateIds.add(targetStateId); // Track enemy state
+
+                    let targetName = `State ${targetStateId}`;
+                    // Resolve Name & Capital
+                    if (typeof statesData !== 'undefined') {
+                        const targetState = statesData.find(s => s.id === targetStateId);
+                        if (targetState) {
+                            targetName = `${targetState.capital_name} (${targetState.name})`;
+
+                            // Highlight Enemy Capital & Add Objective
+                            if (window.burgsData && targetState.capital_id) {
+                                const enemyCapital = burgsData.find(b => b.id === targetState.capital_id);
+                                if (enemyCapital) {
+                                    this.highlightCell(enemyCapital.cell_id, "#c0392b"); // Red for enemy
+
+                                    // Add Objective for this specific capital
+                                    this.addObjective(
+                                        `obj_conquer_${enemyCapital.id}`,
+                                        `Conquer ${targetName}`,
+                                        "conquest",
+                                        () => this.conqueredBurgs.has(enemyCapital.id)
+                                    );
+                                }
+                            }
+                        }
+                    } else if (window.stateNameIdMap) {
+                        for (const [name, id] of Object.entries(stateNameIdMap)) {
+                            if (id === targetStateId) {
+                                targetName = name;
+                                break;
+                            }
+                        }
+                    }
+                    enemies.push(targetName);
+                }
+            });
+        }
+
+        // Render the newly added objectives
+        this.renderObjectives();
+        this.refreshVisuals(); // Draw initial flags/highlights
+
+        const homeString = this.homeBurgName !== "Unknown" ? `${this.homeBurgName} (${this.homeStateName})` : this.homeStateName;
+        AdventureManager.showFeedback(`Home: ${homeString}.`, 8000);
+    }
+
+    onEnd() {
+        super.onEnd();
+        this.clearHighlights();
+    }
+
+    refreshVisuals() {
+        super.refreshVisuals(); // Draws ⚔️ on all enemies and 🚩 on conquered
+
+        // 2. Highlight Enemy Capitals (Objectives) with Rings
+        this.enemyStateIds.forEach(stateId => {
+            if (typeof statesData !== 'undefined') {
+                const targetState = statesData.find(s => s.id === stateId);
+                if (targetState && window.burgsData && targetState.capital_id) {
+                    // Only if not conquered
+                    if (!this.conqueredBurgs.has(targetState.capital_id)) {
+                        const enemyCapital = burgsData.find(b => b.id === targetState.capital_id);
+                        if (enemyCapital) {
+                            this.highlightCell(enemyCapital.cell_id, "#c0392b"); // Red Ring for objective
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    updateObjectiveText() {
+        // Hooks calling checkObjectives handles this
+        this.renderObjectives();
+    }
+}
+
+// Register Campaign
+CampaignManager.availableCampaigns.push(WarCampaign);
 
 
 // Global Sets for Multi-Selection
@@ -4593,9 +5592,22 @@ function highlightTradeRowsByIds(fromId, toId, className) {
 function selectBurg(id) {
     if (!id) return; // Ignore clear calls if any
 
+    const modeBtn = document.getElementById('mapModeBtn');
+    const currentMode = modeBtn ? modeBtn.getAttribute('data-current-mode') : null;
+
+    // Handle State/Political Mode
+    if (currentMode === 'state') {
+        const burgDot = document.querySelector(`.burg-dot[data-id="${id}"]`);
+        if (burgDot && burgDot.hasAttribute('data-state-id')) {
+            const stateId = burgDot.getAttribute('data-state-id');
+            if (window.selectState) selectState(stateId);
+        }
+        return;
+    }
+
     // Restrict highlighting to Free Mode only
-    const modeBtn = document.getElementById('gameModeBtn');
-    if (modeBtn && !modeBtn.innerText.includes('Free Mode')) {
+    const gameModeBtn = document.getElementById('gameModeBtn');
+    if (gameModeBtn && !gameModeBtn.innerText.includes('Free Mode')) {
         return;
     }
 
@@ -4658,10 +5670,31 @@ function selectState(stateId) {
     const btn = document.getElementById('mapModeBtn');
     if (btn) {
         const currentMode = btn.getAttribute('data-current-mode');
-        // Only run diplomacy update if already in state mode (or switch to it?)
-        // User said "when you are on the state map", so we assume mode is already 'state'.
+        // Only run diplomacy update if already in state mode
         if (currentMode === 'state') {
             const id = parseInt(stateId);
+            let targetId = id;
+
+            // Toggle logic: If clicking the same state, deselect (target "No State" / -2)
+            if (diplomacySelectedStateId === id) {
+                targetId = -2;
+            }
+
+            // check if Faction Selector is active/visible by checking for a radio input?
+            // Or just check if the radio exists.
+            const radio = document.querySelector(`input[name="warFactionSelect"][value="${targetId}"]`);
+
+            if (radio) {
+                radio.checked = true;
+                if (typeof FactionSelectorInstance !== 'undefined') {
+                    FactionSelectorInstance.onSelect(targetId);
+                    // Sync our local tracker with what FactionSelector likely did
+                    diplomacySelectedStateId = (targetId === -2) ? null : targetId;
+                    return;
+                }
+            }
+
+            // Fallback for when Faction Selector is not active/available
             if (diplomacySelectedStateId === id) {
                 // Toggle Off
                 updateDiplomacyColors(null);

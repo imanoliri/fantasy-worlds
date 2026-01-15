@@ -9,23 +9,62 @@ class BaseCampaign {
         this.active = false;
         this.objectives = [];
         this.startConfig = null;
+
+        // Bind Handlers
+        this.onAdventureStart = this.onAdventureStart.bind(this);
+        this.onUpdateStats = this.onUpdateStats.bind(this);
+        this.onMissionStart = this.onMissionStart.bind(this);
+        this.onMissionComplete = this.onMissionComplete.bind(this);
+        this.onBurgPopupOpened = this.onBurgPopupOpened.bind(this);
+        this.onBeforeBurgPopup = this.onBeforeBurgPopup.bind(this);
+        this.onBeforeMissionSpawn = this.onBeforeMissionSpawn.bind(this);
+        this.onCalculateMissionRewards = this.onCalculateMissionRewards.bind(this);
     }
 
     // Lifecycle Hooks
     onStart() {
         this.active = true;
         console.log(`Campaign '${this.name}' Started.`);
+
+        // Register Listeners
+        if (AdventureManager.events) {
+            AdventureManager.events.on('start', this.onAdventureStart);
+            AdventureManager.events.on('updateStats', this.onUpdateStats); // Direct bind assumes signature match or ignored args
+            AdventureManager.events.on('missionStart', this.onMissionStart);
+            AdventureManager.events.on('missionComplete', this.onMissionComplete);
+            AdventureManager.events.on('burgPopupOpened', this.onBurgPopupOpened);
+            AdventureManager.events.on('beforeBurgPopup', this.onBeforeBurgPopup);
+            AdventureManager.events.on('beforeMissionSpawn', this.onBeforeMissionSpawn);
+            AdventureManager.events.on('calculateMissionRewards', this.onCalculateMissionRewards);
+        }
     }
 
     onEnd() {
         this.active = false;
         this.clearHighlights();
+
+        // Cleanup Listeners
+        if (AdventureManager.events) {
+            AdventureManager.events.off('start', this.onAdventureStart);
+            AdventureManager.events.off('updateStats', this.onUpdateStats);
+            AdventureManager.events.off('missionStart', this.onMissionStart);
+            AdventureManager.events.off('missionComplete', this.onMissionComplete);
+            AdventureManager.events.off('burgPopupOpened', this.onBurgPopupOpened);
+            AdventureManager.events.off('beforeBurgPopup', this.onBeforeBurgPopup);
+            AdventureManager.events.off('beforeMissionSpawn', this.onBeforeMissionSpawn);
+            AdventureManager.events.off('calculateMissionRewards', this.onCalculateMissionRewards);
+        }
         console.log(`Campaign '${this.name}' Ended.`);
     }
 
     // Configuration Hooks
     getPartyStartConfig() {
         return this.partyStartConfig || {};
+    }
+
+    // Lifecycle Hook for Setup Phase Cleanup
+    teardownSetup() {
+        // Override in child classes to clean up setup UI (e.g. faction selectors)
     }
 
     // Event Handlers
@@ -181,6 +220,13 @@ const CampaignManager = {
 
     selectCampaign(index) {
         if (index === "") return;
+
+        // Cleanup previous selection if exists
+        if (this.currentCampaignInstance) {
+            this.currentCampaignInstance.teardownSetup();
+            // Also call onEnd just in case, though usually only active campaigns need onEnd
+        }
+
         const CampClass = this.availableCampaigns[index];
         this.currentCampaignInstance = new CampClass();
 
@@ -188,24 +234,59 @@ const CampaignManager = {
         document.getElementById('campaignCancelBtn').classList.add('hidden'); // Ensure cancel is hidden
         this.currentCampaignInstance.renderObjectives();
         document.getElementById('campaignObjectives').classList.remove('hidden');
+
+        // New Setup Logic: Mount Custom UI
+        if (typeof this.currentCampaignInstance.mountSetupUI === 'function') {
+            this.currentCampaignInstance.mountSetupUI();
+        }
+        // Fallback: Legacy sidebar injection
+        else {
+            const setupContainer = document.getElementById('campaignSetupContainer');
+            if (setupContainer) {
+                setupContainer.innerHTML = "";
+                if (typeof this.currentCampaignInstance.renderSetupUI === 'function') {
+                    setupContainer.innerHTML = this.currentCampaignInstance.renderSetupUI();
+                }
+            }
+        }
     },
 
     startCampaign() {
         if (!this.currentCampaignInstance) return;
 
-        this.active = true;
+        // Capture Setup UI Selection (Generic DOM check)
+        // Check Floating Panel first
+        const floatingPanel = document.getElementById('warFactionSelectPanel');
+        if (floatingPanel) {
+            const radios = floatingPanel.querySelectorAll('input[type="radio"]:checked');
+            if (radios.length > 0) {
+                if (this.currentCampaignInstance.presetStateId !== undefined) {
+                    this.currentCampaignInstance.presetStateId = parseInt(radios[0].value);
+                }
+            }
+        }
+
+        // Check Sidebar Fallback
+        const setupContainer = document.getElementById('campaignSetupContainer');
+        if (setupContainer && setupContainer.childNodes.length > 0) {
+            const radios = setupContainer.querySelectorAll('input[type="radio"]:checked');
+            if (radios.length > 0) {
+                if (this.currentCampaignInstance.presetStateId !== undefined) {
+                    // Only overwrite if not already set (or overwrite? prefer floating)
+                    if (!this.currentCampaignInstance.presetStateId) {
+                        this.currentCampaignInstance.presetStateId = parseInt(radios[0].value);
+                    }
+                }
+            }
+        }
+
+        // Unmount Setup UI
+        this.currentCampaignInstance.teardownSetup();
+        if (setupContainer) setupContainer.innerHTML = ""; // Clear legacy
+
         this.active = true;
         AdventureManager.init();
         AdventureManager.active = true;
-
-        AdventureManager.events.on('start', () => this.currentCampaignInstance.onAdventureStart());
-        AdventureManager.events.on('updateStats', () => this.currentCampaignInstance.onUpdateStats(AdventureManager.party));
-        AdventureManager.events.on('missionStart', (d) => this.currentCampaignInstance.onMissionStart(d));
-        AdventureManager.events.on('missionComplete', (d) => this.currentCampaignInstance.onMissionComplete(d));
-        AdventureManager.events.on('burgPopupOpened', (d) => this.currentCampaignInstance.onBurgPopupOpened(d));
-        AdventureManager.events.on('beforeBurgPopup', (d) => this.currentCampaignInstance.onBeforeBurgPopup(d));
-        AdventureManager.events.on('beforeMissionSpawn', (d) => this.currentCampaignInstance.onBeforeMissionSpawn(d));
-        AdventureManager.events.on('calculateMissionRewards', (d) => this.currentCampaignInstance.onCalculateMissionRewards(d));
 
         this.currentCampaignInstance.onStart(); // Call *before* Adventure start to register listeners
 
@@ -235,6 +316,8 @@ const CampaignManager = {
     cancelCampaign() {
         // 1. Cleanup current campaign
         if (this.currentCampaignInstance) {
+            // Unmount Setup UI (in case we cancel BEFORE starting)
+            this.currentCampaignInstance.teardownSetup();
             this.currentCampaignInstance.onEnd();
             this.currentCampaignInstance = null;
         }

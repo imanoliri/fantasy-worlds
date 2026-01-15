@@ -13,9 +13,12 @@
     "adventure.js",
     "interactions.js",
     "campaign.js",
+    "battles.js",
+    "campaign_military_base.js",
     "campaign_siege_defense.js",
     "campaign_explorer.js",
     "campaign_diplomat.js",
     "campaign_horde.js",
+    "campaign_war.js",
     "selection.js"
 ]
