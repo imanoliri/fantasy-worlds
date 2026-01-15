@@ -188,7 +188,8 @@ function selectBurg(id) {
     }
 
     // Restrict highlighting to Free Mode only
-    if (modeBtn && !modeBtn.innerText.includes('Free Mode')) {
+    const gameModeBtn = document.getElementById('gameModeBtn');
+    if (gameModeBtn && !gameModeBtn.innerText.includes('Free Mode')) {
         return;
     }
 
