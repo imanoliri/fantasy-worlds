@@ -165,37 +165,55 @@ class SiegeBattle extends Battle {
 class RaidBattle extends Battle {
     constructor(campaign, burgId, enemyStrength) {
         super(campaign, burgId, enemyStrength);
-        this.winCurveK = 2.2; // Steamroll mechanics
+        this.winCurveK = 2.0; // Standardize to 2.0 as per snippet
     }
 
     calculateCasualties(isVictory) {
         if (isVictory) {
-            // Snowball: If we massively outnumber them, casualties are negligible
-            const ratio = this.playerSoldiers / this.enemyStrength;
-            if (ratio > 3) return Math.floor(this.playerSoldiers * 0.02); // 2% losses
-            if (ratio > 2) return Math.floor(this.playerSoldiers * 0.05); // 5% losses
-
-            // Standard risk
-            return Math.floor(this.playerSoldiers * 0.15);
+            return 0; // Flawless victory for the Horde
         }
-
-        // Failed raid is disastrous
-        return Math.floor(this.playerSoldiers * 0.30);
+        // Defeat is disastrous: 20-40% losses
+        const lossPct = 0.20 + (Math.random() * 0.20);
+        return Math.floor(this.playerSoldiers * lossPct);
     }
 
     calculateRewards() {
-        // Pillage: High Yields
-        const gold = Math.floor(this.enemyStrength / 4); // More gold
-        const soldiers = Math.floor(this.enemyStrength / 4); // Forced conscription
+        // Pillage: High Yields (30% of enemy strength)
+        const gold = Math.floor(this.enemyStrength / 10) * 3;
+        const soldiers = Math.floor(this.enemyStrength / 10) * 3;
+
         let food = 0;
         if (this.burg && this.burg.net_food > 0) {
-            food = Math.floor(this.burg.net_food * 0.5); // Take half the stores
+            food = Math.floor(this.burg.net_food * 0.4); // 40% of food
         }
         return { gold, soldiers, food };
     }
 
     onVictory() {
-        super.onVictory();
+        const rewards = this.calculateRewards();
+        const losses = this.calculateCasualties(true);
+
+        // Apply changes
+        AdventureManager.party.gold += rewards.gold;
+        AdventureManager.party.soldiers += rewards.soldiers;
+        AdventureManager.party.food += rewards.food;
+        AdventureManager.party.soldiers = Math.max(0, AdventureManager.party.soldiers - losses);
+
+        // Event Emission
+        if (AdventureManager.events) {
+            AdventureManager.events.emit('battleWon', {
+                burg: this.burg,
+                rewards: rewards,
+                campaignId: this.campaign ? this.campaign.id : null
+            });
+        }
+
+        // Custom UI Feedback for Pillage
+        const targetName = this.burg ? this.burg.name : "Target";
+        AdventureManager.showFeedback(`Victory! Pillaged ${targetName}. Gained ${rewards.gold} gold, ${rewards.food} food, ${rewards.soldiers} soldiers.`);
+        this.showFloatingStats(true, rewards, losses);
+
+        AdventureManager.updateStats();
     }
 }
 

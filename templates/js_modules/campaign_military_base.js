@@ -90,13 +90,27 @@ class MilitaryCampaign extends BaseCampaign {
         }
     }
 
+    // Configurable Labels (Override in Child)
+    getAttackButtonLabel(burg) {
+        return this.attackButtonLabel || "Attack City"; // Default
+    }
+
+    getConqueredButtonLabel(burg) {
+        return `City ${this.conqueredStatusLabel} (Yours)`; // Default
+    }
+
     onBurgPopupOpened(context) {
         const { burg, buttons } = context;
 
         // 1. Check if already conquered
         if (this.isConquered(burg)) {
+            // Preserve utility buttons (Ship/Leave)
+            const preserved = buttons.filter(b => this.shouldPreserveButton(b.id));
+            buttons.length = 0;
+            if (preserved.length) buttons.push(...preserved);
+
             buttons.unshift({
-                label: `City ${this.conqueredStatusLabel} (Yours)`,
+                label: this.getConqueredButtonLabel(burg),
                 action: () => { },
                 disabled: true,
                 style: "background: #27ae60; cursor: default; opacity: 1.0; color: white;",
@@ -107,15 +121,20 @@ class MilitaryCampaign extends BaseCampaign {
 
         // 2. Logic for Hostile Cities
         if (this.isHostile(burg)) {
+            // Preserve utility buttons (Ship/Leave)
+            const preserved = buttons.filter(b => this.shouldPreserveButton(b.id));
+
             // Clear peaceful options
             buttons.length = 0;
+            if (preserved.length) buttons.push(...preserved);
 
             // Calculate Strength
             const soldierQ = burg.soldier_quartiers || 0;
-            const strength = Math.max(10, 20 + (15 * soldierQ));
+            // Allow child class to tune strength calculation if needed, or use default logic
+            const strength = this.calculateGarrisonStrength(burg);
 
             buttons.push({
-                label: `Attack City (Strength: ${strength})`,
+                label: `${this.getAttackButtonLabel(burg)} (Strength: ${strength})`,
                 onClick: `CampaignManager.currentCampaignInstance.showBattlePopup(${burg.id}, ${strength})`,
                 class: "btn-attack",
                 style: "background: #c0392b; color: white;"
@@ -126,6 +145,17 @@ class MilitaryCampaign extends BaseCampaign {
         // 3. Logic for Non-Hostile (Neutral) - allow attack if not identical to home?
         // For now, base class defaults to ONLY hostile check. 
         // Child classes can call super() and then add more buttons if they want.
+    }
+
+    shouldPreserveButton(btnId) {
+        // List of IDs to keep even when hostile
+        const keep = ['leave_ship', 'rent_ship'];
+        return keep.includes(btnId);
+    }
+
+    calculateGarrisonStrength(burg) {
+        const soldierQ = burg.soldier_quartiers || 0;
+        return Math.max(10, (15 * soldierQ));
     }
 
     // --- Shared Battle UI ---

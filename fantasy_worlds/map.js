@@ -4076,37 +4076,55 @@ class SiegeBattle extends Battle {
 class RaidBattle extends Battle {
     constructor(campaign, burgId, enemyStrength) {
         super(campaign, burgId, enemyStrength);
-        this.winCurveK = 2.2; // Steamroll mechanics
+        this.winCurveK = 2.0; // Standardize to 2.0 as per snippet
     }
 
     calculateCasualties(isVictory) {
         if (isVictory) {
-            // Snowball: If we massively outnumber them, casualties are negligible
-            const ratio = this.playerSoldiers / this.enemyStrength;
-            if (ratio > 3) return Math.floor(this.playerSoldiers * 0.02); // 2% losses
-            if (ratio > 2) return Math.floor(this.playerSoldiers * 0.05); // 5% losses
-
-            // Standard risk
-            return Math.floor(this.playerSoldiers * 0.15);
+            return 0; // Flawless victory for the Horde
         }
-
-        // Failed raid is disastrous
-        return Math.floor(this.playerSoldiers * 0.30);
+        // Defeat is disastrous: 20-40% losses
+        const lossPct = 0.20 + (Math.random() * 0.20);
+        return Math.floor(this.playerSoldiers * lossPct);
     }
 
     calculateRewards() {
-        // Pillage: High Yields
-        const gold = Math.floor(this.enemyStrength / 4); // More gold
-        const soldiers = Math.floor(this.enemyStrength / 4); // Forced conscription
+        // Pillage: High Yields (30% of enemy strength)
+        const gold = Math.floor(this.enemyStrength / 10) * 3;
+        const soldiers = Math.floor(this.enemyStrength / 10) * 3;
+
         let food = 0;
         if (this.burg && this.burg.net_food > 0) {
-            food = Math.floor(this.burg.net_food * 0.5); // Take half the stores
+            food = Math.floor(this.burg.net_food * 0.4); // 40% of food
         }
         return { gold, soldiers, food };
     }
 
     onVictory() {
-        super.onVictory();
+        const rewards = this.calculateRewards();
+        const losses = this.calculateCasualties(true);
+
+        // Apply changes
+        AdventureManager.party.gold += rewards.gold;
+        AdventureManager.party.soldiers += rewards.soldiers;
+        AdventureManager.party.food += rewards.food;
+        AdventureManager.party.soldiers = Math.max(0, AdventureManager.party.soldiers - losses);
+
+        // Event Emission
+        if (AdventureManager.events) {
+            AdventureManager.events.emit('battleWon', {
+                burg: this.burg,
+                rewards: rewards,
+                campaignId: this.campaign ? this.campaign.id : null
+            });
+        }
+
+        // Custom UI Feedback for Pillage
+        const targetName = this.burg ? this.burg.name : "Target";
+        AdventureManager.showFeedback(`Victory! Pillaged ${targetName}. Gained ${rewards.gold} gold, ${rewards.food} food, ${rewards.soldiers} soldiers.`);
+        this.showFloatingStats(true, rewards, losses);
+
+        AdventureManager.updateStats();
     }
 }
 
@@ -4247,13 +4265,27 @@ class MilitaryCampaign extends BaseCampaign {
         }
     }
 
+    // Configurable Labels (Override in Child)
+    getAttackButtonLabel(burg) {
+        return this.attackButtonLabel || "Attack City"; // Default
+    }
+
+    getConqueredButtonLabel(burg) {
+        return `City ${this.conqueredStatusLabel} (Yours)`; // Default
+    }
+
     onBurgPopupOpened(context) {
         const { burg, buttons } = context;
 
         // 1. Check if already conquered
         if (this.isConquered(burg)) {
+            // Preserve utility buttons (Ship/Leave)
+            const preserved = buttons.filter(b => this.shouldPreserveButton(b.id));
+            buttons.length = 0;
+            if (preserved.length) buttons.push(...preserved);
+
             buttons.unshift({
-                label: `City ${this.conqueredStatusLabel} (Yours)`,
+                label: this.getConqueredButtonLabel(burg),
                 action: () => { },
                 disabled: true,
                 style: "background: #27ae60; cursor: default; opacity: 1.0; color: white;",
@@ -4264,15 +4296,20 @@ class MilitaryCampaign extends BaseCampaign {
 
         // 2. Logic for Hostile Cities
         if (this.isHostile(burg)) {
+            // Preserve utility buttons (Ship/Leave)
+            const preserved = buttons.filter(b => this.shouldPreserveButton(b.id));
+
             // Clear peaceful options
             buttons.length = 0;
+            if (preserved.length) buttons.push(...preserved);
 
             // Calculate Strength
             const soldierQ = burg.soldier_quartiers || 0;
-            const strength = Math.max(10, 20 + (15 * soldierQ));
+            // Allow child class to tune strength calculation if needed, or use default logic
+            const strength = this.calculateGarrisonStrength(burg);
 
             buttons.push({
-                label: `Attack City (Strength: ${strength})`,
+                label: `${this.getAttackButtonLabel(burg)} (Strength: ${strength})`,
                 onClick: `CampaignManager.currentCampaignInstance.showBattlePopup(${burg.id}, ${strength})`,
                 class: "btn-attack",
                 style: "background: #c0392b; color: white;"
@@ -4283,6 +4320,17 @@ class MilitaryCampaign extends BaseCampaign {
         // 3. Logic for Non-Hostile (Neutral) - allow attack if not identical to home?
         // For now, base class defaults to ONLY hostile check. 
         // Child classes can call super() and then add more buttons if they want.
+    }
+
+    shouldPreserveButton(btnId) {
+        // List of IDs to keep even when hostile
+        const keep = ['leave_ship', 'rent_ship'];
+        return keep.includes(btnId);
+    }
+
+    calculateGarrisonStrength(burg) {
+        const soldierQ = burg.soldier_quartiers || 0;
+        return Math.max(10, (15 * soldierQ));
     }
 
     // --- Shared Battle UI ---
@@ -4902,6 +4950,9 @@ class HordeCampaign extends MilitaryCampaign {
 
         // Bind methods
         this.onBattleWonEventListener = this.onBattleWonEventListener.bind(this); // For event listeners
+
+        // Configurations
+        this.attackButtonLabel = "Pillage City";
     }
 
 
@@ -4927,180 +4978,14 @@ class HordeCampaign extends MilitaryCampaign {
         return this.pillagedBurgs.has(burg.id);
     }
 
-    onBurgPopupOpened(context) {
-        const { burg, party, buttons } = context;
-
-        // Only modify if hostile
-        if (this.isHostile(burg)) {
-            // Preserve Ship Actions (Rent/Leave Ship)
-            const shipButtons = buttons.filter(b => b.label && b.label.includes("Ship"));
-
-            // Clear existing buttons (Standard actions blocked)
-            buttons.length = 0;
-
-
-            // Check if already pillaged
-            if (this.pillagedBurgs.has(burg.id)) {
-                buttons.push({
-                    label: "City Pillaged (Ruins)",
-                    action: () => { }, // No action
-                    disabled: true,
-                    class: "btn-recruit", // Use recruit style but greyed out via inline style
-                    style: "background: #555; cursor: default; opacity: 0.7;"
-                });
-            } else {
-                // Add Fight button
-                // Strength logic: 10 * soldier_quartiers
-                const soldierQ = burg.soldier_quartiers || 0;
-                const strength = Math.max(10, 10 * (1 + soldierQ)); // Min 10 strength
-
-                buttons.push({
-                    label: `Pillage City (Strength: ${strength})`,
-                    onClick: `CampaignManager.currentCampaignInstance.showBattlePopup(${burg.id}, ${strength})`,
-                    class: "btn-attack",
-                    style: "background: #c0392b; color: white;"
-                });
-            }
-
-            // Add ship buttons back
-            if (shipButtons.length > 0) {
-                if (!this.pillagedBurgs.has(burg.id)) {
-                    shipButtons.forEach(btn => {
-                        btn.disabled = true;
-                        btn.title = "Pillage city to unlock port";
-                        btn.style = "background: #555; cursor: not-allowed; opacity: 0.6;";
-                        btn.onClick = ""; // Prevent execution
-                    });
-                }
-                buttons.unshift(...shipButtons);
-            }
-        }
+    getConqueredButtonLabel(burg) {
+        return "City Pillaged (Ruins)";
     }
 
-    showBattlePopup(burgId, enemyStrength) {
-        if (!AdventureManager.popupElement) AdventureManager.openPopup('');
-
-        // Ensure overlay
-        let overlay = document.getElementById('modalOverlay');
-        if (!overlay) {
-            overlay = document.createElement('div');
-            overlay.id = 'modalOverlay';
-            overlay.className = 'modal-overlay';
-            document.body.appendChild(overlay);
-        }
-        overlay.style.display = 'block';
-
-        const mySoldiers = AdventureManager.party.soldiers;
-
-        // Win Probability Logic
-        const ratio = mySoldiers / enemyStrength;
-        const k = 2;
-        const winProb = (Math.pow(ratio, k) / (Math.pow(ratio, k) + 1));
-        const winPercent = (winProb * 100).toFixed(1);
-
-        const content = `
-             <h2>⚔️ Battle Imminent ⚔️</h2>
-             <div class="content-wrapper" style="display: flex; gap: 20px; align-items: center; justify-content: center;">
-                 <div style="text-align: center;">
-                    <h3>Your Army</h3>
-                    <div style="font-size: 24px; color: #2ecc71; font-weight: bold;">${mySoldiers} 🛡️</div>
-                 </div>
-                 <div style="font-size: 20px; font-weight: bold;">VS</div>
-                 <div style="text-align: center;">
-                    <h3>City Garrison</h3>
-                    <div style="font-size: 24px; color: #e74c3c; font-weight: bold;">${enemyStrength} ⚔️</div>
-                 </div>
-             </div>
-             
-             <div style="text-align: center; margin: 15px 0;">
-                <div>Win Probability: <strong>${winPercent}%</strong></div>
-             </div>
-             
-             <div class="actions">
-                 <button class="btn-recruit" style="background-color: #c0392b;" onclick="CampaignManager.currentCampaignInstance.resolveCityBattle(${burgId}, ${enemyStrength})">ATTACK!</button>
-                 <button class="btn-leave" onclick="AdventureManager.closePopup()">Retreat</button>
-             </div>
-        `;
-        AdventureManager.openPopup(content);
-    }
-
-    resolveCityBattle(burgId, enemySoldiers) {
-        // Find burg again since we passed ID
-        const burg = burgsData.find(b => b.id === burgId);
-        if (!burg) return;
-
-        const playerSoldiers = AdventureManager.party.soldiers;
-
-        if (playerSoldiers <= 0) {
-            AdventureManager.showFeedback("You have no soldiers to fight with!");
-            AdventureManager.closePopup();
-            return;
-        }
-
-        const ratio = playerSoldiers / enemySoldiers;
-        const winProbability = (ratio * ratio) / ((ratio * ratio) + 1);
-
-        const isWin = Math.random() < winProbability;
-
-        AdventureManager.closePopup(); // Close battle popup
-
-        if (isWin) {
-            // Rewards (Aligned with BattleMission plus Food = Gold)
-            const goldReward = Math.floor(enemySoldiers / 10) * 3;
-            const soldierReward = Math.floor(enemySoldiers / 10) * 3;
-
-            // Food Reward: 40% of city's net food
-            let foodReward = 0;
-            // Ensure we have a valid food value
-            const cityFood = burg.net_food || 0;
-            if (cityFood > 0) {
-                foodReward = Math.floor(cityFood * 0.4);
-            }
-
-            AdventureManager.party.gold += goldReward;
-            AdventureManager.party.soldiers += soldierReward;
-            AdventureManager.party.food += foodReward;
-
-            // Mark as pillaged (Capital or not)
-            this.pillagedBurgs.add(burg.id);
-
-            AdventureManager.showFeedback(`Victory! Pillaged ${burg.name}. Gained ${goldReward} gold, ${foodReward} food, ${soldierReward} soldiers.`);
-
-            this.refreshVisuals(); // Update map markers
-
-            // Floating Text (Win)
-            const cell = graphData[AdventureManager.party.cell];
-            if (cell) {
-                AdventureManager.showFloatingText(`VICTORY!`, cell.p[0], cell.p[1] - 80, "#2ecc71");
-                AdventureManager.showFloatingText(`+${goldReward} 💰`, cell.p[0], cell.p[1] - 60, "#f1c40f");
-                AdventureManager.showFloatingText(`+${foodReward} 🍎`, cell.p[0], cell.p[1] - 40, "#e67e22");
-                AdventureManager.showFloatingText(`+${soldierReward} ⚔️`, cell.p[0], cell.p[1] - 20, "#9b59b6");
-            }
-
-            // Update Objectives
-            this.updateObjectiveText();
-            this.checkVictory();
-
-            // Highlight Pillaged? Maybe not needed, standard highlight is fine.
-
-        } else {
-            // Defeat
-            // Losses: High (20-40%)
-            const lossPct = 0.20 + (Math.random() * 0.20);
-            const losses = Math.floor(playerSoldiers * lossPct);
-            AdventureManager.party.soldiers = Math.max(0, playerSoldiers - losses);
-
-            AdventureManager.showFeedback(`Defeat! Failed to pillage ${burg.name}. Retreating with ${losses} casualties.`);
-
-            // Floating Text (Loss)
-            const cell = graphData[AdventureManager.party.cell];
-            if (cell) {
-                AdventureManager.showFloatingText(`DEFEAT!`, cell.p[0], cell.p[1] - 40, "#e74c3c");
-                if (losses > 0) AdventureManager.showFloatingText(`-${losses} ⚔️`, cell.p[0], cell.p[1] - 20, "#e74c3c");
-            }
-        }
-
-        AdventureManager.updateStats();
+    calculateGarrisonStrength(burg) {
+        // Horde Logic: 10 * soldier_quartiers (Weaker than standard war)
+        const soldierQ = burg.soldier_quartiers || 0;
+        return 10 + 10 * (1 + soldierQ);
     }
 
     onBattleWin(burg, rewards) {
