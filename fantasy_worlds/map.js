@@ -617,15 +617,15 @@ function filterTable() {
                 `.burg-ring-selection[data-id="${burgId}"]`,
                 `.burg-ring-gold[data-id="${burgId}"]`,
                 `.burg-info-badge[data-id="${burgId}"]`,
-                // Add other rings if needed, e.g. .burg-ring-food if class exists
+                `.capital-crown[data-id="${burgId}"]`
             ];
 
             elementsToToggle.forEach(selector => {
-                const el = document.querySelector(selector);
-                if (el) {
+                const els = document.querySelectorAll(selector);
+                els.forEach(el => {
                     if (isVisible) el.classList.remove('hidden');
                     else el.classList.add('hidden');
-                }
+                });
             });
         }
     }
@@ -3564,6 +3564,21 @@ class BaseCampaign {
             AdventureManager.events.on('missionStart', this.onMissionStart);
             AdventureManager.events.on('missionComplete', this.onMissionComplete);
             AdventureManager.events.on('burgPopupOpened', this.onBurgPopupOpened);
+
+            // Re-order to ensure Campaign runs before Missions (Siege)
+            // This allows Campaign to set up buttons (e.g. Attack) first, and Siege logic to disable them if needed.
+            if (AdventureManager.events.listeners['burgPopupOpened']) {
+                const listeners = AdventureManager.events.listeners['burgPopupOpened'];
+                if (listeners.length > 1) {
+                    // Pull our listener (added last) and unshift to front
+                    // Note: This relies on us just having added it.
+                    // To be safe, find by reference? But bind() creates new ref.
+                    // Since we just called .on(), we are at the end.
+                    const me = listeners.pop();
+                    listeners.unshift(me);
+                }
+            }
+
             AdventureManager.events.on('beforeBurgPopup', this.onBeforeBurgPopup);
             AdventureManager.events.on('beforeMissionSpawn', this.onBeforeMissionSpawn);
             AdventureManager.events.on('calculateMissionRewards', this.onCalculateMissionRewards);
