@@ -1495,7 +1495,13 @@ class SiegeMission extends AdventureMission {
         svg.appendChild(siegeGroup);
 
         // Register Event Listener for Burg Popup
-        AdventureManager.events.on('burgPopupOpened', this.handleburgPopupOpened.bind(this));
+        if (AdventureManager.events) {
+            AdventureManager.events.on('burgPopupOpened', this.handleburgPopupOpened.bind(this), {
+                id: 'mission_siege',
+                priority: 100, // Run LATER to override buttons
+                after: ['campaign_base'] // Explicit constraint
+            });
+        }
     }
 
     handleburgPopupOpened(context) {
@@ -2069,21 +2075,76 @@ const AdventureManager = {
     // Initialize Event System (Top-level to ensure availability)
     events: {
         listeners: {},
-        on(event, callback) {
+        on(event, callback, options = {}) {
             if (!this.listeners[event]) this.listeners[event] = [];
-            this.listeners[event].push(callback);
+
+            // Validate Options
+            const listener = {
+                callback: callback,
+                priority: options.priority || 0, // Higher runs LAST (overrides)
+                id: options.id || null,
+                after: options.after || [],      // Array of IDs this must run AFTER
+                before: options.before || []     // Array of IDs this must run BEFORE
+            };
+
+            this.listeners[event].push(listener);
+            this.sortListeners(event);
         },
         off(event, callback) {
             if (!this.listeners[event]) return;
-            this.listeners[event] = this.listeners[event].filter(cb => cb !== callback);
+            this.listeners[event] = this.listeners[event].filter(l => l.callback !== callback);
         },
         emit(event, data) {
             if (this.listeners[event]) {
-                this.listeners[event].forEach(cb => cb(data));
+                // Return value? Some events might use return values (chain of responsibility)
+                // For now, just execute.
+                this.listeners[event].forEach(l => l.callback(data));
             }
         },
         clear() {
             this.listeners = {};
+        },
+        sortListeners(event) {
+            const list = this.listeners[event];
+
+            // 1. Base Sort by Priority (Low -> High)
+            // Lower priority runs first. Higher priority runs last (overriding previous).
+            list.sort((a, b) => a.priority - b.priority);
+
+            // 2. Resolve 'after' / 'before' constraints
+            // Simple constraint solver via bubble sort (iterative checking)
+            // Run N times or until stable
+            let changed = true;
+            let iterations = 0;
+            const limit = list.length * list.length; // Safety break
+
+            while (changed && iterations < limit && list.length > 1) {
+                changed = false;
+                iterations++;
+
+                for (let i = 0; i < list.length - 1; i++) {
+                    const current = list[i];
+                    const next = list[i + 1];
+
+                    let shouldSwap = false;
+
+                    // Swap if 'current' needs to be AFTER 'next'
+                    // Rule 1: 'current' says I must be AFTER 'next'
+                    if (next.id && current.after.includes(next.id)) {
+                        shouldSwap = true;
+                    }
+                    // Rule 2: 'next' says I must be BEFORE 'current'
+                    if (current.id && next.before.includes(current.id)) {
+                        shouldSwap = true;
+                    }
+
+                    if (shouldSwap) {
+                        list[i] = next;
+                        list[i + 1] = current;
+                        changed = true;
+                    }
+                }
+            }
         }
     },
 
@@ -3563,21 +3624,12 @@ class BaseCampaign {
             AdventureManager.events.on('updateStats', this.onUpdateStats); // Direct bind assumes signature match or ignored args
             AdventureManager.events.on('missionStart', this.onMissionStart);
             AdventureManager.events.on('missionComplete', this.onMissionComplete);
-            AdventureManager.events.on('burgPopupOpened', this.onBurgPopupOpened);
 
-            // Re-order to ensure Campaign runs before Missions (Siege)
-            // This allows Campaign to set up buttons (e.g. Attack) first, and Siege logic to disable them if needed.
-            if (AdventureManager.events.listeners['burgPopupOpened']) {
-                const listeners = AdventureManager.events.listeners['burgPopupOpened'];
-                if (listeners.length > 1) {
-                    // Pull our listener (added last) and unshift to front
-                    // Note: This relies on us just having added it.
-                    // To be safe, find by reference? But bind() creates new ref.
-                    // Since we just called .on(), we are at the end.
-                    const me = listeners.pop();
-                    listeners.unshift(me);
-                }
-            }
+            // Register with Priority 10 (Standard Campaign Logic)
+            AdventureManager.events.on('burgPopupOpened', this.onBurgPopupOpened, {
+                id: 'campaign_base',
+                priority: 10
+            });
 
             AdventureManager.events.on('beforeBurgPopup', this.onBeforeBurgPopup);
             AdventureManager.events.on('beforeMissionSpawn', this.onBeforeMissionSpawn);

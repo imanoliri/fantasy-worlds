@@ -149,7 +149,7 @@ class MilitaryCampaign extends BaseCampaign {
 
     shouldPreserveButton(btnId) {
         // List of IDs to keep even when hostile
-        const keep = ['leave_ship', 'rent_ship'];
+        const keep = ['leave_ship', 'rent_ship', 'fight_siege'];
         return keep.includes(btnId);
     }
 

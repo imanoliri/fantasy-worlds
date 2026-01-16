@@ -67,7 +67,13 @@ class SiegeMission extends AdventureMission {
         svg.appendChild(siegeGroup);
 
         // Register Event Listener for Burg Popup
-        AdventureManager.events.on('burgPopupOpened', this.handleburgPopupOpened.bind(this));
+        if (AdventureManager.events) {
+            AdventureManager.events.on('burgPopupOpened', this.handleburgPopupOpened.bind(this), {
+                id: 'mission_siege',
+                priority: 100, // Run LATER to override buttons
+                after: ['campaign_base'] // Explicit constraint
+            });
+        }
     }
 
     handleburgPopupOpened(context) {

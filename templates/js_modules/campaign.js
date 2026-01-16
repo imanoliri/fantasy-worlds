@@ -32,21 +32,12 @@ class BaseCampaign {
             AdventureManager.events.on('updateStats', this.onUpdateStats); // Direct bind assumes signature match or ignored args
             AdventureManager.events.on('missionStart', this.onMissionStart);
             AdventureManager.events.on('missionComplete', this.onMissionComplete);
-            AdventureManager.events.on('burgPopupOpened', this.onBurgPopupOpened);
 
-            // Re-order to ensure Campaign runs before Missions (Siege)
-            // This allows Campaign to set up buttons (e.g. Attack) first, and Siege logic to disable them if needed.
-            if (AdventureManager.events.listeners['burgPopupOpened']) {
-                const listeners = AdventureManager.events.listeners['burgPopupOpened'];
-                if (listeners.length > 1) {
-                    // Pull our listener (added last) and unshift to front
-                    // Note: This relies on us just having added it.
-                    // To be safe, find by reference? But bind() creates new ref.
-                    // Since we just called .on(), we are at the end.
-                    const me = listeners.pop();
-                    listeners.unshift(me);
-                }
-            }
+            // Register with Priority -100 (Ensure it runs FIRST)
+            AdventureManager.events.on('burgPopupOpened', this.onBurgPopupOpened, {
+                id: 'campaign_base',
+                priority: -100
+            });
 
             AdventureManager.events.on('beforeBurgPopup', this.onBeforeBurgPopup);
             AdventureManager.events.on('beforeMissionSpawn', this.onBeforeMissionSpawn);
