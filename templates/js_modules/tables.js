@@ -86,15 +86,15 @@ function filterTable() {
                 `.burg-ring-selection[data-id="${burgId}"]`,
                 `.burg-ring-gold[data-id="${burgId}"]`,
                 `.burg-info-badge[data-id="${burgId}"]`,
-                // Add other rings if needed, e.g. .burg-ring-food if class exists
+                `.capital-crown[data-id="${burgId}"]`
             ];
 
             elementsToToggle.forEach(selector => {
-                const el = document.querySelector(selector);
-                if (el) {
+                const els = document.querySelectorAll(selector);
+                els.forEach(el => {
                     if (isVisible) el.classList.remove('hidden');
                     else el.classList.add('hidden');
-                }
+                });
             });
         }
     }
