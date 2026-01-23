@@ -4041,11 +4041,25 @@ class DiplomacyView {
             if (!this.isOpen || this.layout !== 'force') return;
 
             // Physics Constants
-            const repulsion = 15000; // Stronger push apart
-            const springLength = 200; // Longer connections
-            const springStrength = 0.05;
-            const centerGravity = 0.005; // Weaker gravity to allow spreading
+            // Physics Constants
+            const repulsion = 10000;
+            const centerGravity = 0.005;
             const maxVelocity = 10;
+
+            // Physics Configuration per Relation
+            // distance: Ideal length of the spring (pixels)
+            // strength: How hard it pulls/pushes to that length (0-1)
+            const physicsConfig = {
+                "War": { length: 600, strength: 0.2 }, // Push enemies far away
+                "Enemy": { length: 500, strength: 0.15 },
+                "Rival": { length: 400, strength: 0.1 },
+                "Suspicion": { length: 300, strength: 0.05 },
+                "Neutral": { length: 250, strength: 0.02 },
+                "Friendly": { length: 150, strength: 0.05 },
+                "Ally": { length: 70, strength: 0.2 }, // Pull allies close
+                "Subject": { length: 50, strength: 0.2 },
+                "Suzerain": { length: 50, strength: 0.2 }
+            };
 
             // 1. Repulsion (Nodes push apart)
             for (let i = 0; i < nodes.length; i++) {
@@ -4073,7 +4087,7 @@ class DiplomacyView {
                 }
             }
 
-            // 2. Attraction (Links pull together)
+            // 2. Attraction (Links pull together or push apart based on relation)
             links.forEach(link => {
                 const a = link.source;
                 const b = link.target;
@@ -4081,8 +4095,13 @@ class DiplomacyView {
                 const dy = b.y - a.y;
                 const dist = Math.sqrt(dx * dx + dy * dy);
 
+                // Get config for this relation
+                let rel = link.relation;
+                if (!this.colors[rel]) rel = "Neutral";
+                const config = physicsConfig[rel] || physicsConfig["Neutral"];
+
                 // Spring force
-                const force = (dist - springLength) * springStrength;
+                const force = (dist - config.length) * config.strength;
                 const fx = (dx / dist) * force;
                 const fy = (dy / dist) * force;
 
