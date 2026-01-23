@@ -3801,6 +3801,7 @@ class DiplomacyView {
         if (!container) return;
         container.innerHTML = '';
 
+        // Layout Toolbar removed (Moved to HTML)
         // Get all unique relations actually present in the matrix?
         // Or just use the predefined colors list? Predefined is safer and more consistent.
         Object.keys(this.colors).forEach(relation => {
@@ -3814,7 +3815,16 @@ class DiplomacyView {
 
             const checkbox = document.createElement('input');
             checkbox.type = 'checkbox';
-            checkbox.checked = true; // Default ON
+            // Default ON, except for Neutral and Suspicion
+            if (relation === "Neutral" || relation === "Suspicion") {
+                checkbox.checked = false;
+            } else {
+                checkbox.checked = true;
+            }
+            // Trigger visibility update immediately for the default state
+            // Note: toggleRelationVisibility runs on change, but we need initial state.
+            // However, render() calls this logic at the end based on checked state.
+            // So setting checked = false here is sufficient.
             checkbox.value = relation;
             checkbox.style.marginRight = '10px';
             checkbox.style.accentColor = color;
@@ -3838,8 +3848,8 @@ class DiplomacyView {
     }
 
     toggleRelationVisibility(relation, isVisible) {
-        // Select all lines AND rects (matrix cells) with this relation
-        const elements = this.svg.querySelectorAll(`line[data-relation="${relation}"], rect[data-relation="${relation}"]`);
+        // Select all lines, paths (arcs), AND rects (matrix cells) with this relation
+        const elements = this.svg.querySelectorAll(`line[data-relation="${relation}"], path[data-relation="${relation}"], rect[data-relation="${relation}"]`);
         elements.forEach(el => {
             if (isVisible) {
                 el.style.display = 'block';
@@ -3874,6 +3884,8 @@ class DiplomacyView {
             this.renderForce();
         } else if (this.layout === 'matrix') {
             this.renderMatrix();
+        } else if (this.layout === 'arc') {
+            this.renderArc();
         } else {
             this.renderCircle();
         }
@@ -4248,6 +4260,141 @@ class DiplomacyView {
         }
     }
 
+    renderArc() {
+        const validStates = statesData.filter(s => s.id > 0);
+        // Sort by name or ID for consistent ordering along the line
+        validStates.sort((a, b) => a.name.localeCompare(b.name));
+
+        const count = validStates.length;
+        // Draw along a horizontal line in the middle
+        const y = this.cy;
+        // Use about 80% of width
+        const width = (this.svg.clientWidth || 800) * 0.8;
+        const startX = (this.svg.clientWidth || 800) * 0.1;
+        const step = width / (count - 1);
+
+        const nodes = validStates.map((state, index) => {
+            return {
+                id: state.id,
+                name: state.name,
+                color: state.color,
+                x: startX + index * step,
+                y: y,
+                index: index // scaling helper
+            };
+        });
+
+        // Generate Links
+        const links = [];
+        nodes.forEach((nodeA, i) => {
+            for (let j = i + 1; j < nodes.length; j++) {
+                const nodeB = nodes[j];
+                const rel = diplomacyMatrix[nodeA.id] && diplomacyMatrix[nodeA.id][nodeB.id];
+                if (rel && rel !== "Neutral") {
+                    links.push({ source: nodeA, target: nodeB, relation: rel });
+                } else {
+                    // Include Neutral/Unknown for consistency if needed, but Arc usually cleaner without
+                    // However, our filter logic relies on DOM existence.
+                    // Let's add them but they will be hidden by default filter
+                    let finalRel = rel || "Neutral";
+                    if (!this.colors[finalRel]) finalRel = "Neutral";
+                    links.push({ source: nodeA, target: nodeB, relation: finalRel });
+                }
+            }
+        });
+
+        // Draw Nodes
+        const nodesGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        nodesGroup.id = "diplomacyNodes";
+
+        nodes.forEach(node => {
+            const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+            g.dataset.id = node.id;
+            g.setAttribute("transform", `translate(${node.x}, ${node.y})`);
+            g.style.cursor = "pointer";
+
+            // Interaction
+            g.addEventListener('mouseenter', () => this.highlightState(node.id));
+            g.addEventListener('mouseleave', () => this.resetHighlight());
+
+            const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            circle.setAttribute("r", this.nodeRadius);
+            circle.setAttribute("fill", node.color);
+            circle.setAttribute("stroke", "#333");
+            circle.setAttribute("stroke-width", 2);
+            g.appendChild(circle);
+
+            // Label below
+            const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            text.textContent = node.name;
+            text.setAttribute("fill", "#ccc");
+            text.setAttribute("font-size", "12px");
+            text.setAttribute("y", this.nodeRadius + 15);
+            text.setAttribute("text-anchor", "middle");
+            text.setAttribute("transform", "rotate(45, 0, " + (this.nodeRadius + 15) + ")"); // Angled labels for space
+            g.appendChild(text);
+
+            nodesGroup.appendChild(g);
+        });
+
+        // Draw Arcs
+        const linksGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        linksGroup.id = "diplomacyLinks";
+
+        links.forEach(link => {
+            const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+
+            const x1 = link.source.x;
+            const x2 = link.target.x;
+            const dist = Math.abs(x2 - x1);
+
+            // Height proportional to distance
+            const height = dist * 0.5;
+
+            // Semantic Direction:
+            // Positive (Up): Ally, Friendly, Subject, Suzerain
+            // Negative (Down): War, Enemy, Rival, Suspicion
+            // Neutral (Up/Small): Neutral
+            const negativeRelations = ["War", "Enemy", "Rival", "Suspicion"];
+            const isNegative = negativeRelations.includes(link.relation);
+
+            // Quadratic Bezier: M x1,y Q cx,cy x2,y
+            const cx = (x1 + x2) / 2;
+            const cy = isNegative ? y + height : y - height;
+
+            const d = `M ${x1},${y} Q ${cx},${cy} ${x2},${y}`;
+
+            path.setAttribute("d", d);
+            path.setAttribute("fill", "none");
+            path.setAttribute("stroke", this.getRelationColor(link.relation));
+            path.setAttribute("stroke-width", this.getStrokeWidth(link.relation));
+            path.setAttribute("stroke-opacity", 0.6);
+
+            path.dataset.source = link.source.id;
+            path.dataset.target = link.target.id;
+
+            // Normalize for filtering: if color not found, it's Neutral
+            let relationName = link.relation;
+            if (!this.colors[relationName]) {
+                relationName = "Neutral";
+            }
+            path.dataset.relation = relationName;
+
+            linksGroup.appendChild(path);
+        });
+
+        this.svg.appendChild(linksGroup);
+        this.svg.appendChild(nodesGroup);
+
+        // Apply filters
+        const checkContainer = document.getElementById('diplomacyCheckboxes');
+        if (checkContainer) {
+            checkContainer.querySelectorAll('input').forEach(input => {
+                this.toggleRelationVisibility(input.value, input.checked);
+            });
+        }
+    }
+
     updateGraphPositions(nodes) {
         if (!this.activeNodes || !this.activeLinks) return;
 
@@ -4269,7 +4416,8 @@ class DiplomacyView {
 
     highlightState(stateId) {
         stateId = parseInt(stateId);
-        const links = this.svg.querySelectorAll('#diplomacyLinks line');
+        // Select both lines (Force/Circle) and paths (Arc)
+        const links = this.svg.querySelectorAll('#diplomacyLinks line, #diplomacyLinks path');
         const nodes = this.svg.querySelectorAll('#diplomacyNodes g');
 
         // Dim all first
@@ -4297,8 +4445,6 @@ class DiplomacyView {
                 // Highlight Link
                 link.setAttribute("stroke-opacity", 1.0);
                 link.style.opacity = 1.0;
-                // Bring to front (visual trick: no z-index in SVG, element order matters)
-                // We could re-append, but simple opacity change usually enough.
 
                 // Highlight Neighbor Node
                 const neighborNode = this.svg.querySelector(`#diplomacyNodes g[data-id="${neighborId}"]`);
@@ -4308,7 +4454,8 @@ class DiplomacyView {
     }
 
     resetHighlight() {
-        const links = this.svg.querySelectorAll('#diplomacyLinks line');
+        // Select both lines and paths
+        const links = this.svg.querySelectorAll('#diplomacyLinks line, #diplomacyLinks path');
         const nodes = this.svg.querySelectorAll('#diplomacyNodes g');
 
         links.forEach(link => {
