@@ -3838,16 +3838,15 @@ class DiplomacyView {
     }
 
     toggleRelationVisibility(relation, isVisible) {
-        // Select all lines with this relation
-        // Note: CSS selector for data attributes needs quotes
-        const lines = this.svg.querySelectorAll(`line[data-relation="${relation}"]`);
-        lines.forEach(line => {
+        // Select all lines AND rects (matrix cells) with this relation
+        const elements = this.svg.querySelectorAll(`line[data-relation="${relation}"], rect[data-relation="${relation}"]`);
+        elements.forEach(el => {
             if (isVisible) {
-                line.style.display = 'block';
-                line.setAttribute('display', 'block'); // SVG attribute
+                el.style.display = 'block';
+                el.setAttribute('display', 'block');
             } else {
-                line.style.display = 'none';
-                line.setAttribute('display', 'none');
+                el.style.display = 'none';
+                el.setAttribute('display', 'none');
             }
         });
     }
@@ -3873,8 +3872,117 @@ class DiplomacyView {
 
         if (this.layout === 'force') {
             this.renderForce();
+        } else if (this.layout === 'matrix') {
+            this.renderMatrix();
         } else {
             this.renderCircle();
+        }
+    }
+
+    renderMatrix() {
+        const validStates = statesData.filter(s => s.id > 0);
+        const count = validStates.length;
+
+        // Config
+        const margin = { top: 120, left: 120 };
+        const size = Math.min(this.svg.clientWidth || 800, this.svg.clientHeight || 700) - Math.max(margin.top, margin.left) - 20;
+        const step = size / count;
+
+        const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        group.setAttribute("transform", `translate(${margin.left}, ${margin.top})`);
+        this.svg.appendChild(group);
+
+        // Columns (Target)
+        validStates.forEach((state, i) => {
+            const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            text.textContent = state.name;
+            text.setAttribute("x", i * step + step / 2);
+            text.setAttribute("y", -10);
+            text.setAttribute("transform", `rotate(-90, ${i * step + step / 2}, -10)`);
+            text.setAttribute("text-anchor", "start"); // After rotation, start is bottom
+            text.setAttribute("fill", "#ccc");
+            text.setAttribute("font-size", "12px");
+            text.setAttribute("font-family", "Arial, sans-serif");
+            group.appendChild(text);
+        });
+
+        // Rows (Source)
+        validStates.forEach((state, i) => {
+            const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            text.textContent = state.name;
+            text.setAttribute("x", -10);
+            text.setAttribute("y", i * step + step / 2);
+            text.setAttribute("dy", "0.35em");
+            text.setAttribute("text-anchor", "end");
+            text.setAttribute("fill", "#ccc");
+            text.setAttribute("font-size", "12px");
+            text.setAttribute("font-family", "Arial, sans-serif");
+            group.appendChild(text);
+        });
+
+        // Cells
+        validStates.forEach((rowState, i) => {
+            validStates.forEach((colState, j) => {
+                const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+                rect.setAttribute("x", j * step);
+                rect.setAttribute("y", i * step);
+                rect.setAttribute("width", step - 1);
+                rect.setAttribute("height", step - 1);
+
+                let color = "#222"; // Default empty/neutral
+                let opacity = 0.3;
+
+                if (rowState.id === colState.id) {
+                    color = "#444"; // Self
+                    opacity = 0.5;
+                    rect.setAttribute("data-relation", "Self");
+                } else {
+                    const rel = diplomacyMatrix[rowState.id] && diplomacyMatrix[rowState.id][colState.id];
+                    let relationName = rel || "Neutral";
+
+                    // If the relation is not in our known list, treat it as Neutral for consistency
+                    if (!this.colors[relationName]) {
+                        relationName = "Neutral";
+                    }
+
+                    // Always use the defined color, even for Neutral so it matches the toggle
+                    color = this.getRelationColor(relationName);
+                    // Neutrals slightly more transparent but visible
+                    opacity = relationName === "Neutral" ? 0.4 : 0.8;
+
+                    rect.setAttribute("data-relation", relationName);
+                }
+
+                rect.setAttribute("fill", color);
+                rect.setAttribute("fill-opacity", opacity);
+
+                // Interaction
+                rect.addEventListener('mouseenter', () => {
+                    rect.setAttribute("stroke", "#fff");
+                    rect.setAttribute("stroke-width", 2);
+                    // Tooltip logic could go here
+                });
+                rect.addEventListener('mouseleave', () => {
+                    rect.setAttribute("stroke", "none");
+                });
+
+                // Add simple title for hover
+                const title = document.createElementNS("http://www.w3.org/2000/svg", "title");
+                const relName = (diplomacyMatrix[rowState.id] && diplomacyMatrix[rowState.id][colState.id]) || "Neutral";
+                title.textContent = `${rowState.name} ➔ ${colState.name}: ${relName}`;
+                rect.appendChild(title);
+
+                group.appendChild(rect);
+            });
+        });
+
+        // Apply current filter visibility
+        // (Re-run toggle logic based on existing checkboxes)
+        const checkContainer = document.getElementById('diplomacyCheckboxes');
+        if (checkContainer) {
+            checkContainer.querySelectorAll('input').forEach(input => {
+                this.toggleRelationVisibility(input.value, input.checked);
+            });
         }
     }
 
@@ -4053,7 +4161,13 @@ class DiplomacyView {
             path.setAttribute("stroke-opacity", 0.6);
             path.dataset.source = link.source.id;
             path.dataset.target = link.target.id;
-            path.dataset.relation = link.relation;
+
+            // Normalize relation name for filtering
+            let relationName = link.relation;
+            if (!this.colors[relationName]) {
+                relationName = "Neutral";
+            }
+            path.dataset.relation = relationName;
             linksGroup.appendChild(path);
 
             // Store DOM ref for updates
