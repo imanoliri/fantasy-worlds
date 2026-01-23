@@ -13,6 +13,7 @@
     "adventure_mission_explore.js",
     "adventure.js",
     "interactions.js",
+    "diplomacy_view.js",
     "campaign.js",
     "battles.js",
     "campaign_military_base.js",

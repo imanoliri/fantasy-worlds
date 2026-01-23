@@ -40,11 +40,29 @@ function setMapMode(mode) {
         mapGroup.style.display = 'none';
         if (mapBtn) mapBtn.innerText = 'Map: None';
         if (typeof FactionSelectorInstance !== 'undefined') FactionSelectorInstance.hide();
+        // Hide Diplomacy Button
+        const diplomacyBtn = document.getElementById('openDiplomacyBtn');
+        if (diplomacyBtn) diplomacyBtn.classList.add('hidden');
         return;
     }
 
     // Ensure map is visible for other modes
     mapGroup.style.display = 'block';
+
+    // Toggle Diplomacy Matrix Button
+    const diplomacyBtn = document.getElementById('openDiplomacyBtn');
+    if (diplomacyBtn) {
+        if (mode === 'state') {
+            diplomacyBtn.classList.remove('hidden');
+        } else {
+            diplomacyBtn.classList.add('hidden');
+            // Also close if open
+            const overlay = document.getElementById('diplomacyMatrixOverlay');
+            if (overlay && !overlay.classList.contains('hidden')) {
+                if (window.DiplomacyViewInstance) window.DiplomacyViewInstance.close();
+            }
+        }
+    }
 
     // Toggle Faction Selector
     if (typeof FactionSelectorInstance !== 'undefined') {

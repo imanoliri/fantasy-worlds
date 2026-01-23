@@ -71,6 +71,8 @@ document.body.addEventListener('change', ({ target }) => {
     }
 });
 
+
+
 // --- Map Context Menu ---
 svg.addEventListener('contextmenu', (e) => {
     if (AdventureManager.active) {

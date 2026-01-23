@@ -6,6 +6,83 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>World: {{ map_name }}</title>
     <link rel="stylesheet" href="../map.css">
+    <style>
+        /* Diplomacy Matrix Overlay */
+        #diplomacyMatrixOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 10000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(5px);
+        }
+
+        #diplomacyGraphContainer {
+            width: 800px;
+            height: 700px;
+            position: relative;
+        }
+
+        #closeDiplomacyBtn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            z-index: 10001;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #closeDiplomacyBtn:hover {
+            background: #c0392b;
+            transform: scale(1.1);
+        }
+
+        /* Floating Diplomacy Button */
+        #openDiplomacyBtn {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: #2c3e50;
+            border: 2px solid #f1c40f;
+            color: #f1c40f;
+            font-size: 30px;
+            cursor: pointer;
+            z-index: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            transition: all 0.3s ease;
+        }
+
+        #openDiplomacyBtn.hidden {
+            display: none;
+        }
+
+        #openDiplomacyBtn:hover {
+            transform: translateX(-50%) scale(1.1);
+            background: #34495e;
+            box-shadow: 0 0 20px rgba(241, 196, 15, 0.4);
+        }
+    </style>
 </head>
 
 <body class="show-capitals show-food-trades show-gold-trades show-info-banners show-food-banners">
@@ -132,6 +209,17 @@
                 </div>
 
 
+            </div>
+
+            <!-- Diplomacy Matrix Integration -->
+            <button id="openDiplomacyBtn" class="hidden" onclick="openDiplomacyMatrix()"
+                title="View Political Matrix">🕸️</button>
+
+            <div id="diplomacyMatrixOverlay" class="hidden">
+                <button id="closeDiplomacyBtn">✖</button>
+                <div id="diplomacyGraphContainer">
+                    <svg id="diplomacyGraphSvg" width="100%" height="100%" viewBox="0 0 800 700"></svg>
+                </div>
             </div>
 
             <svg id="mapSvg" viewBox="{{ min_x-50 }} {{ min_y-50 }} {{ width }} {{ height }}"
