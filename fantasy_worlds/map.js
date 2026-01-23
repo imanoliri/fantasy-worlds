@@ -719,7 +719,9 @@ function filterTable() {
                 `.burg-ring-selection[data-id="${burgId}"]`,
                 `.burg-ring-gold[data-id="${burgId}"]`,
                 `.burg-info-badge[data-id="${burgId}"]`,
-                `.capital-crown[data-id="${burgId}"]`
+                `.capital-crown[data-id="${burgId}"]`,
+                `.siege-ring[data-id="${burgId}"]`,     // Added
+                `.diplomacy-ring[data-id="${burgId}"]`  // Added
             ];
 
             elementsToToggle.forEach(selector => {
@@ -1714,6 +1716,8 @@ class SiegeMission extends AdventureMission {
                     ring.setAttribute("stroke", "#000"); // Black
                     ring.setAttribute("stroke-width", "4");
                     ring.setAttribute("pointer-events", "none");
+                    ring.setAttribute("class", "siege-ring"); // Add Class
+                    ring.setAttribute("data-id", burg.id);   // Add ID
                     this.ringGroup.appendChild(ring);
                     this.ringGroup.style.display = 'inline';
                 }
@@ -1925,6 +1929,7 @@ class DiplomaticMission extends AdventureMission {
                     ring.setAttribute("stroke-width", "3");
                     ring.setAttribute("pointer-events", "none");
                     ring.setAttribute("class", "diplomacy-ring"); // Add class for animation
+                    ring.setAttribute("data-id", burg.id);        // Add ID
                     this.group.appendChild(ring);
                 }
             });

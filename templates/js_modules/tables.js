@@ -86,7 +86,9 @@ function filterTable() {
                 `.burg-ring-selection[data-id="${burgId}"]`,
                 `.burg-ring-gold[data-id="${burgId}"]`,
                 `.burg-info-badge[data-id="${burgId}"]`,
-                `.capital-crown[data-id="${burgId}"]`
+                `.capital-crown[data-id="${burgId}"]`,
+                `.siege-ring[data-id="${burgId}"]`,     // Added
+                `.diplomacy-ring[data-id="${burgId}"]`  // Added
             ];
 
             elementsToToggle.forEach(selector => {

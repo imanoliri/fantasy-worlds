@@ -62,6 +62,7 @@ class DiplomaticMission extends AdventureMission {
                     ring.setAttribute("stroke-width", "3");
                     ring.setAttribute("pointer-events", "none");
                     ring.setAttribute("class", "diplomacy-ring"); // Add class for animation
+                    ring.setAttribute("data-id", burg.id);        // Add ID
                     this.group.appendChild(ring);
                 }
             });

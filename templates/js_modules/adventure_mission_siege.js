@@ -184,6 +184,8 @@ class SiegeMission extends AdventureMission {
                     ring.setAttribute("stroke", "#000"); // Black
                     ring.setAttribute("stroke-width", "4");
                     ring.setAttribute("pointer-events", "none");
+                    ring.setAttribute("class", "siege-ring"); // Add Class
+                    ring.setAttribute("data-id", burg.id);   // Add ID
                     this.ringGroup.appendChild(ring);
                     this.ringGroup.style.display = 'inline';
                 }
