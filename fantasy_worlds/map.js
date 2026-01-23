@@ -5072,7 +5072,6 @@ class DiplomatCampaign extends BaseCampaign {
                     const relation = window.GameState.getRelation(prevState, currState);
                     const prevStateName = prevBurg.state_name || "Unknown State";
                     tooltip = `This state is ${relation} of the last visited ${prevStateName}`;
-                    label += " ⚔️";
                 }
             }
         }
@@ -5086,7 +5085,6 @@ class DiplomatCampaign extends BaseCampaign {
                 isDisabled = true;
                 tooltip = "Requires 50 Food and 50 Gold reserve.";
             }
-            label += " 🔒";
         }
 
         // Add Button (Use class disabled if needed, but UI improvements handled generally)
