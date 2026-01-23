@@ -83,9 +83,8 @@ class DiplomacyView {
 
         // Prepare Data
         // Filter out neutral/empty states if necessary, or just use all valid states
-        // statesData is array of objects {i, name, color, ...}
-        // statesData[0] is usually Neutral/Unclaimed, we might strip it if needed, but keeping it is fine if it has relations
-        const validStates = statesData.filter(s => s.i > 0);
+        // statesData is array of objects {id, name, color, ...}
+        const validStates = statesData.filter(s => s.id > 0);
         const count = validStates.length;
         const angleStep = (2 * Math.PI) / count;
 
@@ -93,7 +92,7 @@ class DiplomacyView {
         const nodes = validStates.map((state, index) => {
             const angle = index * angleStep - Math.PI / 2; // Start at top
             return {
-                id: state.i,
+                id: state.id,
                 name: state.name,
                 color: state.color,
                 x: this.cx + this.radius * Math.cos(angle),

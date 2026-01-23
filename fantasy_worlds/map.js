@@ -372,6 +372,21 @@ class FactionSelector {
             });
         }
 
+        const header = panel.querySelector('.faction-select-header');
+        if (header && !document.getElementById('viewDiplomacyMatrixBtn')) {
+            const btn = document.createElement('button');
+            btn.id = 'viewDiplomacyMatrixBtn';
+            btn.innerHTML = 'Relations Graph';
+            btn.className = 'adventure-btn';
+            btn.style.marginTop = '10px';
+            btn.style.width = '100%';
+            btn.style.fontSize = '0.9rem';
+            btn.style.background = '#2c3e50';
+            btn.style.border = '1px solid #7f8c8d';
+            btn.onclick = () => window.openDiplomacyMatrix();
+            header.appendChild(btn);
+        }
+
         listContainer.innerHTML = html;
         panel.classList.remove('hidden');
     }
@@ -469,9 +484,6 @@ function setMapMode(mode) {
         mapGroup.style.display = 'none';
         if (mapBtn) mapBtn.innerText = 'Map: None';
         if (typeof FactionSelectorInstance !== 'undefined') FactionSelectorInstance.hide();
-        // Hide Diplomacy Button
-        const diplomacyBtn = document.getElementById('openDiplomacyBtn');
-        if (diplomacyBtn) diplomacyBtn.classList.add('hidden');
         return;
     }
 
@@ -479,17 +491,11 @@ function setMapMode(mode) {
     mapGroup.style.display = 'block';
 
     // Toggle Diplomacy Matrix Button
-    const diplomacyBtn = document.getElementById('openDiplomacyBtn');
-    if (diplomacyBtn) {
-        if (mode === 'state') {
-            diplomacyBtn.classList.remove('hidden');
-        } else {
-            diplomacyBtn.classList.add('hidden');
-            // Also close if open
-            const overlay = document.getElementById('diplomacyMatrixOverlay');
-            if (overlay && !overlay.classList.contains('hidden')) {
-                if (window.DiplomacyViewInstance) window.DiplomacyViewInstance.close();
-            }
+    // (Button moved to Faction Selector, so we only handle overlay closing)
+    if (mode !== 'state') {
+        const overlay = document.getElementById('diplomacyMatrixOverlay');
+        if (overlay && !overlay.classList.contains('hidden')) {
+            if (window.DiplomacyViewInstance) window.DiplomacyViewInstance.close();
         }
     }
 
@@ -5415,7 +5421,7 @@ class DiplomatCampaign extends BaseCampaign {
 CampaignManager.availableCampaigns.push(DiplomatCampaign);
 
 
-
+﻿
 class HordeCampaign extends MilitaryCampaign {
     constructor() {
         super("horde_v1", "The Horde", "Lead a horde to pillage the world. Defeat 10 armies and pillage all capitals.");

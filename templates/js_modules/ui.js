@@ -282,6 +282,21 @@ class FactionSelector {
             });
         }
 
+        const header = panel.querySelector('.faction-select-header');
+        if (header && !document.getElementById('viewDiplomacyMatrixBtn')) {
+            const btn = document.createElement('button');
+            btn.id = 'viewDiplomacyMatrixBtn';
+            btn.innerHTML = 'Relations Graph';
+            btn.className = 'adventure-btn';
+            btn.style.marginTop = '10px';
+            btn.style.width = '100%';
+            btn.style.fontSize = '0.9rem';
+            btn.style.background = '#2c3e50';
+            btn.style.border = '1px solid #7f8c8d';
+            btn.onclick = () => window.openDiplomacyMatrix();
+            header.appendChild(btn);
+        }
+
         listContainer.innerHTML = html;
         panel.classList.remove('hidden');
     }
