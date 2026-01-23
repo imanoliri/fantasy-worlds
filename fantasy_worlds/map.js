@@ -3790,6 +3790,63 @@ class DiplomacyView {
         this.overlay.classList.remove('hidden');
         this.isOpen = true;
         this.render();
+        this.renderControls();
+    }
+
+    renderControls() {
+        const container = document.getElementById('diplomacyCheckboxes');
+        if (!container) return;
+        container.innerHTML = '';
+
+        // Get all unique relations actually present in the matrix?
+        // Or just use the predefined colors list? Predefined is safer and more consistent.
+        Object.keys(this.colors).forEach(relation => {
+            const color = this.colors[relation];
+
+            const label = document.createElement('label');
+            label.style.display = 'flex';
+            label.style.alignItems = 'center';
+            label.style.cursor = 'pointer';
+            label.style.fontSize = '0.9rem';
+
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.checked = true; // Default ON
+            checkbox.value = relation;
+            checkbox.style.marginRight = '10px';
+            checkbox.style.accentColor = color;
+
+            checkbox.onchange = (e) => this.toggleRelationVisibility(relation, e.target.checked);
+
+            const colorBox = document.createElement('span');
+            colorBox.style.display = 'inline-block';
+            colorBox.style.width = '12px';
+            colorBox.style.height = '12px';
+            colorBox.style.borderRadius = '2px';
+            colorBox.style.backgroundColor = color;
+            colorBox.style.marginRight = '8px';
+
+            label.appendChild(checkbox);
+            label.appendChild(colorBox);
+            label.appendChild(document.createTextNode(relation));
+
+            container.appendChild(label);
+        });
+    }
+
+    toggleRelationVisibility(relation, isVisible) {
+        // Select all lines with this relation
+        // Note: CSS selector for data attributes needs quotes
+        const lines = this.svg.querySelectorAll(`line[data-relation="${relation}"]`);
+        lines.forEach(line => {
+            if (isVisible) {
+                line.style.display = 'block';
+                line.setAttribute('display', 'block'); // SVG attribute
+            } else {
+                line.style.display = 'none';
+                line.setAttribute('display', 'none');
+            }
+        });
     }
 
     close() {

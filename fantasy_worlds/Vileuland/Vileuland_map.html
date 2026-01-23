@@ -221,8 +221,20 @@
 
             <div id="diplomacyMatrixOverlay" class="hidden">
                 <button id="closeDiplomacyBtn">✖</button>
-                <div id="diplomacyGraphContainer">
-                    <svg id="diplomacyGraphSvg" width="100%" height="100%" viewBox="0 0 800 700"></svg>
+                <div id="diplomacyContent" style="display: flex; align-items: flex-start; gap: 20px;">
+                    <div id="diplomacyGraphContainer">
+                        <svg id="diplomacyGraphSvg" width="100%" height="100%" viewBox="0 0 800 700"></svg>
+                    </div>
+                    <!-- New Sidebar Controls -->
+                    <div id="diplomacyControls"
+                        style="background: rgba(44, 62, 80, 0.9); padding: 20px; border-radius: 8px; color: white; min-width: 200px; border: 1px solid #7f8c8d; max-height: 80vh; overflow-y: auto;">
+                        <h3
+                            style="margin-top: 0; border-bottom: 1px solid #7f8c8d; padding-bottom: 10px; margin-bottom: 15px; color: #f39c12; font-family: 'Cinzel', serif;">
+                            Calculated Relations</h3>
+                        <div id="diplomacyCheckboxes" style="display: flex; flex-direction: column; gap: 10px;">
+                            <!-- Checkboxes injected by JS -->
+                        </div>
+                    </div>
                 </div>
             </div>
 
