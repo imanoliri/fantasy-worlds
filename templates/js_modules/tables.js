@@ -87,8 +87,12 @@ function filterTable() {
                 `.burg-ring-gold[data-id="${burgId}"]`,
                 `.burg-info-badge[data-id="${burgId}"]`,
                 `.capital-crown[data-id="${burgId}"]`,
-                `.siege-ring[data-id="${burgId}"]`,     // Added
-                `.diplomacy-ring[data-id="${burgId}"]`  // Added
+                `.siege-ring[data-id="${burgId}"]`,
+                `.siege-marker[data-id="${burgId}"]`,    // Added
+                `.campaign-marker[data-id="${burgId}"]`, // Added
+                `.diplomacy-ring[data-id="${burgId}"]`,     // Added
+                `.diplomacy-ring[data-id="${burgId}"]`,  // Added
+                `.campaign-highlight-ring[data-id="${burgId}"]` // Added
             ];
 
             elementsToToggle.forEach(selector => {

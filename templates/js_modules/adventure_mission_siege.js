@@ -19,6 +19,7 @@ class SiegeMission extends AdventureMission {
         siegeGroup.style.display = "none";
         siegeGroup.style.cursor = "pointer";
         siegeGroup.setAttribute("pointer-events", "all");
+        siegeGroup.setAttribute("class", "siege-marker"); // For filtering
 
         siegeGroup.onclick = (e) => {
             e.stopPropagation();
@@ -163,6 +164,7 @@ class SiegeMission extends AdventureMission {
             const sData = graphData[this.data.armyCell];
             if (sData) {
                 this.element.setAttribute("transform", `translate(${sData.p[0]}, ${sData.p[1]})`);
+                this.element.setAttribute("data-id", this.data.burgId); // Link to Burg for filtering
                 this.element.style.display = "block";
                 if (this.countElement) this.countElement.textContent = this.data.soldiers;
             } else {

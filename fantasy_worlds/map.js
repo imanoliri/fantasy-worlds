@@ -720,8 +720,12 @@ function filterTable() {
                 `.burg-ring-gold[data-id="${burgId}"]`,
                 `.burg-info-badge[data-id="${burgId}"]`,
                 `.capital-crown[data-id="${burgId}"]`,
-                `.siege-ring[data-id="${burgId}"]`,     // Added
-                `.diplomacy-ring[data-id="${burgId}"]`  // Added
+                `.siege-ring[data-id="${burgId}"]`,
+                `.siege-marker[data-id="${burgId}"]`,    // Added
+                `.campaign-marker[data-id="${burgId}"]`, // Added
+                `.diplomacy-ring[data-id="${burgId}"]`,     // Added
+                `.diplomacy-ring[data-id="${burgId}"]`,  // Added
+                `.campaign-highlight-ring[data-id="${burgId}"]` // Added
             ];
 
             elementsToToggle.forEach(selector => {
@@ -1551,6 +1555,7 @@ class SiegeMission extends AdventureMission {
         siegeGroup.style.display = "none";
         siegeGroup.style.cursor = "pointer";
         siegeGroup.setAttribute("pointer-events", "all");
+        siegeGroup.setAttribute("class", "siege-marker"); // For filtering
 
         siegeGroup.onclick = (e) => {
             e.stopPropagation();
@@ -1695,6 +1700,7 @@ class SiegeMission extends AdventureMission {
             const sData = graphData[this.data.armyCell];
             if (sData) {
                 this.element.setAttribute("transform", `translate(${sData.p[0]}, ${sData.p[1]})`);
+                this.element.setAttribute("data-id", this.data.burgId); // Link to Burg for filtering
                 this.element.style.display = "block";
                 if (this.countElement) this.countElement.textContent = this.data.soldiers;
             } else {
@@ -4747,6 +4753,15 @@ class BaseCampaign {
         ring.setAttribute("stroke-width", "3");
         ring.setAttribute("stroke-dasharray", "4,4");
 
+        // Add Class & Data-ID for Filtering
+        ring.setAttribute("class", "campaign-highlight-ring");
+        if (burg) {
+            ring.setAttribute("data-id", burg.id);
+        } else {
+            const foundBurg = burgsData.find(b => b.cell_id === cellId);
+            if (foundBurg) ring.setAttribute("data-id", foundBurg.id);
+        }
+
         // Animation
         const anim = document.createElementNS("http://www.w3.org/2000/svg", "animate");
         anim.setAttribute("attributeName", "r");
@@ -5483,6 +5498,11 @@ class MilitaryCampaign extends BaseCampaign {
         textEl.setAttribute("font-size", "14px"); // Slightly smaller for global clutter reduction
         textEl.setAttribute("style", "pointer-events: none; user-select: none; text-shadow: 1px 1px 2px black;");
         textEl.textContent = text;
+
+        // Added for filtering
+        textEl.setAttribute("class", "campaign-marker");
+        if (burg) textEl.setAttribute("data-id", burg.id);
+
         container.appendChild(textEl);
     }
 

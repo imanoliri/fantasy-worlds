@@ -171,6 +171,15 @@ class BaseCampaign {
         ring.setAttribute("stroke-width", "3");
         ring.setAttribute("stroke-dasharray", "4,4");
 
+        // Add Class & Data-ID for Filtering
+        ring.setAttribute("class", "campaign-highlight-ring");
+        if (burg) {
+            ring.setAttribute("data-id", burg.id);
+        } else {
+            const foundBurg = burgsData.find(b => b.cell_id === cellId);
+            if (foundBurg) ring.setAttribute("data-id", foundBurg.id);
+        }
+
         // Animation
         const anim = document.createElementNS("http://www.w3.org/2000/svg", "animate");
         anim.setAttribute("attributeName", "r");
