@@ -157,6 +157,8 @@ class DiplomacyView {
             this.renderMatrix();
         } else if (this.layout === 'arc') {
             this.renderArc();
+        } else if (this.layout === 'geo') {
+            this.renderGeographic();
         } else {
             this.renderCircle();
         }
@@ -290,19 +292,101 @@ class DiplomacyView {
         this.drawGraph(nodes);
     }
 
-    renderForce() {
-        const validStates = statesData.filter(s => s.id > 0);
+    getGeographicPositions() {
+        // 1. Get Map Bounds
+        const mapSvg = document.getElementById("mapSvg"); // The main map
+        let minX = 0, minY = 0, mapWidth = 1000, mapHeight = 1000;
 
-        // Initialize random positions near center
-        const nodes = validStates.map(state => ({
-            id: state.id,
-            name: state.name,
-            color: state.color,
-            x: this.cx + (Math.random() - 0.5) * 100,
-            y: this.cy + (Math.random() - 0.5) * 100,
-            vx: 0,
-            vy: 0
-        }));
+        if (mapSvg) {
+            const viewBox = mapSvg.getAttribute("viewBox").split(" ").map(Number);
+            if (viewBox.length === 4) {
+                minX = viewBox[0];
+                minY = viewBox[1];
+                mapWidth = viewBox[2];
+                mapHeight = viewBox[3];
+            }
+        }
+
+        // 2. Helper to get state center from DOM
+        const getStateCenter = (stateId) => {
+            // Find all paths for this state
+            const paths = document.querySelectorAll(`#mapSvg path[data-state-id="${stateId}"]`);
+            if (!paths || paths.length === 0) return null;
+
+            let minBx = Infinity, minBy = Infinity, maxBx = -Infinity, maxBy = -Infinity;
+            let count = 0;
+
+            paths.forEach(p => {
+                if (p.getBBox) {
+                    const box = p.getBBox();
+                    minBx = Math.min(minBx, box.x);
+                    minBy = Math.min(minBy, box.y);
+                    maxBx = Math.max(maxBx, box.x + box.width);
+                    maxBy = Math.max(maxBy, box.y + box.height);
+                    count++;
+                }
+            });
+
+            if (count === 0) return null;
+
+            return {
+                x: minBx + (maxBx - minBx) / 2,
+                y: minBy + (maxBy - minBy) / 2
+            };
+        };
+
+        const validStates = statesData.filter(s => s.id > 0);
+        return validStates.map(state => {
+            let startX = this.cx + (Math.random() - 0.5) * 100;
+            let startY = this.cy + (Math.random() - 0.5) * 100;
+
+            const center = getStateCenter(state.id);
+            if (center) {
+                // Map from World Space to Graph Space (with some padding)
+                const padding = 50;
+                const graphW = (this.svg.clientWidth || 800) - 2 * padding;
+                const graphH = (this.svg.clientHeight || 700) - 2 * padding;
+
+                const normX = (center.x - minX) / mapWidth;
+                const normY = (center.y - minY) / mapHeight;
+
+                startX = padding + normX * graphW;
+                startY = padding + normY * graphH;
+            }
+
+            return {
+                id: state.id,
+                name: state.name,
+                color: state.color,
+                x: startX,
+                y: startY,
+                vx: 0,
+                vy: 0
+            };
+        });
+    }
+
+    renderGeographic() {
+        const nodes = this.getGeographicPositions();
+
+        // Links
+        const links = [];
+        nodes.forEach((nodeA, i) => {
+            for (let j = i + 1; j < nodes.length; j++) {
+                const nodeB = nodes[j];
+                const rel = diplomacyMatrix[nodeA.id] && diplomacyMatrix[nodeA.id][nodeB.id];
+                if (rel && rel !== "Neutral") {
+                    links.push({ source: nodeA, target: nodeB, relation: rel });
+                }
+            }
+        });
+
+        this.drawGraph(nodes, links);
+    }
+
+    renderForce() {
+        // Initialize positions based on map coordinates
+        const nodes = this.getGeographicPositions();
 
         // Links Data needed for physics
         const links = [];
