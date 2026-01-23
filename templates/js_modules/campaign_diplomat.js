@@ -116,15 +116,8 @@ class DiplomatCampaign extends BaseCampaign {
         let tooltip = "Complete diplomatic mission (Costs 5 💰)";
         let label = "Diplomatic Mission (5 💰)";
 
-        // Constraint A: Resources
-        if (context.party.food < 50 || context.party.gold < 50) {
-            isDisabled = true;
-            tooltip = "Requires 50 Food and 50 Gold reserve.";
-            label += " 🔒";
-        }
-
-        // Constraint B: Enemy State
-        if (!isDisabled && this.previousBurgId !== null) {
+        // Constraint A: Enemy State (Priority)
+        if (this.previousBurgId !== null) {
             const prevBurg = burgsData.find(b => b.id === this.previousBurgId);
             if (prevBurg) {
                 const prevState = prevBurg.state_id !== undefined ? prevBurg.state_id : prevBurg.state;
@@ -133,10 +126,25 @@ class DiplomatCampaign extends BaseCampaign {
                 // Check Diplomacy
                 if (window.GameState && window.GameState.isStrictEnemy(prevState, currState)) {
                     isDisabled = true;
-                    tooltip = `Cannot negotiate! You arrived from ${prevBurg.name} (${pack.states[prevState].name}), an Enemy state.`;
+                    // Safe dynamic tooltip
+                    const relation = window.GameState.getRelation(prevState, currState);
+                    const prevStateName = prevBurg.state_name || "Unknown State";
+                    tooltip = `This state is ${relation} of the last visited ${prevStateName}`;
                     label += " ⚔️";
                 }
             }
+        }
+
+        // Constraint B: Resources
+        if (context.party.food < 50 || context.party.gold < 50) {
+            if (isDisabled) {
+                // Already disabled by Enemy, append info
+                tooltip += " (Also requires 50 Food and 50 Gold reserve)";
+            } else {
+                isDisabled = true;
+                tooltip = "Requires 50 Food and 50 Gold reserve.";
+            }
+            label += " 🔒";
         }
 
         // Add Button (Use class disabled if needed, but UI improvements handled generally)
