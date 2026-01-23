@@ -3563,6 +3563,28 @@ document.body.addEventListener('mousemove', (e) => {
             content = `<strong>Biome</strong><br>${d.biome}`;
         } else if (mode === 'state') {
             content = `<strong>State</strong><br>${d.state}`;
+
+            // Show relationship if a state is selected in Faction Selector
+            if (typeof FactionSelectorInstance !== 'undefined') {
+                const activeOption = document.querySelector('input[name="warFactionSelect"]:checked');
+                if (activeOption) {
+                    const selectedStateId = parseInt(activeOption.value);
+                    const hoveredStateId = parseInt(d.stateId); // Use data-state-id
+
+                    if (!isNaN(selectedStateId) && selectedStateId >= 0 && !isNaN(hoveredStateId) && selectedStateId !== hoveredStateId) {
+                        // Calculate Relation
+                        let relation = "Unknown";
+                        if (window.GameState) {
+                            relation = window.GameState.getRelation(selectedStateId, hoveredStateId);
+                        } else if (window.diplomacyMatrix && diplomacyMatrix[selectedStateId]) {
+                            relation = diplomacyMatrix[selectedStateId][hoveredStateId] || "Unknown";
+                        }
+
+                        // Add to tooltip
+                        content += `<br>Relation: ${relation}`;
+                    }
+                }
+            }
         } else if (mode === 'heightmap') {
             content = `<strong>Height</strong><br>${d.height}`;
         } else if (mode === 'temperature') {
