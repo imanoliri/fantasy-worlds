@@ -713,27 +713,12 @@ function filterTable() {
                 visibleBurgIds.add(burgId);
             }
 
-            // 3. Toggle Dependent Elements (Dot, Rings)
-            const elementsToToggle = [
-                `.burg-dot[data-id="${burgId}"]`,
-                `.burg-ring-selection[data-id="${burgId}"]`,
-                `.burg-ring-gold[data-id="${burgId}"]`,
-                `.burg-info-badge[data-id="${burgId}"]`,
-                `.capital-crown[data-id="${burgId}"]`,
-                `.siege-ring[data-id="${burgId}"]`,
-                `.siege-marker[data-id="${burgId}"]`,    // Added
-                `.campaign-marker[data-id="${burgId}"]`, // Added
-                `.diplomacy-ring[data-id="${burgId}"]`,     // Added
-                `.diplomacy-ring[data-id="${burgId}"]`,  // Added
-                `.campaign-highlight-ring[data-id="${burgId}"]` // Added
-            ];
-
-            elementsToToggle.forEach(selector => {
-                const els = document.querySelectorAll(selector);
-                els.forEach(el => {
-                    if (isVisible) el.classList.remove('hidden');
-                    else el.classList.add('hidden');
-                });
+            // 3. Toggle Dependent Elements (Generic Catch-All for Map Visuals)
+            // Scoped to #mapSvg to avoid affecting the table row or other UI
+            const els = document.querySelectorAll(`#mapSvg [data-id="${burgId}"]`);
+            els.forEach(el => {
+                if (isVisible) el.classList.remove('hidden');
+                else el.classList.add('hidden');
             });
         }
     }
