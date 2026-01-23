@@ -4963,7 +4963,7 @@ class DiplomatCampaign extends BaseCampaign {
         let currentBurgState = null;
         if (this.currentBurgId) {
             const cur = burgsData.find(b => b.id === this.currentBurgId);
-            if (cur) currentBurgState = cur.state;
+            if (cur) currentBurgState = cur.state_id !== undefined ? cur.state_id : cur.state;
         }
 
         capitals.forEach(c => {
@@ -4974,7 +4974,7 @@ class DiplomatCampaign extends BaseCampaign {
 
             // Check if Restricted (Enemy)
             if (currentBurgState !== null) {
-                const targetState = c.state;
+                const targetState = c.state_id !== undefined ? c.state_id : c.state;
                 if (window.GameState && window.GameState.isStrictEnemy(currentBurgState, targetState)) {
                     color = "#FF0000"; // Red (Restricted)
                 }
@@ -5069,8 +5069,8 @@ class DiplomatCampaign extends BaseCampaign {
         if (!isDisabled && this.previousBurgId !== null) {
             const prevBurg = burgsData.find(b => b.id === this.previousBurgId);
             if (prevBurg) {
-                const prevState = prevBurg.state;
-                const currState = context.burg.state;
+                const prevState = prevBurg.state_id !== undefined ? prevBurg.state_id : prevBurg.state;
+                const currState = context.burg.state_id !== undefined ? context.burg.state_id : context.burg.state;
 
                 // Check Diplomacy
                 if (window.GameState && window.GameState.isStrictEnemy(prevState, currState)) {
