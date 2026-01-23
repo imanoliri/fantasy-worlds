@@ -10,6 +10,84 @@ let highlightedIds = [];
 // let stateNameIdMap = [];
 
 
+class GameState {
+    constructor() {
+        this.events = null; // Will bind to AdventureManager.events or own system
+    }
+
+    init() {
+        console.log("GameState Initialized");
+    }
+
+    // --- Data Accessors ---
+
+    getBurg(id) {
+        if (!window.burgsData) return null;
+        return window.burgsData.find(b => b.id === id);
+    }
+
+    getState(id) {
+        if (!window.statesData) return null;
+        return window.statesData.find(s => s.id === id);
+    }
+
+    // --- Diplomacy Helpers ---
+
+    getDiplomacyMatrix() {
+        return window.diplomacyMatrix || null;
+    }
+
+    getRelation(stateIdA, stateIdB) {
+        const matrix = this.getDiplomacyMatrix();
+        if (!matrix || !matrix[stateIdA]) return "Unknown";
+
+        // Handle array vs object matrix structure (just in case)
+        const rel = matrix[stateIdA][stateIdB];
+        return rel || "Unknown";
+    }
+
+    isEnemy(stateIdA, stateIdB) {
+        const rel = this.getRelation(stateIdA, stateIdB);
+        return rel === "Enemy" || rel === "War" || rel === "Rival";
+        // Added Rival as potentially hostile? 
+        // campaign_diplomat used: rel === "Enemy" || rel === "War"
+        // Let's stick to strict Enemy/War for now to match logic.
+    }
+
+    isStrictEnemy(stateIdA, stateIdB) {
+        const rel = this.getRelation(stateIdA, stateIdB);
+        // Include Rival as it is colored Red on map
+        return rel === "Enemy" || rel === "War" || rel === "Rival";
+    }
+
+    // --- Navigation / Restrictions ---
+
+    canVisitFrom(fromBurgId, toBurgId) {
+        if (!fromBurgId || !toBurgId) return { allowed: true };
+
+        const fromBurg = this.getBurg(fromBurgId);
+        const toBurg = this.getBurg(toBurgId);
+
+        if (!fromBurg || !toBurg) return { allowed: true };
+
+        // Diplomatic check
+        if (this.isStrictEnemy(fromBurg.state, toBurg.state)) {
+            return {
+                allowed: false,
+                reason: "Political Enemy",
+                details: `Cannot travel from ${fromBurg.name} (${pack.states[fromBurg.state].name}) to ${toBurg.name} due to hostile relations.`
+            };
+        }
+
+        return { allowed: true };
+    }
+}
+
+// Global Instance
+window.GameState = new GameState();
+window.GameState.init();
+
+
 /* Dropdown Logic */
 function toggleDropdown(id) {
     document.getElementById(id).classList.toggle("show");
@@ -2088,6 +2166,7 @@ const AdventureManager = {
             };
 
             this.listeners[event].push(listener);
+            console.log(`[Event] Registered '${event}' listener ID='${listener.id}' Priority=${listener.priority}`);
             this.sortListeners(event);
         },
         off(event, callback) {
@@ -2096,9 +2175,11 @@ const AdventureManager = {
         },
         emit(event, data) {
             if (this.listeners[event]) {
-                // Return value? Some events might use return values (chain of responsibility)
-                // For now, just execute.
-                this.listeners[event].forEach(l => l.callback(data));
+                console.log(`[Event] Emitting '${event}' to ${this.listeners[event].length} listeners`);
+                this.listeners[event].forEach(l => {
+                    console.log(`  -> Invoking listener ID='${l.id}' Priority=${l.priority}`);
+                    l.callback(data);
+                });
             }
         },
         clear() {
@@ -2936,8 +3017,16 @@ const AdventureManager = {
         let actionsHtml = context.buttons.map(btn => {
             const style = btn.style ? `style="${btn.style}"` : '';
             const cls = btn.class || 'btn-recruit'; // default class
-            const disabled = btn.disabled ? 'disabled' : '';
-            return `<button class="${cls}" ${style} onclick="${btn.onClick}" title="${btn.title}" ${disabled}>${btn.label}</button>`;
+            const disabledClass = btn.disabled ? 'disabled' : '';
+            // Use data-tooltip for custom system, title as fallback
+            const tooltipAttr = `data-tooltip="${btn.title}" title="${btn.title}"`;
+
+            // Wrap onclick to prevent execution if disabled
+            const onClickHandler = btn.disabled ?
+                "event.stopImmediatePropagation(); return false;" :
+                btn.onClick;
+
+            return `<button class="${cls} ${disabledClass}" ${style} onclick="${onClickHandler}" ${tooltipAttr}>${btn.label}</button>`;
         }).join('\n');
 
         // Always add Leave button at the end
@@ -3625,10 +3714,10 @@ class BaseCampaign {
             AdventureManager.events.on('missionStart', this.onMissionStart);
             AdventureManager.events.on('missionComplete', this.onMissionComplete);
 
-            // Register with Priority 10 (Standard Campaign Logic)
+            // Register with Priority -100 (Ensure it runs FIRST)
             AdventureManager.events.on('burgPopupOpened', this.onBurgPopupOpened, {
                 id: 'campaign_base',
-                priority: 10
+                priority: -100
             });
 
             AdventureManager.events.on('beforeBurgPopup', this.onBeforeBurgPopup);
@@ -4391,7 +4480,7 @@ class MilitaryCampaign extends BaseCampaign {
 
     shouldPreserveButton(btnId) {
         // List of IDs to keep even when hostile
-        const keep = ['leave_ship', 'rent_ship'];
+        const keep = ['leave_ship', 'rent_ship', 'fight_siege'];
         return keep.includes(btnId);
     }
 
@@ -4843,6 +4932,36 @@ class DiplomatCampaign extends BaseCampaign {
         this.addObjective("obj_diplomat", "Complete Diplomat Missions (0/?)", "diplomacy", () => false);
     }
 
+    // Helper: Update Map Visuals (Red/Gold Rings)
+    updateMapHighlights() {
+        this.clearHighlights();
+
+        const capitals = burgsData.filter(b => b.is_capital);
+
+        let currentBurgState = null;
+        if (this.currentBurgId) {
+            const cur = burgsData.find(b => b.id === this.currentBurgId);
+            if (cur) currentBurgState = cur.state;
+        }
+
+        capitals.forEach(c => {
+            // Skip Visited (No Ring = Done)
+            if (this.visitedCapitals.has(c.id)) return;
+
+            let color = "#FFD700"; // Default: Gold (Available)
+
+            // Check if Restricted (Enemy)
+            if (currentBurgState !== null) {
+                const targetState = c.state;
+                if (window.GameState && window.GameState.isStrictEnemy(currentBurgState, targetState)) {
+                    color = "#FF0000"; // Red (Restricted)
+                }
+            }
+
+            this.highlightCell(c.cell_id, color);
+        });
+    }
+
     onStart() {
         super.onStart();
 
@@ -4853,10 +4972,11 @@ class DiplomatCampaign extends BaseCampaign {
             this.totalCapitals = capitals.length;
             this.updateObjectiveText();
 
-            // Highlight all unvisited capitals
-            capitals.forEach(c => this.highlightCell(c.cell_id, "#FFD700")); // Gold highlight
+            // Initial Highlight
+            this.updateMapHighlights();
         };
 
+        // Delay slightly to ensure data loaded if not already? Usually onStart is safe.
         initCampaignData();
     }
 
@@ -4881,14 +5001,22 @@ class DiplomatCampaign extends BaseCampaign {
 
     onBurgPopupOpened(context) {
         // 1. Navigation Tracking
-        // Only update if it's a NEW burg visited
+        let updateHighlights = false;
         if (this.currentBurgId !== context.burg.id) {
             this.previousBurgId = this.currentBurgId;
             this.currentBurgId = context.burg.id;
+            updateHighlights = true;
         }
 
         // 2. Logic for Capital
-        if (!context.burg.is_capital) return;
+        if (!context.burg.is_capital) {
+            // Still update highlights if we moved to a non-capital (it changes the origin state)
+            if (updateHighlights) this.updateMapHighlights();
+            return;
+        }
+
+        // Update highlights now that currentBurgId is set
+        if (updateHighlights) this.updateMapHighlights();
 
         // If already visited, maybe show a "Completed" indicator?
         if (this.visitedCapitals.has(context.burg.id)) {
@@ -4923,21 +5051,15 @@ class DiplomatCampaign extends BaseCampaign {
                 const currState = context.burg.state;
 
                 // Check Diplomacy
-                // data is in 'diplomacyMatrix' (global from map.js)
-                // Check Diplomacy
-                // data is in 'diplomacyMatrix' (global from map.js)
-                if (window.diplomacyMatrix && diplomacyMatrix[prevState]) {
-                    const relation = diplomacyMatrix[prevState][currState] || "Unknown";
-                    if (relation === "Enemy" || relation === "War") {
-                        isDisabled = true;
-                        tooltip = `Cannot negotiate! You arrived from ${prevBurg.name} (${pack.states[prevState].name}), an Enemy state.`;
-                        label += " ⚔️";
-                    }
+                if (window.GameState && window.GameState.isStrictEnemy(prevState, currState)) {
+                    isDisabled = true;
+                    tooltip = `Cannot negotiate! You arrived from ${prevBurg.name} (${pack.states[prevState].name}), an Enemy state.`;
+                    label += " ⚔️";
                 }
             }
         }
 
-        // Add Button
+        // Add Button (Use class disabled if needed, but UI improvements handled generally)
         context.buttons.push({
             id: 'diplomacy_mission',
             label: label,
@@ -4963,17 +5085,8 @@ class DiplomatCampaign extends BaseCampaign {
         // Floating text
         const burg = burgsData.find(b => b.id === burgId);
         if (burg) {
-            // Remove highlight
-            // Need to redraw highlights for all EXCEPT visited? Or just clear invalid ones?
-            // Since 'highlightCell' adds a generic circle, I can't easily remove just one without ID.
-            // Simplest: Clear all and redraw unvisited.
-            this.clearHighlights();
-            const capitals = burgsData.filter(b => b.is_capital);
-            capitals.forEach(c => {
-                if (!this.visitedCapitals.has(c.id)) {
-                    this.highlightCell(c.cell_id, "#FFD700");
-                }
-            });
+            // Update Highlights (Redraws filtering out visited)
+            this.updateMapHighlights();
 
             // Show text
             AdventureManager.showFloatingText("-5 💰", burg.x, burg.y, "#f1c40f");

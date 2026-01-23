@@ -909,8 +909,16 @@ const AdventureManager = {
         let actionsHtml = context.buttons.map(btn => {
             const style = btn.style ? `style="${btn.style}"` : '';
             const cls = btn.class || 'btn-recruit'; // default class
-            const disabled = btn.disabled ? 'disabled' : '';
-            return `<button class="${cls}" ${style} onclick="${btn.onClick}" title="${btn.title}" ${disabled}>${btn.label}</button>`;
+            const disabledClass = btn.disabled ? 'disabled' : '';
+            // Use data-tooltip for custom system, title as fallback
+            const tooltipAttr = `data-tooltip="${btn.title}" title="${btn.title}"`;
+
+            // Wrap onclick to prevent execution if disabled
+            const onClickHandler = btn.disabled ?
+                "event.stopImmediatePropagation(); return false;" :
+                btn.onClick;
+
+            return `<button class="${cls} ${disabledClass}" ${style} onclick="${onClickHandler}" ${tooltipAttr}>${btn.label}</button>`;
         }).join('\n');
 
         // Always add Leave button at the end

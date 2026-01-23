@@ -1,5 +1,6 @@
 [
     "globals.js",
+    "game_state.js",
     "ui.js",
     "map_render.js",
     "tables.js",
