@@ -254,6 +254,24 @@
                         style="background: rgba(44, 62, 80, 0.9); padding: 20px; border-radius: 8px; color: white; min-width: 200px; border: 1px solid #7f8c8d; max-height: 80vh; overflow-y: auto;">
                         <h3
                             style="margin-top: 0; border-bottom: 1px solid #7f8c8d; padding-bottom: 10px; margin-bottom: 15px; color: #f39c12; font-family: 'Cinzel', serif;">
+                            Layout</h3>
+                        <div style="margin-bottom: 20px; display: flex; gap: 15px;">
+                            <label style="cursor: pointer; display: flex; align-items: center;">
+                                <input type="radio" name="diplomacyLayout" value="circle" checked
+                                    onchange="window.DiplomacyViewInstance.setLayout('circle')"
+                                    style="margin-right: 5px;">
+                                Circle
+                            </label>
+                            <label style="cursor: pointer; display: flex; align-items: center;">
+                                <input type="radio" name="diplomacyLayout" value="force"
+                                    onchange="window.DiplomacyViewInstance.setLayout('force')"
+                                    style="margin-right: 5px;">
+                                Force
+                            </label>
+                        </div>
+
+                        <h3
+                            style="margin-top: 0; border-bottom: 1px solid #7f8c8d; padding-bottom: 10px; margin-bottom: 15px; color: #f39c12; font-family: 'Cinzel', serif;">
                             Calculated Relations</h3>
                         <div id="diplomacyCheckboxes" style="display: flex; flex-direction: column; gap: 10px;">
                             <!-- Checkboxes injected by JS -->

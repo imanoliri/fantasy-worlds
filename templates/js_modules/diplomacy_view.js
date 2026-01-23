@@ -5,6 +5,8 @@ class DiplomacyView {
         this.container = document.getElementById('diplomacyGraphContainer');
         this.closeBtn = document.getElementById('closeDiplomacyBtn');
         this.isOpen = false;
+        this.layout = 'circle'; // Default
+        this.simulationId = null;
 
         // Configuration
         this.radius = 300; // Radius of the circle
@@ -42,15 +44,11 @@ class DiplomacyView {
         if (this.closeBtn) {
             this.closeBtn.addEventListener('click', () => this.close());
         }
-
-        // Close on clicking background
         if (this.overlay) {
             this.overlay.addEventListener('click', (e) => {
                 if (e.target === this.overlay) this.close();
             });
         }
-
-        // Add keyboard listener for Escape
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape' && this.isOpen) this.close();
         });
@@ -62,6 +60,11 @@ class DiplomacyView {
         this.isOpen = true;
         this.render();
         this.renderControls();
+    }
+
+    setLayout(mode) {
+        this.layout = mode;
+        if (this.isOpen) this.render();
     }
 
     renderControls() {
@@ -124,6 +127,7 @@ class DiplomacyView {
         if (!this.overlay) return;
         this.overlay.classList.add('hidden');
         this.isOpen = false;
+        if (this.simulationId) cancelAnimationFrame(this.simulationId);
     }
 
     getRelationColor(relation) {
@@ -135,19 +139,24 @@ class DiplomacyView {
     }
 
     render() {
-        // Clear previous
-        this.svg.innerHTML = '';
+        if (this.simulationId) cancelAnimationFrame(this.simulationId);
+        this.svg.innerHTML = ''; // Clear
 
+        if (this.layout === 'force') {
+            this.renderForce();
+        } else {
+            this.renderCircle();
+        }
+    }
+
+    renderCircle() {
         // Prepare Data
-        // Filter out neutral/empty states if necessary, or just use all valid states
-        // statesData is array of objects {id, name, color, ...}
         const validStates = statesData.filter(s => s.id > 0);
         const count = validStates.length;
         const angleStep = (2 * Math.PI) / count;
 
-        // Calculate Nodes
         const nodes = validStates.map((state, index) => {
-            const angle = index * angleStep - Math.PI / 2; // Start at top
+            const angle = index * angleStep - Math.PI / 2;
             return {
                 id: state.id,
                 name: state.name,
@@ -158,43 +167,168 @@ class DiplomacyView {
             };
         });
 
-        // Create Links Group (Background)
+        this.drawGraph(nodes);
+    }
+
+    renderForce() {
+        const validStates = statesData.filter(s => s.id > 0);
+
+        // Initialize random positions near center
+        const nodes = validStates.map(state => ({
+            id: state.id,
+            name: state.name,
+            color: state.color,
+            x: this.cx + (Math.random() - 0.5) * 100,
+            y: this.cy + (Math.random() - 0.5) * 100,
+            vx: 0,
+            vy: 0
+        }));
+
+        // Links Data needed for physics
+        const links = [];
+        nodes.forEach((nodeA, i) => {
+            for (let j = i + 1; j < nodes.length; j++) {
+                const nodeB = nodes[j];
+                const rel = diplomacyMatrix[nodeA.id] && diplomacyMatrix[nodeA.id][nodeB.id];
+                if (rel && rel !== "Neutral") {
+                    links.push({ source: nodeA, target: nodeB, relation: rel });
+                }
+            }
+        });
+
+        // Initial Draw
+        this.drawGraph(nodes, links);
+
+        // Physics Loop
+        const runSimulation = () => {
+            if (!this.isOpen || this.layout !== 'force') return;
+
+            // Physics Constants
+            const repulsion = 15000; // Stronger push apart
+            const springLength = 200; // Longer connections
+            const springStrength = 0.05;
+            const centerGravity = 0.005; // Weaker gravity to allow spreading
+            const maxVelocity = 10;
+
+            // 1. Repulsion (Nodes push apart)
+            for (let i = 0; i < nodes.length; i++) {
+                for (let j = i + 1; j < nodes.length; j++) {
+                    const a = nodes[i];
+                    const b = nodes[j];
+                    const dx = a.x - b.x;
+                    const dy = a.y - b.y;
+                    let distSq = dx * dx + dy * dy;
+                    if (distSq === 0) {
+                        distSq = 0.1; // Avoid division by zero
+                        a.x += Math.random();
+                    }
+
+                    const dist = Math.sqrt(distSq);
+                    const force = repulsion / distSq;
+
+                    const fx = (dx / dist) * force;
+                    const fy = (dy / dist) * force;
+
+                    a.vx += fx;
+                    a.vy += fy;
+                    b.vx -= fx;
+                    b.vy -= fy;
+                }
+            }
+
+            // 2. Attraction (Links pull together)
+            links.forEach(link => {
+                const a = link.source;
+                const b = link.target;
+                const dx = b.x - a.x;
+                const dy = b.y - a.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+
+                // Spring force
+                const force = (dist - springLength) * springStrength;
+                const fx = (dx / dist) * force;
+                const fy = (dy / dist) * force;
+
+                a.vx += fx;
+                a.vy += fy;
+                b.vx -= fx;
+                b.vy -= fy;
+            });
+
+            // 3. Center Gravity (Keep them on screen)
+            nodes.forEach(node => {
+                const dx = this.cx - node.x;
+                const dy = this.cy - node.y;
+                node.vx += dx * centerGravity;
+                node.vy += dy * centerGravity;
+
+                // 4. Update Position & Damping
+                node.vx *= 0.9; // Friction
+                node.vy *= 0.9;
+
+                // Limit speed
+                const speed = Math.sqrt(node.vx * node.vx + node.vy * node.vy);
+                if (speed > maxVelocity) {
+                    node.vx = (node.vx / speed) * maxVelocity;
+                    node.vy = (node.vy / speed) * maxVelocity;
+                }
+
+                node.x += node.vx;
+                node.y += node.vy;
+            });
+
+            // Update DOM
+            this.updateGraphPositions(nodes);
+
+            this.simulationId = requestAnimationFrame(runSimulation);
+        };
+
+        this.simulationId = requestAnimationFrame(runSimulation);
+    }
+
+    drawGraph(nodes, precalcLinks = null) {
+        // Create Groups
         const linksGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
         linksGroup.id = "diplomacyLinks";
         this.svg.appendChild(linksGroup);
 
-        // Create Nodes Group (Foreground)
         const nodesGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
         nodesGroup.id = "diplomacyNodes";
         this.svg.appendChild(nodesGroup);
 
         // Draw Links
-        // We iterate through every pair once
-        nodes.forEach((nodeA, i) => {
-            for (let j = i + 1; j < nodes.length; j++) {
-                const nodeB = nodes[j];
-                const rel = diplomacyMatrix[nodeA.id] && diplomacyMatrix[nodeA.id][nodeB.id];
-
-                if (rel && rel !== "Neutral") { // Only draw non-neutral lines to reduce clutter? Or draw all?
-                    // User request said "connect with lines with the color of their diplomatic relationship"
-                    // Usually drawing all Neutral lines is too messy. Let's skip Neutral for visual clarity unless requested otherwise.
-                    // Actually, "Greys the unrelated states" implies we might want to see them.
-                    // But usually in these graphs, no line = neutral.
-
-                    const path = document.createElementNS("http://www.w3.org/2000/svg", "line");
-                    path.setAttribute("x1", nodeA.x);
-                    path.setAttribute("y1", nodeA.y);
-                    path.setAttribute("x2", nodeB.x);
-                    path.setAttribute("y2", nodeB.y);
-                    path.setAttribute("stroke", this.getRelationColor(rel));
-                    path.setAttribute("stroke-width", this.getStrokeWidth(rel));
-                    path.setAttribute("stroke-opacity", 0.6);
-                    path.dataset.source = nodeA.id;
-                    path.dataset.target = nodeB.id;
-                    path.dataset.relation = rel;
-                    linksGroup.appendChild(path);
+        // Logic similar to before, but we need to store references if animating
+        const links = precalcLinks || [];
+        if (!precalcLinks) {
+            nodes.forEach((nodeA, i) => {
+                for (let j = i + 1; j < nodes.length; j++) {
+                    const nodeB = nodes[j];
+                    const rel = diplomacyMatrix[nodeA.id] && diplomacyMatrix[nodeA.id][nodeB.id];
+                    if (rel && rel !== "Neutral") {
+                        links.push({ source: nodeA, target: nodeB, relation: rel });
+                    }
                 }
-            }
+            });
+        }
+
+        links.forEach(link => {
+            const path = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            // If circle, simple check. If force, objects.
+            const x1 = link.source.x || link.source.x;
+            path.setAttribute("x1", link.source.x);
+            path.setAttribute("y1", link.source.y);
+            path.setAttribute("x2", link.target.x);
+            path.setAttribute("y2", link.target.y);
+            path.setAttribute("stroke", this.getRelationColor(link.relation));
+            path.setAttribute("stroke-width", this.getStrokeWidth(link.relation));
+            path.setAttribute("stroke-opacity", 0.6);
+            path.dataset.source = link.source.id;
+            path.dataset.target = link.target.id;
+            path.dataset.relation = link.relation;
+            linksGroup.appendChild(path);
+
+            // Store DOM ref for updates
+            link.domElement = path;
         });
 
         // Draw Nodes
@@ -203,14 +337,14 @@ class DiplomacyView {
             g.dataset.id = node.id;
             g.style.cursor = "pointer";
 
-            // Interaction Events
+            // Interaction
             g.addEventListener('mouseenter', () => this.highlightState(node.id));
             g.addEventListener('mouseleave', () => this.resetHighlight());
 
             // Circle
             const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-            circle.setAttribute("cx", node.x);
-            circle.setAttribute("cy", node.y);
+            circle.setAttribute("cx", 0); // Use translation for group
+            circle.setAttribute("cy", 0);
             circle.setAttribute("r", this.nodeRadius);
             circle.setAttribute("fill", node.color);
             circle.setAttribute("stroke", "#333");
@@ -219,30 +353,55 @@ class DiplomacyView {
 
             // Label
             const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-            // Position text outside the circle
-            const labelDist = this.nodeRadius + 15;
-            const tx = node.x + labelDist * Math.cos(node.angle);
-            const ty = node.y + labelDist * Math.sin(node.angle);
-
-            text.setAttribute("x", tx);
-            text.setAttribute("y", ty);
-            text.setAttribute("dy", "0.35em");
-
-            // Align text based on angle to keep it readable
-            if (Math.cos(node.angle) > 0) {
-                text.setAttribute("text-anchor", "start");
-            } else {
-                text.setAttribute("text-anchor", "end");
-            }
-
             text.textContent = node.name;
-            text.setAttribute("fill", "#ccc"); // Light text for dark mode
+            text.setAttribute("fill", "#ccc");
             text.setAttribute("font-size", "14px");
             text.setAttribute("font-family", "Arial, sans-serif");
-            text.style.pointerEvents = "none"; // Let mouse pass through to group/circle
+            text.style.pointerEvents = "none";
+
+            // For circle layout, we had angled labels. For Force, centered or top is fine.
+            // Let's standardise: Text below node
+            text.setAttribute("x", 0);
+            text.setAttribute("y", this.nodeRadius + 15);
+            text.setAttribute("text-anchor", "middle");
             g.appendChild(text);
 
+            g.setAttribute("transform", `translate(${node.x}, ${node.y})`);
             nodesGroup.appendChild(g);
+
+            node.domElement = g;
+        });
+
+        // Store references for animation
+        this.activeNodes = nodes;
+        this.activeLinks = links;
+
+        // Apply current filter visibility
+        // (Re-run toggle logic based on existing checkboxes)
+        const checkContainer = document.getElementById('diplomacyCheckboxes');
+        if (checkContainer) {
+            checkContainer.querySelectorAll('input').forEach(input => {
+                this.toggleRelationVisibility(input.value, input.checked);
+            });
+        }
+    }
+
+    updateGraphPositions(nodes) {
+        if (!this.activeNodes || !this.activeLinks) return;
+
+        this.activeNodes.forEach(node => {
+            if (node.domElement) {
+                node.domElement.setAttribute("transform", `translate(${node.x}, ${node.y})`);
+            }
+        });
+
+        this.activeLinks.forEach(link => {
+            if (link.domElement) {
+                link.domElement.setAttribute("x1", link.source.x);
+                link.domElement.setAttribute("y1", link.source.y);
+                link.domElement.setAttribute("x2", link.target.x);
+                link.domElement.setAttribute("y2", link.target.y);
+            }
         });
     }
 
