@@ -2560,6 +2560,11 @@ const AdventureManager = {
         const cellId = this.getTargetCellId(target);
 
         if (cellId !== null) {
+            if (cellId === this.party.cell) {
+                this.checkForArrival();
+                return;
+            }
+
             const isWater = graphData[cellId].b === marineBiomeId;
 
             if (!this.party.onShip && isWater) {
