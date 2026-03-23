@@ -580,6 +580,18 @@ if __name__ == "__main__":
                 states_file = os.path.join(map_dir, f"{safe_name}_states.json")
                 save_json(states, states_file)
 
+                # Export Diplomacy Matrix
+                diplomacy_matrix = []
+                if isinstance(states, list):
+                    for s in states:
+                        if isinstance(s, dict):
+                            diplomacy_matrix.append(s.get('diplomacy', []))
+                        else:
+                             diplomacy_matrix.append([])
+                
+                diplomacy_file = os.path.join(map_dir, f"{safe_name}_diplomacy.json")
+                save_json(diplomacy_matrix, diplomacy_file)
+
                 cultures = data.get('pack', {}).get('cultures', [])
                 cultures_file = os.path.join(map_dir, f"{safe_name}_cultures.json")
                 save_json(cultures, cultures_file)

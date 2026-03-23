@@ -149,7 +149,7 @@ class MilitaryCampaign extends BaseCampaign {
 
     shouldPreserveButton(btnId) {
         // List of IDs to keep even when hostile
-        const keep = ['leave_ship', 'rent_ship'];
+        const keep = ['leave_ship', 'rent_ship', 'fight_siege'];
         return keep.includes(btnId);
     }
 
@@ -257,6 +257,11 @@ class MilitaryCampaign extends BaseCampaign {
         textEl.setAttribute("font-size", "14px"); // Slightly smaller for global clutter reduction
         textEl.setAttribute("style", "pointer-events: none; user-select: none; text-shadow: 1px 1px 2px black;");
         textEl.textContent = text;
+
+        // Added for filtering
+        textEl.setAttribute("class", "campaign-marker");
+        if (burg) textEl.setAttribute("data-id", burg.id);
+
         container.appendChild(textEl);
     }
 

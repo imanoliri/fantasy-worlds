@@ -10,6 +10,84 @@ let highlightedIds = [];
 // let stateNameIdMap = [];
 
 
+class GameState {
+    constructor() {
+        this.events = null; // Will bind to AdventureManager.events or own system
+    }
+
+    init() {
+        console.log("GameState Initialized");
+    }
+
+    // --- Data Accessors ---
+
+    getBurg(id) {
+        if (!window.burgsData) return null;
+        return window.burgsData.find(b => b.id === id);
+    }
+
+    getState(id) {
+        if (!window.statesData) return null;
+        return window.statesData.find(s => s.id === id);
+    }
+
+    // --- Diplomacy Helpers ---
+
+    getDiplomacyMatrix() {
+        return window.diplomacyMatrix || null;
+    }
+
+    getRelation(stateIdA, stateIdB) {
+        const matrix = this.getDiplomacyMatrix();
+        if (!matrix || !matrix[stateIdA]) return "Unknown";
+
+        // Handle array vs object matrix structure (just in case)
+        const rel = matrix[stateIdA][stateIdB];
+        return rel || "Unknown";
+    }
+
+    isEnemy(stateIdA, stateIdB) {
+        const rel = this.getRelation(stateIdA, stateIdB);
+        return rel === "Enemy" || rel === "War" || rel === "Rival";
+        // Added Rival as potentially hostile? 
+        // campaign_diplomat used: rel === "Enemy" || rel === "War"
+        // Let's stick to strict Enemy/War for now to match logic.
+    }
+
+    isStrictEnemy(stateIdA, stateIdB) {
+        const rel = this.getRelation(stateIdA, stateIdB);
+        // Include Rival as it is colored Red on map
+        return rel === "Enemy" || rel === "War" || rel === "Rival";
+    }
+
+    // --- Navigation / Restrictions ---
+
+    canVisitFrom(fromBurgId, toBurgId) {
+        if (!fromBurgId || !toBurgId) return { allowed: true };
+
+        const fromBurg = this.getBurg(fromBurgId);
+        const toBurg = this.getBurg(toBurgId);
+
+        if (!fromBurg || !toBurg) return { allowed: true };
+
+        // Diplomatic check
+        if (this.isStrictEnemy(fromBurg.state, toBurg.state)) {
+            return {
+                allowed: false,
+                reason: "Political Enemy",
+                details: `Cannot travel from ${fromBurg.name} (${pack.states[fromBurg.state].name}) to ${toBurg.name} due to hostile relations.`
+            };
+        }
+
+        return { allowed: true };
+    }
+}
+
+// Global Instance
+window.GameState = new GameState();
+window.GameState.init();
+
+
 /* Dropdown Logic */
 function toggleDropdown(id) {
     document.getElementById(id).classList.toggle("show");
@@ -294,6 +372,21 @@ class FactionSelector {
             });
         }
 
+        const header = panel.querySelector('.faction-select-header');
+        if (header && !document.getElementById('viewDiplomacyMatrixBtn')) {
+            const btn = document.createElement('button');
+            btn.id = 'viewDiplomacyMatrixBtn';
+            btn.innerHTML = 'Relations Graph';
+            btn.className = 'adventure-btn';
+            btn.style.marginTop = '10px';
+            btn.style.width = '100%';
+            btn.style.fontSize = '0.9rem';
+            btn.style.background = '#2c3e50';
+            btn.style.border = '1px solid #7f8c8d';
+            btn.onclick = () => window.openDiplomacyMatrix();
+            header.appendChild(btn);
+        }
+
         listContainer.innerHTML = html;
         panel.classList.remove('hidden');
     }
@@ -396,6 +489,15 @@ function setMapMode(mode) {
 
     // Ensure map is visible for other modes
     mapGroup.style.display = 'block';
+
+    // Toggle Diplomacy Matrix Button
+    // (Button moved to Faction Selector, so we only handle overlay closing)
+    if (mode !== 'state') {
+        const overlay = document.getElementById('diplomacyMatrixOverlay');
+        if (overlay && !overlay.classList.contains('hidden')) {
+            if (window.DiplomacyViewInstance) window.DiplomacyViewInstance.close();
+        }
+    }
 
     // Toggle Faction Selector
     if (typeof FactionSelectorInstance !== 'undefined') {
@@ -611,21 +713,12 @@ function filterTable() {
                 visibleBurgIds.add(burgId);
             }
 
-            // 3. Toggle Dependent Elements (Dot, Rings)
-            const elementsToToggle = [
-                `.burg-dot[data-id="${burgId}"]`,
-                `.burg-ring-selection[data-id="${burgId}"]`,
-                `.burg-ring-gold[data-id="${burgId}"]`,
-                `.burg-info-badge[data-id="${burgId}"]`,
-                // Add other rings if needed, e.g. .burg-ring-food if class exists
-            ];
-
-            elementsToToggle.forEach(selector => {
-                const el = document.querySelector(selector);
-                if (el) {
-                    if (isVisible) el.classList.remove('hidden');
-                    else el.classList.add('hidden');
-                }
+            // 3. Toggle Dependent Elements (Generic Catch-All for Map Visuals)
+            // Scoped to #mapSvg to avoid affecting the table row or other UI
+            const els = document.querySelectorAll(`#mapSvg [data-id="${burgId}"]`);
+            els.forEach(el => {
+                if (isVisible) el.classList.remove('hidden');
+                else el.classList.add('hidden');
             });
         }
     }
@@ -1447,6 +1540,7 @@ class SiegeMission extends AdventureMission {
         siegeGroup.style.display = "none";
         siegeGroup.style.cursor = "pointer";
         siegeGroup.setAttribute("pointer-events", "all");
+        siegeGroup.setAttribute("class", "siege-marker"); // For filtering
 
         siegeGroup.onclick = (e) => {
             e.stopPropagation();
@@ -1495,7 +1589,13 @@ class SiegeMission extends AdventureMission {
         svg.appendChild(siegeGroup);
 
         // Register Event Listener for Burg Popup
-        AdventureManager.events.on('burgPopupOpened', this.handleburgPopupOpened.bind(this));
+        if (AdventureManager.events) {
+            AdventureManager.events.on('burgPopupOpened', this.handleburgPopupOpened.bind(this), {
+                id: 'mission_siege',
+                priority: 100, // Run LATER to override buttons
+                after: ['campaign_base'] // Explicit constraint
+            });
+        }
     }
 
     handleburgPopupOpened(context) {
@@ -1585,6 +1685,7 @@ class SiegeMission extends AdventureMission {
             const sData = graphData[this.data.armyCell];
             if (sData) {
                 this.element.setAttribute("transform", `translate(${sData.p[0]}, ${sData.p[1]})`);
+                this.element.setAttribute("data-id", this.data.burgId); // Link to Burg for filtering
                 this.element.style.display = "block";
                 if (this.countElement) this.countElement.textContent = this.data.soldiers;
             } else {
@@ -1606,6 +1707,8 @@ class SiegeMission extends AdventureMission {
                     ring.setAttribute("stroke", "#000"); // Black
                     ring.setAttribute("stroke-width", "4");
                     ring.setAttribute("pointer-events", "none");
+                    ring.setAttribute("class", "siege-ring"); // Add Class
+                    ring.setAttribute("data-id", burg.id);   // Add ID
                     this.ringGroup.appendChild(ring);
                     this.ringGroup.style.display = 'inline';
                 }
@@ -1817,6 +1920,7 @@ class DiplomaticMission extends AdventureMission {
                     ring.setAttribute("stroke-width", "3");
                     ring.setAttribute("pointer-events", "none");
                     ring.setAttribute("class", "diplomacy-ring"); // Add class for animation
+                    ring.setAttribute("data-id", burg.id);        // Add ID
                     this.group.appendChild(ring);
                 }
             });
@@ -2069,21 +2173,79 @@ const AdventureManager = {
     // Initialize Event System (Top-level to ensure availability)
     events: {
         listeners: {},
-        on(event, callback) {
+        on(event, callback, options = {}) {
             if (!this.listeners[event]) this.listeners[event] = [];
-            this.listeners[event].push(callback);
+
+            // Validate Options
+            const listener = {
+                callback: callback,
+                priority: options.priority || 0, // Higher runs LAST (overrides)
+                id: options.id || null,
+                after: options.after || [],      // Array of IDs this must run AFTER
+                before: options.before || []     // Array of IDs this must run BEFORE
+            };
+
+            this.listeners[event].push(listener);
+            console.log(`[Event] Registered '${event}' listener ID='${listener.id}' Priority=${listener.priority}`);
+            this.sortListeners(event);
         },
         off(event, callback) {
             if (!this.listeners[event]) return;
-            this.listeners[event] = this.listeners[event].filter(cb => cb !== callback);
+            this.listeners[event] = this.listeners[event].filter(l => l.callback !== callback);
         },
         emit(event, data) {
             if (this.listeners[event]) {
-                this.listeners[event].forEach(cb => cb(data));
+                console.log(`[Event] Emitting '${event}' to ${this.listeners[event].length} listeners`);
+                this.listeners[event].forEach(l => {
+                    console.log(`  -> Invoking listener ID='${l.id}' Priority=${l.priority}`);
+                    l.callback(data);
+                });
             }
         },
         clear() {
             this.listeners = {};
+        },
+        sortListeners(event) {
+            const list = this.listeners[event];
+
+            // 1. Base Sort by Priority (Low -> High)
+            // Lower priority runs first. Higher priority runs last (overriding previous).
+            list.sort((a, b) => a.priority - b.priority);
+
+            // 2. Resolve 'after' / 'before' constraints
+            // Simple constraint solver via bubble sort (iterative checking)
+            // Run N times or until stable
+            let changed = true;
+            let iterations = 0;
+            const limit = list.length * list.length; // Safety break
+
+            while (changed && iterations < limit && list.length > 1) {
+                changed = false;
+                iterations++;
+
+                for (let i = 0; i < list.length - 1; i++) {
+                    const current = list[i];
+                    const next = list[i + 1];
+
+                    let shouldSwap = false;
+
+                    // Swap if 'current' needs to be AFTER 'next'
+                    // Rule 1: 'current' says I must be AFTER 'next'
+                    if (next.id && current.after.includes(next.id)) {
+                        shouldSwap = true;
+                    }
+                    // Rule 2: 'next' says I must be BEFORE 'current'
+                    if (current.id && next.before.includes(current.id)) {
+                        shouldSwap = true;
+                    }
+
+                    if (shouldSwap) {
+                        list[i] = next;
+                        list[i + 1] = current;
+                        changed = true;
+                    }
+                }
+            }
         }
     },
 
@@ -2394,6 +2556,11 @@ const AdventureManager = {
         const cellId = this.getTargetCellId(target);
 
         if (cellId !== null) {
+            if (cellId === this.party.cell) {
+                this.checkForArrival();
+                return;
+            }
+
             const isWater = graphData[cellId].b === marineBiomeId;
 
             if (!this.party.onShip && isWater) {
@@ -2875,8 +3042,16 @@ const AdventureManager = {
         let actionsHtml = context.buttons.map(btn => {
             const style = btn.style ? `style="${btn.style}"` : '';
             const cls = btn.class || 'btn-recruit'; // default class
-            const disabled = btn.disabled ? 'disabled' : '';
-            return `<button class="${cls}" ${style} onclick="${btn.onClick}" title="${btn.title}" ${disabled}>${btn.label}</button>`;
+            const disabledClass = btn.disabled ? 'disabled' : '';
+            // Use data-tooltip for custom system, title as fallback
+            const tooltipAttr = `data-tooltip="${btn.title}" title="${btn.title}"`;
+
+            // Wrap onclick to prevent execution if disabled
+            const onClickHandler = btn.disabled ?
+                "event.stopImmediatePropagation(); return false;" :
+                btn.onClick;
+
+            return `<button class="${cls} ${disabledClass}" ${style} onclick="${onClickHandler}" ${tooltipAttr}>${btn.label}</button>`;
         }).join('\n');
 
         // Always add Leave button at the end
@@ -3351,6 +3526,8 @@ document.body.addEventListener('change', ({ target }) => {
     }
 });
 
+
+
 // --- Map Context Menu ---
 svg.addEventListener('contextmenu', (e) => {
     if (AdventureManager.active) {
@@ -3413,6 +3590,28 @@ document.body.addEventListener('mousemove', (e) => {
             content = `<strong>Biome</strong><br>${d.biome}`;
         } else if (mode === 'state') {
             content = `<strong>State</strong><br>${d.state}`;
+
+            // Show relationship if a state is selected in Faction Selector
+            if (typeof FactionSelectorInstance !== 'undefined') {
+                const activeOption = document.querySelector('input[name="warFactionSelect"]:checked');
+                if (activeOption) {
+                    const selectedStateId = parseInt(activeOption.value);
+                    const hoveredStateId = parseInt(d.stateId); // Use data-state-id
+
+                    if (!isNaN(selectedStateId) && selectedStateId >= 0 && !isNaN(hoveredStateId) && selectedStateId !== hoveredStateId) {
+                        // Calculate Relation
+                        let relation = "Unknown";
+                        if (window.GameState) {
+                            relation = window.GameState.getRelation(selectedStateId, hoveredStateId);
+                        } else if (window.diplomacyMatrix && diplomacyMatrix[selectedStateId]) {
+                            relation = diplomacyMatrix[selectedStateId][hoveredStateId] || "Unknown";
+                        }
+
+                        // Add to tooltip
+                        content += `<br>Relation: ${relation}`;
+                    }
+                }
+            }
         } else if (mode === 'heightmap') {
             content = `<strong>Height</strong><br>${d.height}`;
         } else if (mode === 'temperature') {
@@ -3529,6 +3728,843 @@ mapContainer.addEventListener('touchend', (e) => {
 });
 
 
+class DiplomacyView {
+    constructor() {
+        this.overlay = document.getElementById('diplomacyMatrixOverlay');
+        this.svg = document.getElementById('diplomacyGraphSvg');
+        this.container = document.getElementById('diplomacyGraphContainer');
+        this.closeBtn = document.getElementById('closeDiplomacyBtn');
+        this.isOpen = false;
+        this.layout = 'circle'; // Default
+        this.simulationId = null;
+
+        // Configuration
+        this.radius = 300; // Radius of the circle
+        this.cx = 400;     // Center X
+        this.cy = 350;     // Center Y
+        this.nodeRadius = 15;
+
+        // Colors
+        this.colors = {
+            "Enemy": "#FF0000",
+            "War": "#8B0000",
+            "Rival": "#FF4500",
+            "Suspicion": "#FFD700",
+            "Friendly": "#32CD32",
+            "Ally": "#006400",
+            "Neutral": "#D3D3D3",
+            "Subject": "#800080",
+            "Suzerain": "#4B0082"
+        };
+
+        this.strokeWidths = {
+            "War": 3,
+            "Ally": 3,
+            "Enemy": 2,
+            "Rival": 2,
+            "Subject": 2,
+            "Suzerain": 2,
+            "default": 1
+        };
+
+        this.init();
+    }
+
+    init() {
+        if (this.closeBtn) {
+            this.closeBtn.addEventListener('click', () => this.close());
+        }
+        if (this.overlay) {
+            this.overlay.addEventListener('click', (e) => {
+                if (e.target === this.overlay) this.close();
+            });
+        }
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && this.isOpen) this.close();
+        });
+    }
+
+    open() {
+        if (!this.overlay) return;
+        this.overlay.classList.remove('hidden');
+        this.isOpen = true;
+        this.render();
+        this.renderControls();
+    }
+
+    setLayout(mode) {
+        this.layout = mode;
+        if (this.isOpen) this.render();
+    }
+
+    renderControls() {
+        const container = document.getElementById('diplomacyCheckboxes');
+        if (!container) return;
+        container.innerHTML = '';
+
+        // Layout Toolbar removed (Moved to HTML)
+        // Get all unique relations actually present in the matrix?
+        // Or just use the predefined colors list? Predefined is safer and more consistent.
+        Object.keys(this.colors).forEach(relation => {
+            const color = this.colors[relation];
+
+            const label = document.createElement('label');
+            label.style.display = 'flex';
+            label.style.alignItems = 'center';
+            label.style.cursor = 'pointer';
+            label.style.fontSize = '0.9rem';
+
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            // Default ON, except for Neutral and Suspicion
+            if (relation === "Neutral" || relation === "Suspicion") {
+                checkbox.checked = false;
+            } else {
+                checkbox.checked = true;
+            }
+            // Trigger visibility update immediately for the default state
+            // Note: toggleRelationVisibility runs on change, but we need initial state.
+            // However, render() calls this logic at the end based on checked state.
+            // So setting checked = false here is sufficient.
+            checkbox.value = relation;
+            checkbox.style.marginRight = '10px';
+            checkbox.style.accentColor = color;
+
+            checkbox.onchange = (e) => this.toggleRelationVisibility(relation, e.target.checked);
+
+            const colorBox = document.createElement('span');
+            colorBox.style.display = 'inline-block';
+            colorBox.style.width = '12px';
+            colorBox.style.height = '12px';
+            colorBox.style.borderRadius = '2px';
+            colorBox.style.backgroundColor = color;
+            colorBox.style.marginRight = '8px';
+
+            label.appendChild(checkbox);
+            label.appendChild(colorBox);
+            label.appendChild(document.createTextNode(relation));
+
+            container.appendChild(label);
+        });
+    }
+
+    toggleRelationVisibility(relation, isVisible) {
+        // Select all lines, paths (arcs), AND rects (matrix cells) with this relation
+        const elements = this.svg.querySelectorAll(`line[data-relation="${relation}"], path[data-relation="${relation}"], rect[data-relation="${relation}"]`);
+        elements.forEach(el => {
+            if (isVisible) {
+                el.style.display = 'block';
+                el.setAttribute('display', 'block');
+            } else {
+                el.style.display = 'none';
+                el.setAttribute('display', 'none');
+            }
+        });
+    }
+
+    close() {
+        if (!this.overlay) return;
+        this.overlay.classList.add('hidden');
+        this.isOpen = false;
+        if (this.simulationId) cancelAnimationFrame(this.simulationId);
+    }
+
+    getRelationColor(relation) {
+        return this.colors[relation] || this.colors["Neutral"];
+    }
+
+    getStrokeWidth(relation) {
+        return this.strokeWidths[relation] || this.strokeWidths["default"];
+    }
+
+    render() {
+        if (this.simulationId) cancelAnimationFrame(this.simulationId);
+        this.svg.innerHTML = ''; // Clear
+
+        if (this.layout === 'force') {
+            this.renderForce();
+        } else if (this.layout === 'matrix') {
+            this.renderMatrix();
+        } else if (this.layout === 'arc') {
+            this.renderArc();
+        } else if (this.layout === 'geo') {
+            this.renderGeographic();
+        } else {
+            this.renderCircle();
+        }
+    }
+
+    renderMatrix() {
+        const validStates = statesData.filter(s => s.id > 0);
+        const count = validStates.length;
+
+        // Config
+        const margin = { top: 120, left: 120 };
+        const size = Math.min(this.svg.clientWidth || 800, this.svg.clientHeight || 700) - Math.max(margin.top, margin.left) - 20;
+        const step = size / count;
+
+        const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        group.setAttribute("transform", `translate(${margin.left}, ${margin.top})`);
+        this.svg.appendChild(group);
+
+        // Columns (Target)
+        validStates.forEach((state, i) => {
+            const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            text.textContent = state.name;
+            text.setAttribute("x", i * step + step / 2);
+            text.setAttribute("y", -10);
+            text.setAttribute("transform", `rotate(-90, ${i * step + step / 2}, -10)`);
+            text.setAttribute("text-anchor", "start"); // After rotation, start is bottom
+            text.setAttribute("fill", "#ccc");
+            text.setAttribute("font-size", "12px");
+            text.setAttribute("font-family", "Arial, sans-serif");
+            group.appendChild(text);
+        });
+
+        // Rows (Source)
+        validStates.forEach((state, i) => {
+            const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            text.textContent = state.name;
+            text.setAttribute("x", -10);
+            text.setAttribute("y", i * step + step / 2);
+            text.setAttribute("dy", "0.35em");
+            text.setAttribute("text-anchor", "end");
+            text.setAttribute("fill", "#ccc");
+            text.setAttribute("font-size", "12px");
+            text.setAttribute("font-family", "Arial, sans-serif");
+            group.appendChild(text);
+        });
+
+        // Cells
+        validStates.forEach((rowState, i) => {
+            validStates.forEach((colState, j) => {
+                const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+                rect.setAttribute("x", j * step);
+                rect.setAttribute("y", i * step);
+                rect.setAttribute("width", step - 1);
+                rect.setAttribute("height", step - 1);
+
+                let color = "#222"; // Default empty/neutral
+                let opacity = 0.3;
+
+                if (rowState.id === colState.id) {
+                    color = "#444"; // Self
+                    opacity = 0.5;
+                    rect.setAttribute("data-relation", "Self");
+                } else {
+                    const rel = diplomacyMatrix[rowState.id] && diplomacyMatrix[rowState.id][colState.id];
+                    let relationName = rel || "Neutral";
+
+                    // If the relation is not in our known list, treat it as Neutral for consistency
+                    if (!this.colors[relationName]) {
+                        relationName = "Neutral";
+                    }
+
+                    // Always use the defined color, even for Neutral so it matches the toggle
+                    color = this.getRelationColor(relationName);
+                    // Neutrals slightly more transparent but visible
+                    opacity = relationName === "Neutral" ? 0.4 : 0.8;
+
+                    rect.setAttribute("data-relation", relationName);
+                }
+
+                rect.setAttribute("fill", color);
+                rect.setAttribute("fill-opacity", opacity);
+
+                // Interaction
+                rect.addEventListener('mouseenter', () => {
+                    rect.setAttribute("stroke", "#fff");
+                    rect.setAttribute("stroke-width", 2);
+                    // Tooltip logic could go here
+                });
+                rect.addEventListener('mouseleave', () => {
+                    rect.setAttribute("stroke", "none");
+                });
+
+                // Add simple title for hover
+                const title = document.createElementNS("http://www.w3.org/2000/svg", "title");
+                const relName = (diplomacyMatrix[rowState.id] && diplomacyMatrix[rowState.id][colState.id]) || "Neutral";
+                title.textContent = `${rowState.name} ➔ ${colState.name}: ${relName}`;
+                rect.appendChild(title);
+
+                group.appendChild(rect);
+            });
+        });
+
+        // Apply current filter visibility
+        // (Re-run toggle logic based on existing checkboxes)
+        const checkContainer = document.getElementById('diplomacyCheckboxes');
+        if (checkContainer) {
+            checkContainer.querySelectorAll('input').forEach(input => {
+                this.toggleRelationVisibility(input.value, input.checked);
+            });
+        }
+    }
+
+    renderCircle() {
+        // Prepare Data
+        const validStates = statesData.filter(s => s.id > 0);
+        const count = validStates.length;
+        const angleStep = (2 * Math.PI) / count;
+
+        const nodes = validStates.map((state, index) => {
+            const angle = index * angleStep - Math.PI / 2;
+            return {
+                id: state.id,
+                name: state.name,
+                color: state.color,
+                x: this.cx + this.radius * Math.cos(angle),
+                y: this.cy + this.radius * Math.sin(angle),
+                angle: angle
+            };
+        });
+
+        this.drawGraph(nodes);
+    }
+
+    getGeographicPositions() {
+        // 1. Get Map Bounds
+        const mapSvg = document.getElementById("mapSvg"); // The main map
+        let minX = 0, minY = 0, mapWidth = 1000, mapHeight = 1000;
+
+        if (mapSvg) {
+            const viewBox = mapSvg.getAttribute("viewBox").split(" ").map(Number);
+            if (viewBox.length === 4) {
+                minX = viewBox[0];
+                minY = viewBox[1];
+                mapWidth = viewBox[2];
+                mapHeight = viewBox[3];
+            }
+        }
+
+        // 2. Helper to get state center from DOM
+        const getStateCenter = (stateId) => {
+            // Find all paths for this state
+            const paths = document.querySelectorAll(`#mapSvg path[data-state-id="${stateId}"]`);
+            if (!paths || paths.length === 0) return null;
+
+            let minBx = Infinity, minBy = Infinity, maxBx = -Infinity, maxBy = -Infinity;
+            let count = 0;
+
+            paths.forEach(p => {
+                if (p.getBBox) {
+                    const box = p.getBBox();
+                    minBx = Math.min(minBx, box.x);
+                    minBy = Math.min(minBy, box.y);
+                    maxBx = Math.max(maxBx, box.x + box.width);
+                    maxBy = Math.max(maxBy, box.y + box.height);
+                    count++;
+                }
+            });
+
+            if (count === 0) return null;
+
+            return {
+                x: minBx + (maxBx - minBx) / 2,
+                y: minBy + (maxBy - minBy) / 2
+            };
+        };
+
+        const validStates = statesData.filter(s => s.id > 0);
+        return validStates.map(state => {
+            let startX = this.cx + (Math.random() - 0.5) * 100;
+            let startY = this.cy + (Math.random() - 0.5) * 100;
+
+            const center = getStateCenter(state.id);
+            if (center) {
+                // Map from World Space to Graph Space (with some padding)
+                const padding = 50;
+                const graphW = (this.svg.clientWidth || 800) - 2 * padding;
+                const graphH = (this.svg.clientHeight || 700) - 2 * padding;
+
+                const normX = (center.x - minX) / mapWidth;
+                const normY = (center.y - minY) / mapHeight;
+
+                startX = padding + normX * graphW;
+                startY = padding + normY * graphH;
+            }
+
+            return {
+                id: state.id,
+                name: state.name,
+                color: state.color,
+                x: startX,
+                y: startY,
+                vx: 0,
+                vy: 0
+            };
+        });
+    }
+
+    renderGeographic() {
+        const nodes = this.getGeographicPositions();
+
+        // Links
+        const links = [];
+        nodes.forEach((nodeA, i) => {
+            for (let j = i + 1; j < nodes.length; j++) {
+                const nodeB = nodes[j];
+                const rel = diplomacyMatrix[nodeA.id] && diplomacyMatrix[nodeA.id][nodeB.id];
+                if (rel && rel !== "Neutral") {
+                    links.push({ source: nodeA, target: nodeB, relation: rel });
+                }
+            }
+        });
+
+        this.drawGraph(nodes, links);
+    }
+
+    renderForce() {
+        // Initialize positions based on map coordinates
+        const nodes = this.getGeographicPositions();
+
+        // Links Data needed for physics
+        const links = [];
+        nodes.forEach((nodeA, i) => {
+            for (let j = i + 1; j < nodes.length; j++) {
+                const nodeB = nodes[j];
+                const rel = diplomacyMatrix[nodeA.id] && diplomacyMatrix[nodeA.id][nodeB.id];
+                if (rel && rel !== "Neutral") {
+                    links.push({ source: nodeA, target: nodeB, relation: rel });
+                }
+            }
+        });
+
+        // Initial Draw
+        this.drawGraph(nodes, links);
+
+        // Physics Loop
+        const runSimulation = () => {
+            if (!this.isOpen || this.layout !== 'force') return;
+
+            // Physics Constants
+            // Physics Constants
+            const repulsion = 10000;
+            const centerGravity = 0.005;
+            const maxVelocity = 10;
+
+            // Physics Configuration per Relation
+            // distance: Ideal length of the spring (pixels)
+            // strength: How hard it pulls/pushes to that length (0-1)
+            const physicsConfig = {
+                "War": { length: 600, strength: 0.2 }, // Push enemies far away
+                "Enemy": { length: 500, strength: 0.15 },
+                "Rival": { length: 400, strength: 0.1 },
+                "Suspicion": { length: 300, strength: 0.05 },
+                "Neutral": { length: 250, strength: 0.02 },
+                "Friendly": { length: 150, strength: 0.05 },
+                "Ally": { length: 70, strength: 0.2 }, // Pull allies close
+                "Subject": { length: 50, strength: 0.2 },
+                "Suzerain": { length: 50, strength: 0.2 }
+            };
+
+            // 1. Repulsion (Nodes push apart)
+            for (let i = 0; i < nodes.length; i++) {
+                for (let j = i + 1; j < nodes.length; j++) {
+                    const a = nodes[i];
+                    const b = nodes[j];
+                    const dx = a.x - b.x;
+                    const dy = a.y - b.y;
+                    let distSq = dx * dx + dy * dy;
+                    if (distSq === 0) {
+                        distSq = 0.1; // Avoid division by zero
+                        a.x += Math.random();
+                    }
+
+                    const dist = Math.sqrt(distSq);
+                    const force = repulsion / distSq;
+
+                    const fx = (dx / dist) * force;
+                    const fy = (dy / dist) * force;
+
+                    a.vx += fx;
+                    a.vy += fy;
+                    b.vx -= fx;
+                    b.vy -= fy;
+                }
+            }
+
+            // 2. Attraction (Links pull together or push apart based on relation)
+            links.forEach(link => {
+                const a = link.source;
+                const b = link.target;
+                const dx = b.x - a.x;
+                const dy = b.y - a.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+
+                // Get config for this relation
+                let rel = link.relation;
+                if (!this.colors[rel]) rel = "Neutral";
+                const config = physicsConfig[rel] || physicsConfig["Neutral"];
+
+                // Spring force
+                const force = (dist - config.length) * config.strength;
+                const fx = (dx / dist) * force;
+                const fy = (dy / dist) * force;
+
+                a.vx += fx;
+                a.vy += fy;
+                b.vx -= fx;
+                b.vy -= fy;
+            });
+
+            // 3. Center Gravity (Keep them on screen)
+            nodes.forEach(node => {
+                const dx = this.cx - node.x;
+                const dy = this.cy - node.y;
+                node.vx += dx * centerGravity;
+                node.vy += dy * centerGravity;
+
+                // 4. Update Position & Damping
+                node.vx *= 0.9; // Friction
+                node.vy *= 0.9;
+
+                // Limit speed
+                const speed = Math.sqrt(node.vx * node.vx + node.vy * node.vy);
+                if (speed > maxVelocity) {
+                    node.vx = (node.vx / speed) * maxVelocity;
+                    node.vy = (node.vy / speed) * maxVelocity;
+                }
+
+                node.x += node.vx;
+                node.y += node.vy;
+            });
+
+            // Update DOM
+            this.updateGraphPositions(nodes);
+
+            this.simulationId = requestAnimationFrame(runSimulation);
+        };
+
+        this.simulationId = requestAnimationFrame(runSimulation);
+    }
+
+    drawGraph(nodes, precalcLinks = null) {
+        // Create Groups
+        const linksGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        linksGroup.id = "diplomacyLinks";
+        this.svg.appendChild(linksGroup);
+
+        const nodesGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        nodesGroup.id = "diplomacyNodes";
+        this.svg.appendChild(nodesGroup);
+
+        // Draw Links
+        // Logic similar to before, but we need to store references if animating
+        const links = precalcLinks || [];
+        if (!precalcLinks) {
+            nodes.forEach((nodeA, i) => {
+                for (let j = i + 1; j < nodes.length; j++) {
+                    const nodeB = nodes[j];
+                    const rel = diplomacyMatrix[nodeA.id] && diplomacyMatrix[nodeA.id][nodeB.id];
+                    if (rel && rel !== "Neutral") {
+                        links.push({ source: nodeA, target: nodeB, relation: rel });
+                    }
+                }
+            });
+        }
+
+        links.forEach(link => {
+            const path = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            // If circle, simple check. If force, objects.
+            const x1 = link.source.x || link.source.x;
+            path.setAttribute("x1", link.source.x);
+            path.setAttribute("y1", link.source.y);
+            path.setAttribute("x2", link.target.x);
+            path.setAttribute("y2", link.target.y);
+            path.setAttribute("stroke", this.getRelationColor(link.relation));
+            path.setAttribute("stroke-width", this.getStrokeWidth(link.relation));
+            path.setAttribute("stroke-opacity", 0.6);
+            path.dataset.source = link.source.id;
+            path.dataset.target = link.target.id;
+
+            // Normalize relation name for filtering
+            let relationName = link.relation;
+            if (!this.colors[relationName]) {
+                relationName = "Neutral";
+            }
+            path.dataset.relation = relationName;
+            linksGroup.appendChild(path);
+
+            // Store DOM ref for updates
+            link.domElement = path;
+        });
+
+        // Draw Nodes
+        nodes.forEach(node => {
+            const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+            g.dataset.id = node.id;
+            g.style.cursor = "pointer";
+
+            // Interaction
+            g.addEventListener('mouseenter', () => this.highlightState(node.id));
+            g.addEventListener('mouseleave', () => this.resetHighlight());
+
+            // Circle
+            const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            circle.setAttribute("cx", 0); // Use translation for group
+            circle.setAttribute("cy", 0);
+            circle.setAttribute("r", this.nodeRadius);
+            circle.setAttribute("fill", node.color);
+            circle.setAttribute("stroke", "#333");
+            circle.setAttribute("stroke-width", 2);
+            g.appendChild(circle);
+
+            // Label
+            const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            text.textContent = node.name;
+            text.setAttribute("fill", "#ccc");
+            text.setAttribute("font-size", "14px");
+            text.setAttribute("font-family", "Arial, sans-serif");
+            text.style.pointerEvents = "none";
+
+            // For circle layout, we had angled labels. For Force, centered or top is fine.
+            // Let's standardise: Text below node
+            text.setAttribute("x", 0);
+            text.setAttribute("y", this.nodeRadius + 15);
+            text.setAttribute("text-anchor", "middle");
+            g.appendChild(text);
+
+            g.setAttribute("transform", `translate(${node.x}, ${node.y})`);
+            nodesGroup.appendChild(g);
+
+            node.domElement = g;
+        });
+
+        // Store references for animation
+        this.activeNodes = nodes;
+        this.activeLinks = links;
+
+        // Apply current filter visibility
+        // (Re-run toggle logic based on existing checkboxes)
+        const checkContainer = document.getElementById('diplomacyCheckboxes');
+        if (checkContainer) {
+            checkContainer.querySelectorAll('input').forEach(input => {
+                this.toggleRelationVisibility(input.value, input.checked);
+            });
+        }
+    }
+
+    renderArc() {
+        const validStates = statesData.filter(s => s.id > 0);
+        // Sort by name or ID for consistent ordering along the line
+        validStates.sort((a, b) => a.name.localeCompare(b.name));
+
+        const count = validStates.length;
+        // Draw along a horizontal line in the middle
+        const y = this.cy;
+        // Use about 80% of width
+        const width = (this.svg.clientWidth || 800) * 0.8;
+        const startX = (this.svg.clientWidth || 800) * 0.1;
+        const step = width / (count - 1);
+
+        const nodes = validStates.map((state, index) => {
+            return {
+                id: state.id,
+                name: state.name,
+                color: state.color,
+                x: startX + index * step,
+                y: y,
+                index: index // scaling helper
+            };
+        });
+
+        // Generate Links
+        const links = [];
+        nodes.forEach((nodeA, i) => {
+            for (let j = i + 1; j < nodes.length; j++) {
+                const nodeB = nodes[j];
+                const rel = diplomacyMatrix[nodeA.id] && diplomacyMatrix[nodeA.id][nodeB.id];
+                if (rel && rel !== "Neutral") {
+                    links.push({ source: nodeA, target: nodeB, relation: rel });
+                } else {
+                    // Include Neutral/Unknown for consistency if needed, but Arc usually cleaner without
+                    // However, our filter logic relies on DOM existence.
+                    // Let's add them but they will be hidden by default filter
+                    let finalRel = rel || "Neutral";
+                    if (!this.colors[finalRel]) finalRel = "Neutral";
+                    links.push({ source: nodeA, target: nodeB, relation: finalRel });
+                }
+            }
+        });
+
+        // Draw Nodes
+        const nodesGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        nodesGroup.id = "diplomacyNodes";
+
+        nodes.forEach(node => {
+            const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+            g.dataset.id = node.id;
+            g.setAttribute("transform", `translate(${node.x}, ${node.y})`);
+            g.style.cursor = "pointer";
+
+            // Interaction
+            g.addEventListener('mouseenter', () => this.highlightState(node.id));
+            g.addEventListener('mouseleave', () => this.resetHighlight());
+
+            const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            circle.setAttribute("r", this.nodeRadius);
+            circle.setAttribute("fill", node.color);
+            circle.setAttribute("stroke", "#333");
+            circle.setAttribute("stroke-width", 2);
+            g.appendChild(circle);
+
+            // Label below
+            const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            text.textContent = node.name;
+            text.setAttribute("fill", "#ccc");
+            text.setAttribute("font-size", "12px");
+            text.setAttribute("y", this.nodeRadius + 15);
+            text.setAttribute("text-anchor", "middle");
+            text.setAttribute("transform", "rotate(45, 0, " + (this.nodeRadius + 15) + ")"); // Angled labels for space
+            g.appendChild(text);
+
+            nodesGroup.appendChild(g);
+        });
+
+        // Draw Arcs
+        const linksGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        linksGroup.id = "diplomacyLinks";
+
+        links.forEach(link => {
+            const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+
+            const x1 = link.source.x;
+            const x2 = link.target.x;
+            const dist = Math.abs(x2 - x1);
+
+            // Height proportional to distance
+            const height = dist * 0.5;
+
+            // Semantic Direction:
+            // Positive (Up): Ally, Friendly, Subject, Suzerain
+            // Negative (Down): War, Enemy, Rival, Suspicion
+            // Neutral (Up/Small): Neutral
+            const negativeRelations = ["War", "Enemy", "Rival", "Suspicion"];
+            const isNegative = negativeRelations.includes(link.relation);
+
+            // Quadratic Bezier: M x1,y Q cx,cy x2,y
+            const cx = (x1 + x2) / 2;
+            const cy = isNegative ? y + height : y - height;
+
+            const d = `M ${x1},${y} Q ${cx},${cy} ${x2},${y}`;
+
+            path.setAttribute("d", d);
+            path.setAttribute("fill", "none");
+            path.setAttribute("stroke", this.getRelationColor(link.relation));
+            path.setAttribute("stroke-width", this.getStrokeWidth(link.relation));
+            path.setAttribute("stroke-opacity", 0.6);
+
+            path.dataset.source = link.source.id;
+            path.dataset.target = link.target.id;
+
+            // Normalize for filtering: if color not found, it's Neutral
+            let relationName = link.relation;
+            if (!this.colors[relationName]) {
+                relationName = "Neutral";
+            }
+            path.dataset.relation = relationName;
+
+            linksGroup.appendChild(path);
+        });
+
+        this.svg.appendChild(linksGroup);
+        this.svg.appendChild(nodesGroup);
+
+        // Apply filters
+        const checkContainer = document.getElementById('diplomacyCheckboxes');
+        if (checkContainer) {
+            checkContainer.querySelectorAll('input').forEach(input => {
+                this.toggleRelationVisibility(input.value, input.checked);
+            });
+        }
+    }
+
+    updateGraphPositions(nodes) {
+        if (!this.activeNodes || !this.activeLinks) return;
+
+        this.activeNodes.forEach(node => {
+            if (node.domElement) {
+                node.domElement.setAttribute("transform", `translate(${node.x}, ${node.y})`);
+            }
+        });
+
+        this.activeLinks.forEach(link => {
+            if (link.domElement) {
+                link.domElement.setAttribute("x1", link.source.x);
+                link.domElement.setAttribute("y1", link.source.y);
+                link.domElement.setAttribute("x2", link.target.x);
+                link.domElement.setAttribute("y2", link.target.y);
+            }
+        });
+    }
+
+    highlightState(stateId) {
+        stateId = parseInt(stateId);
+        // Select both lines (Force/Circle) and paths (Arc)
+        const links = this.svg.querySelectorAll('#diplomacyLinks line, #diplomacyLinks path');
+        const nodes = this.svg.querySelectorAll('#diplomacyNodes g');
+
+        // Dim all first
+        links.forEach(link => {
+            link.setAttribute("stroke-opacity", 0.1);
+            link.style.opacity = 0.1;
+        });
+        nodes.forEach(node => {
+            node.style.opacity = 0.2;
+        });
+
+        // Highlight selected node
+        const hostNode = this.svg.querySelector(`#diplomacyNodes g[data-id="${stateId}"]`);
+        if (hostNode) hostNode.style.opacity = 1.0;
+
+        // Highlight connected links and neighbors
+        links.forEach(link => {
+            const s = parseInt(link.dataset.source);
+            const t = parseInt(link.dataset.target);
+
+            if (s === stateId || t === stateId) {
+                // Determine neighbor ID
+                const neighborId = (s === stateId) ? t : s;
+
+                // Highlight Link
+                link.setAttribute("stroke-opacity", 1.0);
+                link.style.opacity = 1.0;
+
+                // Highlight Neighbor Node
+                const neighborNode = this.svg.querySelector(`#diplomacyNodes g[data-id="${neighborId}"]`);
+                if (neighborNode) neighborNode.style.opacity = 1.0;
+            }
+        });
+    }
+
+    resetHighlight() {
+        // Select both lines and paths
+        const links = this.svg.querySelectorAll('#diplomacyLinks line, #diplomacyLinks path');
+        const nodes = this.svg.querySelectorAll('#diplomacyNodes g');
+
+        links.forEach(link => {
+            link.setAttribute("stroke-opacity", 0.6);
+            link.style.opacity = 1.0;
+        });
+        nodes.forEach(node => {
+            node.style.opacity = 1.0;
+        });
+    }
+}
+
+// Global Instance
+window.DiplomacyViewInstance = null;
+
+// Helper to open
+window.openDiplomacyMatrix = function () {
+    if (!window.DiplomacyViewInstance) {
+        window.DiplomacyViewInstance = new DiplomacyView();
+    }
+    window.DiplomacyViewInstance.open();
+};
+
+
 /* Campaign Mode Logic */
 
 // Base Class for all Campaigns
@@ -3563,7 +4599,13 @@ class BaseCampaign {
             AdventureManager.events.on('updateStats', this.onUpdateStats); // Direct bind assumes signature match or ignored args
             AdventureManager.events.on('missionStart', this.onMissionStart);
             AdventureManager.events.on('missionComplete', this.onMissionComplete);
-            AdventureManager.events.on('burgPopupOpened', this.onBurgPopupOpened);
+
+            // Register with Priority -100 (Ensure it runs FIRST)
+            AdventureManager.events.on('burgPopupOpened', this.onBurgPopupOpened, {
+                id: 'campaign_base',
+                priority: -100
+            });
+
             AdventureManager.events.on('beforeBurgPopup', this.onBeforeBurgPopup);
             AdventureManager.events.on('beforeMissionSpawn', this.onBeforeMissionSpawn);
             AdventureManager.events.on('calculateMissionRewards', this.onCalculateMissionRewards);
@@ -3695,6 +4737,15 @@ class BaseCampaign {
         ring.setAttribute("stroke", color);
         ring.setAttribute("stroke-width", "3");
         ring.setAttribute("stroke-dasharray", "4,4");
+
+        // Add Class & Data-ID for Filtering
+        ring.setAttribute("class", "campaign-highlight-ring");
+        if (burg) {
+            ring.setAttribute("data-id", burg.id);
+        } else {
+            const foundBurg = burgsData.find(b => b.cell_id === cellId);
+            if (foundBurg) ring.setAttribute("data-id", foundBurg.id);
+        }
 
         // Animation
         const anim = document.createElementNS("http://www.w3.org/2000/svg", "animate");
@@ -4324,7 +5375,7 @@ class MilitaryCampaign extends BaseCampaign {
 
     shouldPreserveButton(btnId) {
         // List of IDs to keep even when hostile
-        const keep = ['leave_ship', 'rent_ship'];
+        const keep = ['leave_ship', 'rent_ship', 'fight_siege'];
         return keep.includes(btnId);
     }
 
@@ -4432,6 +5483,11 @@ class MilitaryCampaign extends BaseCampaign {
         textEl.setAttribute("font-size", "14px"); // Slightly smaller for global clutter reduction
         textEl.setAttribute("style", "pointer-events: none; user-select: none; text-shadow: 1px 1px 2px black;");
         textEl.textContent = text;
+
+        // Added for filtering
+        textEl.setAttribute("class", "campaign-marker");
+        if (burg) textEl.setAttribute("data-id", burg.id);
+
         container.appendChild(textEl);
     }
 
@@ -4776,6 +5832,36 @@ class DiplomatCampaign extends BaseCampaign {
         this.addObjective("obj_diplomat", "Complete Diplomat Missions (0/?)", "diplomacy", () => false);
     }
 
+    // Helper: Update Map Visuals (Red/Gold Rings)
+    updateMapHighlights() {
+        this.clearHighlights();
+
+        const capitals = burgsData.filter(b => b.is_capital);
+
+        let currentBurgState = null;
+        if (this.currentBurgId) {
+            const cur = burgsData.find(b => b.id === this.currentBurgId);
+            if (cur) currentBurgState = cur.state_id !== undefined ? cur.state_id : cur.state;
+        }
+
+        capitals.forEach(c => {
+            // Skip Visited (No Ring = Done)
+            if (this.visitedCapitals.has(c.id)) return;
+
+            let color = "#FFD700"; // Default: Gold (Available)
+
+            // Check if Restricted (Enemy)
+            if (currentBurgState !== null) {
+                const targetState = c.state_id !== undefined ? c.state_id : c.state;
+                if (window.GameState && window.GameState.isStrictEnemy(currentBurgState, targetState)) {
+                    color = "#FF0000"; // Red (Restricted)
+                }
+            }
+
+            this.highlightCell(c.cell_id, color);
+        });
+    }
+
     onStart() {
         super.onStart();
 
@@ -4786,10 +5872,11 @@ class DiplomatCampaign extends BaseCampaign {
             this.totalCapitals = capitals.length;
             this.updateObjectiveText();
 
-            // Highlight all unvisited capitals
-            capitals.forEach(c => this.highlightCell(c.cell_id, "#FFD700")); // Gold highlight
+            // Initial Highlight
+            this.updateMapHighlights();
         };
 
+        // Delay slightly to ensure data loaded if not already? Usually onStart is safe.
         initCampaignData();
     }
 
@@ -4814,14 +5901,22 @@ class DiplomatCampaign extends BaseCampaign {
 
     onBurgPopupOpened(context) {
         // 1. Navigation Tracking
-        // Only update if it's a NEW burg visited
+        let updateHighlights = false;
         if (this.currentBurgId !== context.burg.id) {
             this.previousBurgId = this.currentBurgId;
             this.currentBurgId = context.burg.id;
+            updateHighlights = true;
         }
 
         // 2. Logic for Capital
-        if (!context.burg.is_capital) return;
+        if (!context.burg.is_capital) {
+            // Still update highlights if we moved to a non-capital (it changes the origin state)
+            if (updateHighlights) this.updateMapHighlights();
+            return;
+        }
+
+        // Update highlights now that currentBurgId is set
+        if (updateHighlights) this.updateMapHighlights();
 
         // If already visited, maybe show a "Completed" indicator?
         if (this.visitedCapitals.has(context.burg.id)) {
@@ -4841,36 +5936,36 @@ class DiplomatCampaign extends BaseCampaign {
         let tooltip = "Complete diplomatic mission (Costs 5 💰)";
         let label = "Diplomatic Mission (5 💰)";
 
-        // Constraint A: Resources
-        if (context.party.food < 50 || context.party.gold < 50) {
-            isDisabled = true;
-            tooltip = "Requires 50 Food and 50 Gold reserve.";
-            label += " 🔒";
-        }
-
-        // Constraint B: Enemy State
-        if (!isDisabled && this.previousBurgId !== null) {
+        // Constraint A: Enemy State (Priority)
+        if (this.previousBurgId !== null) {
             const prevBurg = burgsData.find(b => b.id === this.previousBurgId);
             if (prevBurg) {
-                const prevState = prevBurg.state;
-                const currState = context.burg.state;
+                const prevState = prevBurg.state_id !== undefined ? prevBurg.state_id : prevBurg.state;
+                const currState = context.burg.state_id !== undefined ? context.burg.state_id : context.burg.state;
 
                 // Check Diplomacy
-                // data is in 'diplomacyMatrix' (global from map.js)
-                // Check Diplomacy
-                // data is in 'diplomacyMatrix' (global from map.js)
-                if (window.diplomacyMatrix && diplomacyMatrix[prevState]) {
-                    const relation = diplomacyMatrix[prevState][currState] || "Unknown";
-                    if (relation === "Enemy" || relation === "War") {
-                        isDisabled = true;
-                        tooltip = `Cannot negotiate! You arrived from ${prevBurg.name} (${pack.states[prevState].name}), an Enemy state.`;
-                        label += " ⚔️";
-                    }
+                if (window.GameState && window.GameState.isStrictEnemy(prevState, currState)) {
+                    isDisabled = true;
+                    // Safe dynamic tooltip
+                    const relation = window.GameState.getRelation(prevState, currState);
+                    const prevStateName = prevBurg.state_name || "Unknown State";
+                    tooltip = `This state is ${relation} of the last visited ${prevStateName}`;
                 }
             }
         }
 
-        // Add Button
+        // Constraint B: Resources
+        if (context.party.food < 50 || context.party.gold < 50) {
+            if (isDisabled) {
+                // Already disabled by Enemy, append info
+                tooltip += " (Also requires 50 Food and 50 Gold reserve)";
+            } else {
+                isDisabled = true;
+                tooltip = "Requires 50 Food and 50 Gold reserve.";
+            }
+        }
+
+        // Add Button (Use class disabled if needed, but UI improvements handled generally)
         context.buttons.push({
             id: 'diplomacy_mission',
             label: label,
@@ -4896,17 +5991,8 @@ class DiplomatCampaign extends BaseCampaign {
         // Floating text
         const burg = burgsData.find(b => b.id === burgId);
         if (burg) {
-            // Remove highlight
-            // Need to redraw highlights for all EXCEPT visited? Or just clear invalid ones?
-            // Since 'highlightCell' adds a generic circle, I can't easily remove just one without ID.
-            // Simplest: Clear all and redraw unvisited.
-            this.clearHighlights();
-            const capitals = burgsData.filter(b => b.is_capital);
-            capitals.forEach(c => {
-                if (!this.visitedCapitals.has(c.id)) {
-                    this.highlightCell(c.cell_id, "#FFD700");
-                }
-            });
+            // Update Highlights (Redraws filtering out visited)
+            this.updateMapHighlights();
 
             // Show text
             AdventureManager.showFloatingText("-5 💰", burg.x, burg.y, "#f1c40f");

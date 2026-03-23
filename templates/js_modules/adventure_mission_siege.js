@@ -19,6 +19,7 @@ class SiegeMission extends AdventureMission {
         siegeGroup.style.display = "none";
         siegeGroup.style.cursor = "pointer";
         siegeGroup.setAttribute("pointer-events", "all");
+        siegeGroup.setAttribute("class", "siege-marker"); // For filtering
 
         siegeGroup.onclick = (e) => {
             e.stopPropagation();
@@ -67,7 +68,13 @@ class SiegeMission extends AdventureMission {
         svg.appendChild(siegeGroup);
 
         // Register Event Listener for Burg Popup
-        AdventureManager.events.on('burgPopupOpened', this.handleburgPopupOpened.bind(this));
+        if (AdventureManager.events) {
+            AdventureManager.events.on('burgPopupOpened', this.handleburgPopupOpened.bind(this), {
+                id: 'mission_siege',
+                priority: 100, // Run LATER to override buttons
+                after: ['campaign_base'] // Explicit constraint
+            });
+        }
     }
 
     handleburgPopupOpened(context) {
@@ -157,6 +164,7 @@ class SiegeMission extends AdventureMission {
             const sData = graphData[this.data.armyCell];
             if (sData) {
                 this.element.setAttribute("transform", `translate(${sData.p[0]}, ${sData.p[1]})`);
+                this.element.setAttribute("data-id", this.data.burgId); // Link to Burg for filtering
                 this.element.style.display = "block";
                 if (this.countElement) this.countElement.textContent = this.data.soldiers;
             } else {
@@ -178,6 +186,8 @@ class SiegeMission extends AdventureMission {
                     ring.setAttribute("stroke", "#000"); // Black
                     ring.setAttribute("stroke-width", "4");
                     ring.setAttribute("pointer-events", "none");
+                    ring.setAttribute("class", "siege-ring"); // Add Class
+                    ring.setAttribute("data-id", burg.id);   // Add ID
                     this.ringGroup.appendChild(ring);
                     this.ringGroup.style.display = 'inline';
                 }

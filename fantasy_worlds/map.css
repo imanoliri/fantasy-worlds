@@ -776,6 +776,17 @@ caption {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
+.adventure-modal button.disabled,
+.adventure-modal button:disabled,
+button.disabled:not(.capital-crown),
+button:disabled:not(.capital-crown) {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+    box-shadow: none !important;
+    pointer-events: auto; /* Ensure hover works for tooltip */
+}
+
 /* Burg Popup Card */
 .burg-popup {
     position: fixed;

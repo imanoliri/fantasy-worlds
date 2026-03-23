@@ -80,21 +80,12 @@ function filterTable() {
                 visibleBurgIds.add(burgId);
             }
 
-            // 3. Toggle Dependent Elements (Dot, Rings)
-            const elementsToToggle = [
-                `.burg-dot[data-id="${burgId}"]`,
-                `.burg-ring-selection[data-id="${burgId}"]`,
-                `.burg-ring-gold[data-id="${burgId}"]`,
-                `.burg-info-badge[data-id="${burgId}"]`,
-                // Add other rings if needed, e.g. .burg-ring-food if class exists
-            ];
-
-            elementsToToggle.forEach(selector => {
-                const el = document.querySelector(selector);
-                if (el) {
-                    if (isVisible) el.classList.remove('hidden');
-                    else el.classList.add('hidden');
-                }
+            // 3. Toggle Dependent Elements (Generic Catch-All for Map Visuals)
+            // Scoped to #mapSvg to avoid affecting the table row or other UI
+            const els = document.querySelectorAll(`#mapSvg [data-id="${burgId}"]`);
+            els.forEach(el => {
+                if (isVisible) el.classList.remove('hidden');
+                else el.classList.add('hidden');
             });
         }
     }

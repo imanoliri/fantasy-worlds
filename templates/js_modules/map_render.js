@@ -46,6 +46,15 @@ function setMapMode(mode) {
     // Ensure map is visible for other modes
     mapGroup.style.display = 'block';
 
+    // Toggle Diplomacy Matrix Button
+    // (Button moved to Faction Selector, so we only handle overlay closing)
+    if (mode !== 'state') {
+        const overlay = document.getElementById('diplomacyMatrixOverlay');
+        if (overlay && !overlay.classList.contains('hidden')) {
+            if (window.DiplomacyViewInstance) window.DiplomacyViewInstance.close();
+        }
+    }
+
     // Toggle Faction Selector
     if (typeof FactionSelectorInstance !== 'undefined') {
         if (mode === 'state') {

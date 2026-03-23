@@ -32,7 +32,13 @@ class BaseCampaign {
             AdventureManager.events.on('updateStats', this.onUpdateStats); // Direct bind assumes signature match or ignored args
             AdventureManager.events.on('missionStart', this.onMissionStart);
             AdventureManager.events.on('missionComplete', this.onMissionComplete);
-            AdventureManager.events.on('burgPopupOpened', this.onBurgPopupOpened);
+
+            // Register with Priority -100 (Ensure it runs FIRST)
+            AdventureManager.events.on('burgPopupOpened', this.onBurgPopupOpened, {
+                id: 'campaign_base',
+                priority: -100
+            });
+
             AdventureManager.events.on('beforeBurgPopup', this.onBeforeBurgPopup);
             AdventureManager.events.on('beforeMissionSpawn', this.onBeforeMissionSpawn);
             AdventureManager.events.on('calculateMissionRewards', this.onCalculateMissionRewards);
@@ -164,6 +170,15 @@ class BaseCampaign {
         ring.setAttribute("stroke", color);
         ring.setAttribute("stroke-width", "3");
         ring.setAttribute("stroke-dasharray", "4,4");
+
+        // Add Class & Data-ID for Filtering
+        ring.setAttribute("class", "campaign-highlight-ring");
+        if (burg) {
+            ring.setAttribute("data-id", burg.id);
+        } else {
+            const foundBurg = burgsData.find(b => b.cell_id === cellId);
+            if (foundBurg) ring.setAttribute("data-id", foundBurg.id);
+        }
 
         // Animation
         const anim = document.createElementNS("http://www.w3.org/2000/svg", "animate");

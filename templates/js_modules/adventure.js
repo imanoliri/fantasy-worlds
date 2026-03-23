@@ -45,21 +45,79 @@ const AdventureManager = {
     // Initialize Event System (Top-level to ensure availability)
     events: {
         listeners: {},
-        on(event, callback) {
+        on(event, callback, options = {}) {
             if (!this.listeners[event]) this.listeners[event] = [];
-            this.listeners[event].push(callback);
+
+            // Validate Options
+            const listener = {
+                callback: callback,
+                priority: options.priority || 0, // Higher runs LAST (overrides)
+                id: options.id || null,
+                after: options.after || [],      // Array of IDs this must run AFTER
+                before: options.before || []     // Array of IDs this must run BEFORE
+            };
+
+            this.listeners[event].push(listener);
+            console.log(`[Event] Registered '${event}' listener ID='${listener.id}' Priority=${listener.priority}`);
+            this.sortListeners(event);
         },
         off(event, callback) {
             if (!this.listeners[event]) return;
-            this.listeners[event] = this.listeners[event].filter(cb => cb !== callback);
+            this.listeners[event] = this.listeners[event].filter(l => l.callback !== callback);
         },
         emit(event, data) {
             if (this.listeners[event]) {
-                this.listeners[event].forEach(cb => cb(data));
+                console.log(`[Event] Emitting '${event}' to ${this.listeners[event].length} listeners`);
+                this.listeners[event].forEach(l => {
+                    console.log(`  -> Invoking listener ID='${l.id}' Priority=${l.priority}`);
+                    l.callback(data);
+                });
             }
         },
         clear() {
             this.listeners = {};
+        },
+        sortListeners(event) {
+            const list = this.listeners[event];
+
+            // 1. Base Sort by Priority (Low -> High)
+            // Lower priority runs first. Higher priority runs last (overriding previous).
+            list.sort((a, b) => a.priority - b.priority);
+
+            // 2. Resolve 'after' / 'before' constraints
+            // Simple constraint solver via bubble sort (iterative checking)
+            // Run N times or until stable
+            let changed = true;
+            let iterations = 0;
+            const limit = list.length * list.length; // Safety break
+
+            while (changed && iterations < limit && list.length > 1) {
+                changed = false;
+                iterations++;
+
+                for (let i = 0; i < list.length - 1; i++) {
+                    const current = list[i];
+                    const next = list[i + 1];
+
+                    let shouldSwap = false;
+
+                    // Swap if 'current' needs to be AFTER 'next'
+                    // Rule 1: 'current' says I must be AFTER 'next'
+                    if (next.id && current.after.includes(next.id)) {
+                        shouldSwap = true;
+                    }
+                    // Rule 2: 'next' says I must be BEFORE 'current'
+                    if (current.id && next.before.includes(current.id)) {
+                        shouldSwap = true;
+                    }
+
+                    if (shouldSwap) {
+                        list[i] = next;
+                        list[i + 1] = current;
+                        changed = true;
+                    }
+                }
+            }
         }
     },
 
@@ -370,6 +428,11 @@ const AdventureManager = {
         const cellId = this.getTargetCellId(target);
 
         if (cellId !== null) {
+            if (cellId === this.party.cell) {
+                this.checkForArrival();
+                return;
+            }
+
             const isWater = graphData[cellId].b === marineBiomeId;
 
             if (!this.party.onShip && isWater) {
@@ -851,8 +914,16 @@ const AdventureManager = {
         let actionsHtml = context.buttons.map(btn => {
             const style = btn.style ? `style="${btn.style}"` : '';
             const cls = btn.class || 'btn-recruit'; // default class
-            const disabled = btn.disabled ? 'disabled' : '';
-            return `<button class="${cls}" ${style} onclick="${btn.onClick}" title="${btn.title}" ${disabled}>${btn.label}</button>`;
+            const disabledClass = btn.disabled ? 'disabled' : '';
+            // Use data-tooltip for custom system, title as fallback
+            const tooltipAttr = `data-tooltip="${btn.title}" title="${btn.title}"`;
+
+            // Wrap onclick to prevent execution if disabled
+            const onClickHandler = btn.disabled ?
+                "event.stopImmediatePropagation(); return false;" :
+                btn.onClick;
+
+            return `<button class="${cls} ${disabledClass}" ${style} onclick="${onClickHandler}" ${tooltipAttr}>${btn.label}</button>`;
         }).join('\n');
 
         // Always add Leave button at the end
